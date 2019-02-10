@@ -3,6 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
 
+#include "utils.h"
+#include "graphics.h"
+
 int
 main(int argc, char **argv)
 {
@@ -23,11 +26,19 @@ main(int argc, char **argv)
   /* Set the windows context */
   glfwMakeContextCurrent(window);
 
+
+  /* Program setup */
+  Rectangle* temp = createRectangle(-0.9, -0.9, 0.9, 0.9);
+  RGB* color = createRGB(0, 0, 0);
+
+
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
+
+    drawRectangle(temp, color);
     
     /* Swap buffers */
     glfwSwapBuffers(window);
