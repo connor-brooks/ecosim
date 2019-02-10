@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-g3
-LIBS=-lGL -lm -lglfw
+LIBS=-lGL -lm -lglut -lglfw
 
 all: ecosim
 

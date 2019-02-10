@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <GLFW/glfw3.h>
 #include <GL/gl.h>
+#include <GL/freeglut.h>
 
 #include "utils.h"
 
@@ -19,3 +20,11 @@ drawRectangle(Rectangle* rectangle, RGB* color)
   glEnd();
 }
 
+void
+drawText(float x, float y, const unsigned char* text)
+{
+
+    glColor3f(0.0f, 0.0f, 0.0f);
+    glRasterPos3d(x, y, 0.0);
+    glutBitmapString(GLUT_BITMAP_9_BY_15, text);
+}
