@@ -16,7 +16,7 @@ main(int argc, char **argv)
     return -1; //exit
 
   /* Create window */
-  window = glfwCreateWindow(640, 480, "ecosim", NULL, NULL);
+  window = glfwCreateWindow(300, 300, "ecosim", NULL, NULL);
   if (!window)
   {
     glfwTerminate();
@@ -28,17 +28,38 @@ main(int argc, char **argv)
 
 
   /* Program setup */
-  Rectangle* temp = createRectangle(-0.9, -0.9, 0.9, 0.9);
-  RGB* color = createRGB(0, 0, 0);
+  Rectangle* temp = createRectangle(0.9, 0.9, -0.9, -0.9);
+  RGB* color = createRGB(1.0, 1.0, 1.0);
+
+  Rectangle* temp2 = createRectangle(0.0, 0.0, -0.3, -0.3);
+  RGB* color2 = createRGB(0.0, 0.0, 1.0);
+
+  Rectangle* temp3 = createRectangle(0.0, 0.0, -0.3, 0.3);
+  RGB* color3 = createRGB(1.0, 0.0, 0.0);
+
+  Rectangle* temp4 = createRectangle(0.0, 0.0, 0.3, 0.3);
+  RGB* color4 = createRGB(0.0, 1.0, 0.0);
+
+  Rectangle* temp5 = createRectangle(0.0, 0.0, 0.3, -0.3);
+  RGB* color5 = createRGB(1.0, 1.0, 0.0);
 
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
+    /* Set the viewport */
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    glViewport(0, 0, width, height);
+
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
 
     drawRectangle(temp, color);
+    drawRectangle(temp2, color2);
+    drawRectangle(temp3, color3);
+    drawRectangle(temp4, color4);
+    drawRectangle(temp5, color5);
     
     /* Swap buffers */
     glfwSwapBuffers(window);

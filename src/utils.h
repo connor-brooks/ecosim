@@ -7,8 +7,8 @@ typedef struct {
 } Point;
 
 typedef struct {
-  Point topLeft;
-  Point bottomRight;
+  Point p1;
+  Point p2;
 } Rectangle;
 
 typedef struct {
@@ -19,6 +19,6 @@ typedef struct {
 
 Rectangle* createRectangle(float x1, float y1, float x2, float y2);
 
-RGB* createRGB(int red, int green, int blue); 
+RGB* createRGB(float red, float green, float blue); 
 
 #endif

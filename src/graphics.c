@@ -7,11 +7,15 @@
 void 
 drawRectangle(Rectangle* rectangle, RGB* color)
 {
+  /* Draw counter clockwiswe */
+  glColor3f(color->red, color->green, color->blue);
+
   glBegin(GL_QUADS);
-  glVertex2f(rectangle->topLeft.x, rectangle->topLeft.y);
-  glVertex2f(rectangle->bottomRight.x, rectangle->topLeft.y);
-  glVertex2f(rectangle->bottomRight.x, rectangle->bottomRight.y);
-  glVertex2f(rectangle->topLeft.x, rectangle->bottomRight.y);
+  glVertex2f(rectangle->p1.x, rectangle->p1.y);
+  glVertex2f(rectangle->p2.x, rectangle->p1.y);
+  glVertex2f(rectangle->p2.x, rectangle->p2.y);
+  glVertex2f(rectangle->p1.x, rectangle->p2.y);
+
   glEnd();
 }
 
