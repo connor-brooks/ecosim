@@ -7,81 +7,91 @@
 #include "utils.h"
 #include "graphics.h"
 
-int
+/* Keyboard callback */
+	void
+key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	if ( action == GLFW_PRESS)
+		printf("key %c or %d with mod %d\n", key, key, mods);
+	switch(key){
+		case 81:
+			glfwTerminate();
+			break;
+		default:
+			break;
+	};
+}
+
+/* Main function */
+
+	int
 main(int argc, char **argv)
 {
-  GLFWwindow* window;
+	GLFWwindow* window;
 
-  /* Initalize glfw */
-  if (!glfwInit())
-    return -1; //exit
+	/* Initalize glfw */
+	if (!glfwInit())
+		return -1; //exit
 
-  glutInit(&argc, argv);
+	glutInit(&argc, argv);
 
-  /* Create window */
-  window = glfwCreateWindow(300, 300, "ecosim", NULL, NULL);
-  if (!window)
-  {
-    glfwTerminate();
-    return -1;
-  }
+	/* Create window */
+	window = glfwCreateWindow(300, 300, "ecosim", NULL, NULL);
+	if (!window)
+	{
+		glfwTerminate();
+		return -1;
+	}
 
-  /* Set the windows context */
-  glfwMakeContextCurrent(window);
-
-
-  /* Program setup */
-  Rectangle* temp = createRectangle(0.9, 0.9, -0.9, -0.9);
-  RGB* color = createRGB(1.0, 1.0, 1.0);
-
-  Rectangle* temp2 = createRectangle(0.0, 0.0, -0.3, -0.3);
-  RGB* color2 = createRGB(1.0, 1.0, 0.0);
-
-  Rectangle* temp3 = createRectangle(0.0, 0.0, -0.3, 0.3);
-  RGB* color3 = createRGB(0.0, 1.0, 1.0);
-
-  Rectangle* temp4 = createRectangle(0.0, 0.0, 0.3, 0.3);
-  RGB* color4 = createRGB(1.0, 0.0, 1.0);
-
-  Rectangle* temp5 = createRectangle(0.0, 0.0, 0.3, -0.3);
-  RGB* color5 = createRGB(0.0, 1.0, 0.0);
-
-  Rectangle* temp6 = createRectangle(-0.6, -0.6, 0.6, 0.6);
-  RGB* color6 = createRGB(0.0, 0.0, 0.0);
+	/* Set the windows context */
+	glfwMakeContextCurrent(window);
+	glfwSetKeyCallback(window, key_callback);
 
 
-  /* Main loop */
-  while(!glfwWindowShouldClose(window))
-  {
-    /* Set the viewport */
-    int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
-
-    /* Render */
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    drawRectangle(temp, color);
+	/* Program setup */
 
 
-    drawRectangle(temp6, color6);
 
-    drawRectangle(temp2, color2);
-    drawRectangle(temp3, color3);
-    drawRectangle(temp4, color4);
-    drawRectangle(temp5, color5);
+	/* Main loop */
+	while(!glfwWindowShouldClose(window))
+	{
+		/* Set the viewport */
+		int width, height;
+		glfwGetFramebufferSize(window, &width, &height);
+		glViewport(0, 0, width, height);
+
+		/* Render */
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		/* TESTING GRAPHICS FUNCTIONS */
+
+		/* Draw a rectangle from a struct */
+		Rectangle* temp = createRectangle(0.9, 0.9, -0.9, -0.9);
+		RGB* color = createRGB(1.0, 1.0, 1.0);
+		drawRectangleStruct(temp, color);
+		free(temp);
+		free(color);
+
+		/* Text function test */
+		float current = -0.8, end = 0.81;
+		for(; current <= end; current+=0.1)
+		drawText(-0.8, current,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
+
+		/* Draw a rectangles via arguments */
+		drawRectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
+		drawRectangle(0.0, 0.0, 0.3, -0.3, 0.0, 1.0, 0.0);
+		drawRectangle(0.0, 0.0, 0.3, 0.3, 1.0, 0.0, 1.0);
+		drawRectangle(0.0, 0.0, -0.3, 0.3, 0.0, 1.0, 1.0);
+		drawRectangle(0.0, 0.0, -0.3, -0.3, 1.0, 1.0, 0.0);
 
 
-    drawText(-0.8, 0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
-    drawText(-0.8, -0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
+		/* Swap buffers */
+		glfwSwapBuffers(window);
 
-    /* Swap buffers */
-    glfwSwapBuffers(window);
+		/* Poll for events */
+		glfwPollEvents();
+	}
 
-    /* Poll for events */
-    glfwPollEvents();
-  }
-
-  glfwTerminate();
-  return 0;
+	glfwTerminate();
+	return 0;
 }

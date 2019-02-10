@@ -5,8 +5,26 @@
 
 #include "utils.h"
 
+
+/* Draw rectangle from args */
 void 
-drawRectangle(Rectangle* rectangle, RGB* color)
+drawRectangle(float x1, float y1, float x2, float y2, float r, float g, float b)
+{
+  /* Draw counter clockwiswe */
+  glColor3f(r, g, b);
+
+  glBegin(GL_QUADS);
+  glVertex2f(x1, y1);
+  glVertex2f(x2, y1);
+  glVertex2f(x2, y2);
+  glVertex2f(x1, y2);
+
+  glEnd();
+}
+
+/* Draw from structs */
+void 
+drawRectangleStruct(Rectangle* rectangle, RGB* color)
 {
   /* Draw counter clockwiswe */
   glColor3f(color->red, color->green, color->blue);
