@@ -1,0 +1,96 @@
+<h2>Introduction</h2>
+This document explains the structure and usage of config files used in Ecosim, specifies the parameters required for a valid config file, and provides an example file.
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Attributes</td><td>Characteristics which affect behaviours of agents</td>
+  </tr>
+  <tr>
+    <td>Breed</td><td>A group of agents which share similar attributes</td>
+  </tr>
+  <tr>
+    <td>Dummy</td><td>An agent group that is only spawned to provide food to others</td>
+  </tr>
+  <tr>
+    <td>Member</td><td>An agent belonging to a specific breed or group</td>
+  </tr>
+  <tr>
+    <td>Parameter</td><td>Values provided from the config file which represent attributes</td>
+  </tr>
+  <tr>
+    <td>Plaintext</td><td>A simple ASCII file</td>
+  </tr>
+  <tr>
+    <td>Spawn</td><td>Creation of an agent</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>Ecosim needs a config file to be able to load the initial agents when the simulation is first ran. This file specifies the various agent groups and their <i>attributes</i>, as well as how many <i>members</i> of each group to <i>spawn</i>.<br/><br/>
+The file itself should be written in <i>plaintext</i>, with each value separated by a comma, then a space. Each agent group should be on a new line, and every <i>parameter</i> should be satisfied with the correct datatype.
+
+</p>
+
+<h2>Config File Structure</h2>
+<table>
+  <tr>
+    <th>Config Parameter</th></th><th>Type</th><th>Range</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>agent_id</td><td>int</td><td>0 to 512</td><td><i>Id</i> number of agent group</td>
+  </tr>
+  <tr>
+    <td>g_confidence</td><td>float</td><td>-1 to 1</td><td>Confidence/fear of the agent group</td>
+  </tr>
+  <tr>
+    <td>g_metabolism</td><td>float</td><td>-1 to 1</td><td>Metabolism rate of the agent group</td>
+  </tr>
+  <tr>
+    <td>d_living</td><td>float</td><td>0 to 1</td><td>Living entity food preference of the agent group</td>
+  </tr>
+  <tr>
+    <td>d_nonliving</td><td>float</td><td>0 to 1</td><td>Non-living entity food preference of the agent group</td>
+  </tr>
+  <tr>
+    <td>f_master</td><td>float</td><td>0 to 1</td><td>How much influence flocking has on the agent group</td>
+  </tr>
+  <tr>
+    <td>f_influence</td><td>float</td><td>0 to 1</td><td>How much pull a flock has on an agent of the group</td>
+  </tr>
+  <tr>
+    <td>f_proximity</td><td>float</td><td>0 to 1</td><td>The distance maintained between this group's agents in a flock</td>
+  </tr>
+  <tr>
+    <td>f_velocity</td><td>float</td><td>0 to 1</td><td>The amount of effect the flock's velocity has on an agent of the group</td>
+  </tr>
+  <tr>
+    <td>s_count</td><td>int</td><td>0 - 512</td><td>How many agents from this group are spawned when the simulation is loaded</td>
+  </tr>
+  <tr>
+    <td>s_state</td><td>int</td><td>0 to 1</td><td>The <i>state</i> of the agent group once spawned</td>
+  </tr>
+</table>
+For more information on how these parameters affect agent behaviour, please see the agent specification.
+
+<h2>Sample Config File</h2>
+Below is a sample config file:
+<code><pre>
+# Sample ecosimrc config file for Ecosim
+# Ensure a single space is used between attributes
+# agent_id, g_confidence, g_metabolism, d_living, d_nonliving, f_master, f_influence, f_proximity, f_velocity, s_count, s_state
+0, 0.8, 0.3, 0.7, 0.1, 0.0, 0.0, 0.0, 0.0, 100, 1
+1, 0.2, 0.5, 0.0, 0.9, 0.5, 0.6, 0.3, 0.6, 200, 1
+3, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 100, 0
+</pre>
+</code>
+This config creates three entity groups:
+<ol>
+  <li>A confident slow moving <i>breed</i>, which consumes other living entities. 100 of these agents are <i>spawned</i></li>
+  <li>A fast moving, flocking <i>breed</i> which only consumes non-living agents. 200 of these agents are <i>spawned</i></li>
+  <li>A <i>dummy</i> agent group. These "agents" spawn as non-living entities, as food for group 2. 100 of these agents are <i>spawned</i></li>
+</ol>
+
+

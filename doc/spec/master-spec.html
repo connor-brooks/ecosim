@@ -1,0 +1,700 @@
+<p>
+<h2>Introduction</h2>
+This document offers an brief explanation of how Ecosim will work. For more detailed information on any one component, please see the specifications at the bottom of the page.
+</p>
+
+<p>
+<h2>Project Overview</h2>
+Ecosim is an ecosystem simulator. It's main goal is to help illustrate and explore interconnectedness between various organisms within an environment, and how they can directly and indirectly affect one another.
+<br />
+<br />
+The world these organisms inhabit will be a fairly simple one with minimal graphics, as the project is focused on the behaviours of them, which are the following:
+<ul>
+  <li>Avoidance of genetically non similar organisms</li>
+  <li>Birth, via reproduction</li>
+  <li>Consumption, both primary and secondary</li>
+  <li>Death, as a result of a lack of consumption</li>
+  <li>Evolution, via a genetic algorithm</li>
+  <li>Flocking, via a Boid's type algorithm</li>
+  <li>Reproduction, via splitting, as a result of adequate consumption</li>
+</ul>
+Users are able to interact with the simulation in three ways. The first is via a plaintext config file containing information on the attributes of various "breeds" of organisms which will populate the environment once the program is ran.
+<br />
+<br />
+The second way a user can interact is via Vim style keybindings whilst the simulation is running. These enable the user to perform actions such as:
+<ul>
+  <li>Copying an organism</li>
+  <li>Deleting an organism</li>
+  <li>Inserting a predefined breed</li>
+  <li>Inserting non-living entities (food)</li>
+  <li>Pausing the simulation</li>
+</ul>
+Finally, the user is able to enter direct commands into the engine of the simulation, to perform similar actions as the key binds, but with more verbosity.<br/><br/>
+
+This minimalistic way of interacting allows for the user interface to remain simple yet powerful, the only elements on screen being a small command strip along the bottom with the rest of the window being dedicated to the simulation.<br/><br/>
+As previously stated, the graphics of the simulation will be very simple and utilitarian. Each organism will be a single colored point, with their color being used to indicate their genetics and/or state. Any interaction between two agents will be brought to attention by graphically highlighting the area which the event took place.
+</p>
+
+
+<p>
+<h2>Specifications</h2>
+<ul>
+  <li><a href="agent-spec.html">Agent specification</a></li>
+  <li><a href="command-spec.html">Command specification</a></li>
+  <li><a href="config-spec.html">Config specification</a></li>
+  <li><a href="graphics-spec.html">Graphics specification</a></li>
+  <li><a href="keyboard-spec.html">Keyboard specification</a></li>
+  <li><a href="ui-spec.html">UI specification</a></li>
+</ul>
+</p>
+
+<h2>Introduction</h2>
+<p>
+This document gives an overview of the general mechanics behind the <i>agents</i> which populate Ecosim's environment. However, these details are likely to change during the course of development.
+</p>
+
+
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th>
+    <th>Description</th>
+  </tr>
+  <tr><td>Agent</td><td>A "living" creature in the environment. An entity</td></tr>
+  <tr><td>Attribute</td><td>A characteristic of an agent which influences behaviour and/or represents it's condition</td></tr>
+  <tr><td>Confidence / Fear</td><td>How likely an agent is to approach another which is non-related </td></tr>
+  <tr><td>Energy</td><td>How "hungry" an agent is</td></tr>
+  <tr><td>Flock</td><td>A self-emerging group behaviour <sup>[See <a href="https://en.wikipedia.org/wiki/Boids">Boids</a>]</sup></td></tr>
+  <tr><td>Genes</td><td>Static attributes</td></tr>
+  <tr><td>Living entity</td><td>An agent with energy, which can move and consume</td></tr>
+  <tr><td>Metabolism</td><td>How quickly an agent uses energy, this has pros and cons. A higher metabolism allows faster movement, but also faster starvation</td></tr>
+  <tr><td>Mutation</td><td>Slight changes in an Offspring's static attributes, or "genes"</td></tr>
+  <tr><td>Non-living entity</td><td>An entity which was previously an agent. It cannot move or consume, but it can be consumed.</td></tr>
+  <tr><td>Related</td><td>The relationship between two entities which share similar genes</td></tr>
+  <tr><td>State</td><td>The state of an entity. Living or non-living</td></tr>
+</table>
+
+<h2>Overview</h2>
+<p>
+When the program is ran, a number of agent groups, each with predefined <i>static attributes</i> shall populate the world. Since members of these groups posses the same attributes as their peers, they are considered to be <i>related</i>. These attributes will be represented as a has, as to allow agents to identity each other. <br/><br/>
+
+Attributes which are static change the way that agents interact with the world, and can be considered to be similar to <i>genes</i> in real living creatures. For example, if an agent has a low <i>Confidence / Fear</i> gene, then it is far more likely to avoid non-related agents. These attributes effect a wide range of behaviours, which can be seen in the "Agent Attribute" table below. <br/><br/>
+
+Agents are required to maintain an <i>energy</i> level. This is analogous to humans requiring food. Moving around the environment uses energy, so agents are required to eat regularly. If they do not, they will die, becoming <i>non-living entities</i> and food for others. In contrast, if they consume more than enough food then they are able to reproduce, this happens by the agent splitting into two copies of itself.<br/><br/>
+
+To keep the environment interesting and diverse, when an agent splits there is a likelihood of <i>mutating</i>. This means that the copy of the original agent has it's <i>genes</i> slightly modified. This can result in an improvement or reduction in the chances of survival.
+</p>
+
+
+<h2>Agent Attributes</h2>
+<p>
+Each agent in the world shall be represented by a data structure containing various attributes. There are two kinds of attributes associated with each agent. <i>Dynamic attributes</i> and <i>static attributes</i>
+<br />
+<br />
+
+<i>Dynamic attributes</i> can change during the course of the simulation due to changes in the environment. <i>static attributes</i>, which are generated at the <i>birth</i> and cannot be changed. Static attributes can only be modified outside of the game via a config file, or via <i>mutation</i> when the agent is born.
+</p>
+<table>
+  <tr>
+    <th colspan=4>Dynamic Attributes</th>
+  </tr>
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+    <th>Datatype</th>
+    <th>Range</th>
+  </tr>
+  <tr>
+    <td>Hash</td>
+    <td>A representation of the static attributes of the entity</td>
+    <td>char array</td>
+    <td>N/a</td>
+  </tr>
+  <tr>
+    <td>Energy</td>
+    <td>The amount of energy an agent has left</td>
+    <td>int</td>
+    <td>0 to 255</td>
+  </tr>
+  <tr>
+    <td>State</td>
+    <td>-1: Dead (remove), 0: Dead (as food), 1: Living</td>
+    <td>int</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <td>X</td>
+    <td>X position in the world</td>
+    <td>float</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <td>y</td>
+    <td>Y position in the world</td>
+    <td>float</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <td>X velocity</td>
+    <td>X velocity of the agent</td>
+    <td>float</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <td>Y velocity</td>
+    <td>Y position in the world</td>
+    <td>float</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <th colspan=4>Static Attributes (General)</th>
+  </tr>
+  <tr>
+    <td>Confidence / Fear</td>
+    <td>The direction an agent will move towards another non-related agent (an agent with a different hash)</td>
+    <td>float</td>
+    <td>-1 to 1</td>
+  </tr>
+  <tr>
+    <td>Metabolism</td>
+    <td>How quickly an agent uses energy, a higher value allows the agent to move quicker</td>
+    <td>int</td>
+    <td>-128 to 128</td>
+  </tr>
+  <tr>
+    <th colspan=4>Static Attributes (Diet)</th>
+  </tr>
+  <tr>
+    <td>Living food preference</td>
+    <td>How likely an agent will attempt to consume a living entity</td>
+    <td>float</td>
+    <td>0 to 1</td>
+  </tr>
+  <tr>
+    <td>Non-living food preference</td>
+    <td>How likely an agent will attempt to consume a non-living entity</td>
+    <td>float</td>
+    <td>0 to 1</td>
+  </tr>
+  <tr>
+    <th colspan=4>Static Attributes (Flocking)</th>
+  </tr>
+  <tr>
+    <td>Flock influence</td>
+    <td>How much pull a flock has on an entity</td>
+    <td>float</td>
+    <td>0 to 1</td>
+  </tr>
+  <tr>
+    <td>Flock proximity</td>
+    <td>The distance maintained between agents in a flock</td>
+    <td>float</td>
+    <td>0 to 1</td>
+  </tr>
+  <tr>
+    <td>Flock velocity mirroring</td>
+    <td>The amount of effect the flocks velocity has on an agent</td>
+    <td>float</td>
+    <td>0 to 1</td>
+  </tr>
+</table>
+
+<h2>Agent Life Cycle</h2>
+<p>
+The life cycle of any agent in the simulation can be broken down into the following steps:
+<ol>
+  <li>The agent is born as a <i>living entity</i> in state 1</li>
+  <li>The agent processes all information about the environment it has available, for example, proximity of food, or other agents</li>
+  <li>The agent performs any of the following actions:
+    <ul>
+      <li>Consume, either a <i>living</i> or <i>non-living entity</i>, or both, increasing the agents <i>energy level</i> and forcing the entity into state -1. <b>Only if</b> a suitable entity is within range.</li>
+      <li>Reproduce, splitting itself into two agents, with slightly <i>mutated</i> static attributes. <b>Only if</b> the agent has enough <i>energy</i></li>
+    </ul>
+  </li>
+  <li>The agent moves position based on it's <i>static attributes</i> and environmental information.</li>
+  <li>The agent's <i>energy</i> is checked, if it is below a threshold, move to <i>state 0</i></li>
+  <li>The agent performs one of the following actions depending on which <i>state</i> it is in:
+    <ul>
+      <li><b>State -1</b>: The agent is completely removed from the environment</li>
+      <li><b>State 0</b>: The agent is dead, but remains in the environment as food for others as a <i>non-living entity</i> </li>
+      <li><b>State 1</b>: The agent survives, decrease <i>energy</i> and go to step 2</li>
+    </ul></li>
+</ol>
+</p>
+<h2>Introduction</h2>
+This document provides an overview to the use of commands in Ecosim. There is currently only a set of small yet essential commands ready to be implemented, however this is prone to change and expand during the course of development.
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>agent_id</td><td>An argument which corresponds to an agent group stored in the <i>config </i>file</td>
+  </tr>
+  <tr>
+    <td>Attributes</td><td>Parameters which dictate an agents behaviour</td>
+  </tr>
+  <tr>
+    <td>Buffer</td><td>Where references to agents selected by a previous command are stored ready to be used for a future command</td>
+  </tr>
+  <tr>
+    <td>Config</td><td>The file read at startup, which contain a collection <i>gene </i>groups, which consist of agent <i>id </i>and <i>attributes </i>associated with them.</td>
+  </tr>
+  <tr>
+    <td>Gene</td><td>Non changing <i>attributes </i>associated with an agent</td>
+  </tr>
+  <tr>
+    <td>Size</td><td>An argument to represent the magnitude of area centered around an <i>x </i>and <i>y </i>co ordinate</td>
+  </tr>
+  <tr>
+    <td>X</td><td>An argument which represents a position in the <i>x </i>axis of the simulation</td>
+  </tr>
+  <tr>
+    <td>Y</td><td>An argument which represents a position in the <i>y </i>axis of the simulation</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>As a modular approach is being taken with the construction of the program, the decision to separate key binds and commands has been taken. This way, key bindings are simply shortcuts to a command, rather than being hardcoded into the software. This leave room for easy expansion at a later date. The user is also able to enter commands manually into the command prompt at the bottom of the user interface. <br /> <br/>
+Commands are a way for the user to interface with the simulation whilst it is running, allowing them to modify the environment, adding, removing or changing agents. Some commands require arguments to specify details such as the location where their action should occur, whilst others do not. Below is a list of all the primary commands which will be implemented. 
+</p>
+
+<h2>Commands</h2>
+<table>
+  <tr>
+    <th>Command Name</th></th><th>Description</th><th>Arguments</th>
+  </tr>
+  <tr>
+    <td>Change</td><td>Change agents within the bounds of the square defined by the <i>x</i>, <i>y </i>and <i>size </i>arguments to agents corresponding to the <i>agent_id </i>specified by the <i>config </i>file</td><td><i>x</i>, <i>y</i>, <i>size</i>, <i>agent_id</i></td>
+  </tr>
+  <tr>
+    <td>Delete</td><td>Delete agents within the bounds of the square defined by the <i>x</i>, <i>y </i>and <i>size </i>argument</td><td><i>x</i>, <i>y</i>, <i>size </i></td>
+  </tr>
+  <tr>
+    <td>Insert</td><td>Insert new agents with attributes from the corresponding <i>id </i>in <i>config </i>file, specified with <i>agent_id</i>, at <i>x</i>, <i>y </i>position </td><td><i>x</i>, <i>y</i>, <i>agent_id</i></td>
+  </tr>
+  <tr>
+    <td>Paste</td><td>Paste the agents currently in the <i>buffer</i> at the <i>x </i>and <i>y </i>position</td><td>None</td>
+  </tr>
+  <tr>
+    <td>Quit</td><td>Exit the simulation</td><td>None</td>
+  </tr>
+  <tr>
+    <td>Pause</td><td>Toggle between playing and pausing the simulation</td><td>None</td>
+  </tr>
+  <tr>
+    <td>Reload</td><td>Reload simulation from the <i>config </i>file</td><td>None</td>
+  </tr>
+  <tr>
+    <td>Yank</td><td>Copy the agents within bounds of the square defined by the <i>x</i>, <i>y </i>and <i>size </i>arguments into the <i>buffer</i></td><td><i>x</i>, <i>y</i>, <i>size</i></td>
+  </tr>
+</table>
+<h2>Introduction</h2>
+This document briefly explains the graphics functions implemented to create the simulation visualisation and the user interface. 
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Command Prompt</td><td>An area in the user interface which allows commands to be entered</td>
+  </tr>
+  <tr>
+    <td>inner_color</td><td>An argument which represents the fill color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Mode</td><td>The way the user interface handles key presses</td>
+  </tr>
+  <tr>
+    <td>outer_color</td><td>An argument which represents the border color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Quadtree</td><td>The data structure which contains all of the agents</td>
+  </tr>
+  <tr>
+    <td>State</td><td>The current state of an entity. Living or non-living</td>
+  </tr>
+  <tr>
+    <td>text_string</td><td>An argument which represents the text to be written to the screen</td>
+  </tr>
+  <tr>
+    <td>X</td><td>An argument which represents a position in the x axis of the simulation</td>
+  </tr>
+  <tr>
+    <td>Y</td><td>An argument which represents a position in the y axis of the simulation</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>In an attempt to conserve as much computing power as possible for the mechanics of the simulation, the graphics in Ecosim are very simple and utilitarian. All graphical elements are created by 3 very simple primitives, which are as follows:
+<ul>
+  <li>Rectangles: For drawing for cornered shapes, which have the ability to have separate outline and fill colors</li>
+  <li>Points: For drawing single points on the screen, at varying sizes, with a fill color</li>
+  <li>Text: For drawing text onto the screen, at a fixed pixel size, in a font color</li>
+</ul>
+For a technical specification of each graphical function used in the program, see below.
+</p>
+
+<h2>Graphics functions</h2>
+<table>
+  <tr>
+    <th>Command Name</th></th><th>Description</th><th>Arguments</th>
+  </tr>
+  <tr>
+    <td>Rectangle</td><td>Draw a rectangle on the screen between the specified <i>x/y<sup>1</sup></i> and <i>x/y<sup>2</sup></i> locations with the supplied inner/outer colors</td><td><i>x</i><sup>1</sup>, <i>y</i><sup>1</sup>, <i>x</i><sup>2</sup>, <i>y</i><sup>2</sup>, <i>inner_color</i>, <i>outer_color</i></td>
+  </tr>
+  <tr>
+    <td>Point</td><td>Draw a single point on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i> </td><td><i>x</i>, <i>y</i>, <i>inner_color</i></td>
+  </tr>
+  <tr>
+    <td>Text</td><td>Draw the <i>text_string</i> on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i></td><td><i>x</i>, <i>y</i>, <i>text_string</i>, <i>inner_color</i></td>
+  </tr>
+</table>
+
+<h2>Graphical Elements</h2>
+<p>
+Using a combination of the above functions, the following components of the simulation are able to be created:
+<ul>
+  <li>Agents: Simply a single point drawn on the screen, colored to represent the genetics and <i>state</i> of the agent.</li>
+  <li>Command prompt: Text drawn from the <i>command prompt</i>'s text buffer and a single rectangle to serve as a border</li>
+  <li>Environment: A single rectangle as a border, an option to draw rectangles to represent the <i>quadtree</i> in which the agents occupy</li>
+  <li>Interface bar: A single rectangle as a border</li>
+  <li>Mode Indicator: A single rectangle as a border, with text drawn to indicate which <i>mode</i> the user interface is in</li>
+</ul>
+For a full explanation of the user interface's components and layout, please see the user interface specification.
+</p>
+
+<h2>Introduction</h2>
+This document briefly explains the graphics functions implemented to create the simulation visualisation and the user interface. 
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Command Prompt</td><td>An area in the user interface which allows commands to be entered</td>
+  </tr>
+  <tr>
+    <td>inner_color</td><td>An argument which represents the fill color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Mode</td><td>The way the user interface handles key presses</td>
+  </tr>
+  <tr>
+    <td>outer_color</td><td>An argument which represents the border color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Quadtree</td><td>The data structure which contains all of the agents</td>
+  </tr>
+  <tr>
+    <td>State</td><td>The current state of an entity. Living or non-living</td>
+  </tr>
+  <tr>
+    <td>text_string</td><td>An argument which represents the text to be written to the screen</td>
+  </tr>
+  <tr>
+    <td>X</td><td>An argument which represents a position in the x axis of the simulation</td>
+  </tr>
+  <tr>
+    <td>Y</td><td>An argument which represents a position in the y axis of the simulation</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>In an attempt to conserve as much computing power as possible for the mechanics of the simulation, the graphics in Ecosim are very simple and utilitarian. All graphical elements are created by 3 very simple primitives, which are as follows:
+<ul>
+  <li>Rectangles: For drawing for cornered shapes, which have the ability to have separate outline and fill colors</li>
+  <li>Points: For drawing single points on the screen, at varying sizes, with a fill color</li>
+  <li>Text: For drawing text onto the screen, at a fixed pixel size, in a font color</li>
+</ul>
+For a technical specification of each graphical function used in the program, see below.
+</p>
+
+<h2>Graphics functions</h2>
+<table>
+  <tr>
+    <th>Command Name</th></th><th>Description</th><th>Arguments</th>
+  </tr>
+  <tr>
+    <td>Rectangle</td><td>Draw a rectangle on the screen between the specified <i>x/y<sup>1</sup></i> and <i>x/y<sup>2</sup></i> locations with the supplied inner/outer colors</td><td><i>x</i><sup>1</sup>, <i>y</i><sup>1</sup>, <i>x</i><sup>2</sup>, <i>y</i><sup>2</sup>, <i>inner_color</i>, <i>outer_color</i></td>
+  </tr>
+  <tr>
+    <td>Point</td><td>Draw a single point on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i> </td><td><i>x</i>, <i>y</i>, <i>inner_color</i></td>
+  </tr>
+  <tr>
+    <td>Text</td><td>Draw the <i>text_string</i> on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i></td><td><i>x</i>, <i>y</i>, <i>text_string</i>, <i>inner_color</i></td>
+  </tr>
+</table>
+
+<h2>Graphical Elements</h2>
+<p>
+Using a combination of the above functions, the following components of the simulation are able to be created:
+<ul>
+  <li>Agents: Simply a single point drawn on the screen, colored to represent the genetics and <i>state</i> of the agent.</li>
+  <li>Command prompt: Text drawn from the <i>command prompt</i>'s text buffer and a single rectangle to serve as a border</li>
+  <li>Environment: A single rectangle as a border, an option to draw rectangles to represent the <i>quadtree</i> in which the agents occupy</li>
+  <li>Interface bar: A single rectangle as a border</li>
+  <li>Mode Indicator: A single rectangle as a border, with text drawn to indicate which <i>mode</i> the user interface is in</li>
+</ul>
+For a full explanation of the user interface's components and layout, please see the user interface specification.
+</p>
+
+<h2>Introduction</h2>
+This document briefly explains the user interface handles any key presses made by the user. It also contains a list of the default key bindings. 
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>agent_id</td><td>An argument referencing a specific breed of agent specified in the config file</td>
+  </tr>
+  <tr>
+    <td>Command</td><td>A message sent to the simulation allowing the user to interact with it</td>
+  </tr>
+  <tr>
+    <td>Command prompt buffer</td><td>A piece of memory storing temporary text which has been inputted into the command prompt</td>
+  </tr>
+  <tr>
+    <td>HJKL</td><td>A method of communicating directional data with the h, j, k and l keys of a keyboard</td>
+  </tr>
+  <tr>
+    <td>Insert mode</td><td>A mode which allows users to input commands to be ran by the program</td>
+  </tr>
+  <tr>
+    <td>Normal buffer</td><td>A piece of memory storing key presses made by the user in normal mode</td>
+  </tr>
+  <tr>
+    <td>Normal mode</td><td>The mode in which the user can interact with the program via various key binds</td>
+  </tr>
+  <tr>
+    <td>Parent command</td><td>The command which forced the user interface to enter into select mode</td>
+  </tr>
+  <tr>
+    <td>Positional data</td><td>Two numbers representing a 2D location in the simulations environment</td>
+  </tr>
+  <tr>
+    <td>Regular key</td><td>Keys that are bound to various commands</td>
+  </tr>
+  <tr>
+    <td>Select count</td><td>How many times a parent command will request positional data from select mode</td>
+  </tr>
+  <tr>
+    <td>Select mode</td><td>The mode which allows the user to specify positional data</td>
+  </tr>
+  <tr>
+    <td>Selecting function</td><td>The function which handles select mode</td>
+  </tr>
+  <tr>
+    <td>Special key</td><td>Keys that are essential to the mechanics of the programs user interface</td>
+  </tr>
+  <tr>
+    <td>Yank buffer</td><td>A buffer in which references to all agents yanked are stored</td>
+  </tr>
+  
+</table>
+
+<h2>Overview</h2>
+<p>The only way of interfacing with Ecosim is via the keyboard. By pressing keys, the user is able to manually type commands, or quickly run one via a key bind. Keys behave differently in different modes:
+<ul>
+  <li>In <i>normal mode</i>, all key presses are sent to the <i>normal buffer</i>.</li>
+  <li>In <i>insert mode</i> all key presses are sent to the <i>command prompt buffer</i>.</li>
+  <li>In <i>select mode</i>, all key presses are registered by the <i>selecting function</i>, allowing a position in 2D space to be selected.</li>
+</ul>
+Within the program there are <i>special keys</i>, such as <i>&lt;Esc&gt;</i> and <i>&lt;Return&gt;</i> and which do not map to any command. These keys are special as they're essential to the users ability to interact with the user interface. Other keys, such as <i>d</i> and <i>i</i> are <i>regular keys</i>, as they aren't essential to the user interface, they are simply used to control the simulation.
+</p>
+</ul>
+</p>
+
+<h2>Key Handling in Normal Mode</h2>
+<p>
+In <i>normal mode</i>, the user hits the key binding for a <i>command</i>, then any arguments, without pressing return, for example pressing: <i>"i3"</i> tells the program to insert agents of <i>agent_id</i> 3 into the environment. <br /><br/>
+For any command requiring <i>positional data</i>, such as where to insert the new agents, the user interface will enter <i>select mode</i> as soon as the key binding has enough arguments to fully execute the <i>command</i>.
+<ol>
+  <li>Create an empty <i>normal buffer</i></li>
+  <li>Wait for a key press...</li>
+  <li>Add the key to the <i>normal buffer</i></li>
+  <li>Look up the key. Is it valid?
+    <ul>
+      <li>No: Display error, go to step 1</li>
+      <li>Yes: Check the <i>argument count</i> and <i>select count</i> for the key and continue</li>
+    </ul>
+  </li>
+  <li>Check if there are enough arguments in the <i>normal buffer</i> to execute the <i>command</i></li>
+    <ul>
+      <li>Yes: Enter <i>select mode</i> as many times as needed as per the <i>select count</i> then execute the <i>command</i> and return to step 1</li>
+      <li>No: Continue</li>
+    </ul>
+  </li>
+  <li>Wait for a key press...</li>
+  <li>Add the key to the <i>normal buffer</i></li>
+  <li>Go to step 5</li>
+</ol>
+Note: Pressing the <i>special key</i> <i>&lt;Esc&gt;</i> at any time in <i>normal mode</i> will clear the <i>normal buffer</i>
+</p>
+
+<h2>Key Handling in Insert Mode</h2>
+<p>
+In <i>insert mode</i>, any keys pressed are stored in the <i>command prompt buffer</i> and drawn onto the screen in the <i>command prompt</i> area. This allows the user to type commands in a typical fashion.
+<ol>
+  <li> Create an empty <i>command prompt buffer</i></li>
+  <li>Wait for a key press...</li>
+  <li>Is the key <i>&lt;Return&gt;</i> or <i>&lt;Esc&gt;</i>?
+    <ul>
+      <li><i>&lt;Return&gt;</i>: Attempt to run parse the <i>command</i> in the <i>command prompt buffer</i></li>
+      <li><i>&lt;Esc&gt;</i>: Enter <i>normal mode</i></li>
+      <li>No: Add the key to the <i>command prompt buffer</i> and continue</li>
+    </ul></li>
+    <li>Go to step 2</li>
+</ol>
+</p>
+
+<h2>Key Handling in Select Mode</h2>
+<p>
+The purpose of <i>select mode</i> is to allow the user to select a point in 2D space to be used as an argument for a command by using <i>HJKL</i>. Once return is pressed, the selected location is returned as a co ordinate to the <i>parent command</i>. 
+<ol>
+  <li>Create <i>x</i> and <i>y</i> variables</li>
+  <li>Wait for a key press...</li>
+  <li>What type is the key?
+    <ul>
+      <li>Directional: Update relevant dimension variable, continue</li>
+      <li><i>&lt;Esc&gt;</i>: Return to <i>normal mode</i></li>
+      <li><i>&lt;Return&gt;</i>: Return <i>x</i> and <i>y</i> to the <i>parent command</i></li>
+    </ul>
+  </li>
+  <li>Go to step 2</li>
+</ol>
+</p>
+
+<h2>Key bindings</h2>
+<p>
+Below is a list of all default key bindings in the simulation. Note that any <i>positional data</i> arguments to <i>command</i> functions aren't included in the arguments column. If no mode is specified assume the key binding is for <i>normal mode</i>.
+</p>
+<table>
+  <tr>
+    <th>Key</th><th>Function</th><th>Arguments</th><th>Select Count</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>&lt;Esc&gt;</td><td>N/A</td><td>N/A</td><td>0</td><td>Clear the <i>normal buffer</i> in <i>normal mode</i>, enter <i>normal mode</i> in any other mode</td>
+  </tr>
+  <tr>
+    <td>&lt;Return&gt;</td><td>N/A</td><td>N/A</td><td>0</td><td>Confirm selection in <i>select mode</i>, confirm <i>command</i> in <i>insert mode</i></td>
+  </tr>
+  <tr>
+    <td>&lt;Space&gt;</td><td>Pause</td><td>N/A</td><td>0</td><td>Pause the simulation in <i>normal mode</i></td>
+  </tr>
+  <tr>
+    <td>:</td><td>N/A</td><td>N/A</td><td>0</td><td>Enter <i>insert mode</i></td>
+  </tr>
+  <tr>
+    <td>c</td><td>Change</td><td>agent_id</td><td>2</td><td>Change the selected agents into agents associated with the <i>agent_id</i> argument </td>
+  </tr>
+  <tr>
+    <td>d</td><td>Delete</td><td>N/A</td><td>2</td><td>Delete the selected agents</td>
+  </tr>
+  <tr>
+    <td>h</td><td>N/A</td><td>N/A</td><td>0</td><td>Left in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>i</td><td>Insert</td><td>agent_id</td><td>1</td><td>Insert the agents specified by the <i>agent_id</i> argument at the selected location</td>
+  </tr>
+  <tr>
+    <td>j</td><td>N/A</td><td>N/A</td><td>0</td><td>Down in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>k</td><td>N/A</td><td>N/A</td><td>0</td><td>Up in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>l</td><td>N/A</td><td>N/A</td><td>0</td><td>Right in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>p</td><td>Paste</td><td>N/A</td><td>1</td><td>Paste agents from <i>yank buffer</i> into selected location</td>
+  </tr>
+  <tr>
+    <td>q</td><td>Quit</td><td>N/A</td><td>0</td><td>Quit the simulation</td>
+  </tr>
+  <tr>
+    <td>r</td><td>Reload</td><td>N/A</td><td>0</td><td>Reload the simulation</td>
+  </tr>
+  <tr>
+    <td>y</td><td>Yank</td><td>N/A</td><td>2</td><td>Copy selected agents into the <i>yank buffer</i></td>
+  </tr>
+  <table>
+    <p>
+    For a full list of <i>commands</i> and command arguments, please see the command specification.
+    </p>
+<h2>Introduction</h2>
+This document provides an overview of the user interface. It is very brief as the majority of the interface is specified more in depth in the keyboard and graphics specifications.
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Command prompt</td><td>An area where commands can be entered into the simulation</td>
+  </tr>
+  <tr>
+    <td>Commands</td><td>Messages sent to the simulation to affect it's behaviour or cause an action, such as creating new agents</td>
+  </tr>
+  <tr>
+    <td>HJKL</td><td>A method of directionally navigating using the keyboard</td>
+  </tr>
+  <tr>
+    <td>Insert mode</td><td>A mode in which key presses are entered as text into the command prompt</td>
+  </tr>
+  <tr>
+    <td>Interface bar</td><td>Both the status area and the command prompt area of the user interface</td>
+  </tr>
+  <tr>
+    <td>Key binds</td><td>Shortcuts for performing various commands</td>
+  </tr>
+  <tr>
+    <td>Mode</td><td>The state the user interface is in. Affects how key presses are handled</td>
+  </tr>
+  <tr>
+    <td>Normal mode</td><td>A mode where key presses are registered normally, as keyboard shortcuts</td>
+  </tr>
+  <tr>
+    <td>Select mode</td><td>A mode which allows the selection of areas on the screen</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>The user interface is split into two main sections: the simulation section which take up the majority of the screen, and the <i>interface bar</i> along the bottom. This consists of the <i>mode indicator</i> and the <i>command prompt</i><br/><br/>
+
+The user is able to interface with the simulation via various Vim inspired <i>key binds</i>, for example, hitting the <i>":"</i> key will put the user into <i>insert mode</i>. Hitting <i>Esc</i> will return the user back into <i>normal mode</i>. For more information on all the key bindings, please see the keyboard specification document.</p>
+
+<h2>Modes</h2>
+<p>
+The user interface allows for three different modes: <i>Insert mode</i>, <i>select mode</i>, or <i>normal mode</i>, which are explained below:
+<ul>
+  <li>Insert mode: A user is able to type <i>commands</i> into the <i>command prompt</i>, normal key binds don't work as all key presses are sent to the command prompt area.</li>
+  <li>Normal mode: A user is able to use regular <i>key binds</i>, which are shortcuts to regular commands.</li>
+  <li>Selection mode: A user is able to use <i>HJKL</i> or the arrow keys to select an area which is then provided as an argument to a <i>command</i>, which could, for example, delete all agents within it.
+</ul>
+
+
+</p>
+<h2>Layout</h2>
+Below in figure 1. is an illustration of the user interface with an explanation of each component: 
+<figure>
+<table border='1' cellpadding=50>
+  <tr>
+    <th colspan=2 align=center style="font-weight: normal;"><br/>Graphics<sup><small>[1]</small></sup><br/>&nbsp;</th>
+  </tr>
+  <tr>
+    <td align=center style="padding: 1px;">&nbsp;Mode<sup><small>[2]</small></sup>&nbsp;</td><td align=center style="padding: 1px;">&nbsp;Command prompt<sup><small>[3]</small></sup>&nbsp;</td>
+  </tr>
+</table>
+Figure 1. UI Illustration
+</figure>
+Components:
+<ol>
+  <li>Graphics: This is where the simulation will be displayed</li>
+  <li>Mode indicator: This is where the current mode the UI is in will be displayed</li>
+  <li>Command prompt: This is where the user is able to enter <i>commands</i> to interact with the simulation.</li>
+</ol>
+
+
+
+

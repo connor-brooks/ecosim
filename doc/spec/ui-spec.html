@@ -1,0 +1,75 @@
+<h2>Introduction</h2>
+This document provides an overview of the user interface. It is very brief as the majority of the interface is specified more in depth in the keyboard and graphics specifications.
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Command prompt</td><td>An area where commands can be entered into the simulation</td>
+  </tr>
+  <tr>
+    <td>Commands</td><td>Messages sent to the simulation to affect it's behaviour or cause an action, such as creating new agents</td>
+  </tr>
+  <tr>
+    <td>HJKL</td><td>A method of directionally navigating using the keyboard</td>
+  </tr>
+  <tr>
+    <td>Insert mode</td><td>A mode in which key presses are entered as text into the command prompt</td>
+  </tr>
+  <tr>
+    <td>Interface bar</td><td>Both the status area and the command prompt area of the user interface</td>
+  </tr>
+  <tr>
+    <td>Key binds</td><td>Shortcuts for performing various commands</td>
+  </tr>
+  <tr>
+    <td>Mode</td><td>The state the user interface is in. Affects how key presses are handled</td>
+  </tr>
+  <tr>
+    <td>Normal mode</td><td>A mode where key presses are registered normally, as keyboard shortcuts</td>
+  </tr>
+  <tr>
+    <td>Select mode</td><td>A mode which allows the selection of areas on the screen</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>The user interface is split into two main sections: the simulation section which take up the majority of the screen, and the <i>interface bar</i> along the bottom. This consists of the <i>mode indicator</i> and the <i>command prompt</i><br/><br/>
+
+The user is able to interface with the simulation via various Vim inspired <i>key binds</i>, for example, hitting the <i>":"</i> key will put the user into <i>insert mode</i>. Hitting <i>Esc</i> will return the user back into <i>normal mode</i>. For more information on all the key bindings, please see the keyboard specification document.</p>
+
+<h2>Modes</h2>
+<p>
+The user interface allows for three different modes: <i>Insert mode</i>, <i>select mode</i>, or <i>normal mode</i>, which are explained below:
+<ul>
+  <li>Insert mode: A user is able to type <i>commands</i> into the <i>command prompt</i>, normal key binds don't work as all key presses are sent to the command prompt area.</li>
+  <li>Normal mode: A user is able to use regular <i>key binds</i>, which are shortcuts to regular commands.</li>
+  <li>Selection mode: A user is able to use <i>HJKL</i> or the arrow keys to select an area which is then provided as an argument to a <i>command</i>, which could, for example, delete all agents within it.
+</ul>
+
+
+</p>
+<h2>Layout</h2>
+Below in figure 1. is an illustration of the user interface with an explanation of each component: 
+<figure>
+<table border='1' cellpadding=50>
+  <tr>
+    <th colspan=2 align=center style="font-weight: normal;"><br/>Graphics<sup><small>[1]</small></sup><br/>&nbsp;</th>
+  </tr>
+  <tr>
+    <td align=center style="padding: 1px;">&nbsp;Mode<sup><small>[2]</small></sup>&nbsp;</td><td align=center style="padding: 1px;">&nbsp;Command prompt<sup><small>[3]</small></sup>&nbsp;</td>
+  </tr>
+</table>
+Figure 1. UI Illustration
+</figure>
+Components:
+<ol>
+  <li>Graphics: This is where the simulation will be displayed</li>
+  <li>Mode indicator: This is where the current mode the UI is in will be displayed</li>
+  <li>Command prompt: This is where the user is able to enter <i>commands</i> to interact with the simulation.</li>
+</ol>
+
+
+
+

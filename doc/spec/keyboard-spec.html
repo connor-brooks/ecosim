@@ -1,0 +1,184 @@
+<h2>Introduction</h2>
+This document briefly explains the user interface handles any key presses made by the user. It also contains a list of the default key bindings. 
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>agent_id</td><td>An argument referencing a specific breed of agent specified in the config file</td>
+  </tr>
+  <tr>
+    <td>Command</td><td>A message sent to the simulation allowing the user to interact with it</td>
+  </tr>
+  <tr>
+    <td>Command prompt buffer</td><td>A piece of memory storing temporary text which has been inputted into the command prompt</td>
+  </tr>
+  <tr>
+    <td>HJKL</td><td>A method of communicating directional data with the h, j, k and l keys of a keyboard</td>
+  </tr>
+  <tr>
+    <td>Insert mode</td><td>A mode which allows users to input commands to be ran by the program</td>
+  </tr>
+  <tr>
+    <td>Normal buffer</td><td>A piece of memory storing key presses made by the user in normal mode</td>
+  </tr>
+  <tr>
+    <td>Normal mode</td><td>The mode in which the user can interact with the program via various key binds</td>
+  </tr>
+  <tr>
+    <td>Parent command</td><td>The command which forced the user interface to enter into select mode</td>
+  </tr>
+  <tr>
+    <td>Positional data</td><td>Two numbers representing a 2D location in the simulations environment</td>
+  </tr>
+  <tr>
+    <td>Regular key</td><td>Keys that are bound to various commands</td>
+  </tr>
+  <tr>
+    <td>Select count</td><td>How many times a parent command will request positional data from select mode</td>
+  </tr>
+  <tr>
+    <td>Select mode</td><td>The mode which allows the user to specify positional data</td>
+  </tr>
+  <tr>
+    <td>Selecting function</td><td>The function which handles select mode</td>
+  </tr>
+  <tr>
+    <td>Special key</td><td>Keys that are essential to the mechanics of the programs user interface</td>
+  </tr>
+  <tr>
+    <td>Yank buffer</td><td>A buffer in which references to all agents yanked are stored</td>
+  </tr>
+  
+</table>
+
+<h2>Overview</h2>
+<p>The only way of interfacing with Ecosim is via the keyboard. By pressing keys, the user is able to manually type commands, or quickly run one via a key bind. Keys behave differently in different modes:
+<ul>
+  <li>In <i>normal mode</i>, all key presses are sent to the <i>normal buffer</i>.</li>
+  <li>In <i>insert mode</i> all key presses are sent to the <i>command prompt buffer</i>.</li>
+  <li>In <i>select mode</i>, all key presses are registered by the <i>selecting function</i>, allowing a position in 2D space to be selected.</li>
+</ul>
+Within the program there are <i>special keys</i>, such as <i>&lt;Esc&gt;</i> and <i>&lt;Return&gt;</i> and which do not map to any command. These keys are special as they're essential to the users ability to interact with the user interface. Other keys, such as <i>d</i> and <i>i</i> are <i>regular keys</i>, as they aren't essential to the user interface, they are simply used to control the simulation.
+</p>
+</ul>
+</p>
+
+<h2>Key Handling in Normal Mode</h2>
+<p>
+In <i>normal mode</i>, the user hits the key binding for a <i>command</i>, then any arguments, without pressing return, for example pressing: <i>"i3"</i> tells the program to insert agents of <i>agent_id</i> 3 into the environment. <br /><br/>
+For any command requiring <i>positional data</i>, such as where to insert the new agents, the user interface will enter <i>select mode</i> as soon as the key binding has enough arguments to fully execute the <i>command</i>.
+<ol>
+  <li>Create an empty <i>normal buffer</i></li>
+  <li>Wait for a key press...</li>
+  <li>Add the key to the <i>normal buffer</i></li>
+  <li>Look up the key. Is it valid?
+    <ul>
+      <li>No: Display error, go to step 1</li>
+      <li>Yes: Check the <i>argument count</i> and <i>select count</i> for the key and continue</li>
+    </ul>
+  </li>
+  <li>Check if there are enough arguments in the <i>normal buffer</i> to execute the <i>command</i></li>
+    <ul>
+      <li>Yes: Enter <i>select mode</i> as many times as needed as per the <i>select count</i> then execute the <i>command</i> and return to step 1</li>
+      <li>No: Continue</li>
+    </ul>
+  </li>
+  <li>Wait for a key press...</li>
+  <li>Add the key to the <i>normal buffer</i></li>
+  <li>Go to step 5</li>
+</ol>
+Note: Pressing the <i>special key</i> <i>&lt;Esc&gt;</i> at any time in <i>normal mode</i> will clear the <i>normal buffer</i>
+</p>
+
+<h2>Key Handling in Insert Mode</h2>
+<p>
+In <i>insert mode</i>, any keys pressed are stored in the <i>command prompt buffer</i> and drawn onto the screen in the <i>command prompt</i> area. This allows the user to type commands in a typical fashion.
+<ol>
+  <li> Create an empty <i>command prompt buffer</i></li>
+  <li>Wait for a key press...</li>
+  <li>Is the key <i>&lt;Return&gt;</i> or <i>&lt;Esc&gt;</i>?
+    <ul>
+      <li><i>&lt;Return&gt;</i>: Attempt to run parse the <i>command</i> in the <i>command prompt buffer</i></li>
+      <li><i>&lt;Esc&gt;</i>: Enter <i>normal mode</i></li>
+      <li>No: Add the key to the <i>command prompt buffer</i> and continue</li>
+    </ul></li>
+    <li>Go to step 2</li>
+</ol>
+</p>
+
+<h2>Key Handling in Select Mode</h2>
+<p>
+The purpose of <i>select mode</i> is to allow the user to select a point in 2D space to be used as an argument for a command by using <i>HJKL</i>. Once return is pressed, the selected location is returned as a co ordinate to the <i>parent command</i>. 
+<ol>
+  <li>Create <i>x</i> and <i>y</i> variables</li>
+  <li>Wait for a key press...</li>
+  <li>What type is the key?
+    <ul>
+      <li>Directional: Update relevant dimension variable, continue</li>
+      <li><i>&lt;Esc&gt;</i>: Return to <i>normal mode</i></li>
+      <li><i>&lt;Return&gt;</i>: Return <i>x</i> and <i>y</i> to the <i>parent command</i></li>
+    </ul>
+  </li>
+  <li>Go to step 2</li>
+</ol>
+</p>
+
+<h2>Key bindings</h2>
+<p>
+Below is a list of all default key bindings in the simulation. Note that any <i>positional data</i> arguments to <i>command</i> functions aren't included in the arguments column. If no mode is specified assume the key binding is for <i>normal mode</i>.
+</p>
+<table>
+  <tr>
+    <th>Key</th><th>Function</th><th>Arguments</th><th>Select Count</th><th>Description</th>
+  </tr>
+  <tr>
+    <td>&lt;Esc&gt;</td><td>N/A</td><td>N/A</td><td>0</td><td>Clear the <i>normal buffer</i> in <i>normal mode</i>, enter <i>normal mode</i> in any other mode</td>
+  </tr>
+  <tr>
+    <td>&lt;Return&gt;</td><td>N/A</td><td>N/A</td><td>0</td><td>Confirm selection in <i>select mode</i>, confirm <i>command</i> in <i>insert mode</i></td>
+  </tr>
+  <tr>
+    <td>&lt;Space&gt;</td><td>Pause</td><td>N/A</td><td>0</td><td>Pause the simulation in <i>normal mode</i></td>
+  </tr>
+  <tr>
+    <td>:</td><td>N/A</td><td>N/A</td><td>0</td><td>Enter <i>insert mode</i></td>
+  </tr>
+  <tr>
+    <td>c</td><td>Change</td><td>agent_id</td><td>2</td><td>Change the selected agents into agents associated with the <i>agent_id</i> argument </td>
+  </tr>
+  <tr>
+    <td>d</td><td>Delete</td><td>N/A</td><td>2</td><td>Delete the selected agents</td>
+  </tr>
+  <tr>
+    <td>h</td><td>N/A</td><td>N/A</td><td>0</td><td>Left in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>i</td><td>Insert</td><td>agent_id</td><td>1</td><td>Insert the agents specified by the <i>agent_id</i> argument at the selected location</td>
+  </tr>
+  <tr>
+    <td>j</td><td>N/A</td><td>N/A</td><td>0</td><td>Down in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>k</td><td>N/A</td><td>N/A</td><td>0</td><td>Up in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>l</td><td>N/A</td><td>N/A</td><td>0</td><td>Right in <i>select mode</i></td>
+  </tr>
+  <tr>
+    <td>p</td><td>Paste</td><td>N/A</td><td>1</td><td>Paste agents from <i>yank buffer</i> into selected location</td>
+  </tr>
+  <tr>
+    <td>q</td><td>Quit</td><td>N/A</td><td>0</td><td>Quit the simulation</td>
+  </tr>
+  <tr>
+    <td>r</td><td>Reload</td><td>N/A</td><td>0</td><td>Reload the simulation</td>
+  </tr>
+  <tr>
+    <td>y</td><td>Yank</td><td>N/A</td><td>2</td><td>Copy selected agents into the <i>yank buffer</i></td>
+  </tr>
+  <table>
+    <p>
+    For a full list of <i>commands</i> and command arguments, please see the command specification.
+    </p>

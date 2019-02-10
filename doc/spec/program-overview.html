@@ -1,0 +1,49 @@
+<p>
+<h2>Introduction</h2>
+This document offers an brief explanation of how Ecosim will work. For more detailed information on any one component, please see the specifications at the bottom of the page.
+</p>
+
+<p>
+<h2>Project Overview</h2>
+Ecosim is an ecosystem simulator. It's main goal is to help illustrate and explore interconnectedness between various organisms within an environment, and how they can directly and indirectly affect one another.
+<br />
+<br />
+The world these organisms inhabit will be a fairly simple one with minimal graphics, as the project is focused on the behaviours of them, which are the following:
+<ul>
+  <li>Avoidance of genetically non similar organisms</li>
+  <li>Birth, via reproduction</li>
+  <li>Consumption, both primary and secondary</li>
+  <li>Death, as a result of a lack of consumption</li>
+  <li>Evolution, via a genetic algorithm</li>
+  <li>Flocking, via a Boid's type algorithm</li>
+  <li>Reproduction, via splitting, as a result of adequate consumption</li>
+</ul>
+Users are able to interact with the simulation in three ways. The first is via a plaintext config file containing information on the attributes of various "breeds" of organisms which will populate the environment once the program is ran.
+<br />
+<br />
+The second way a user can interact is via Vim style keybindings whilst the simulation is running. These enable the user to perform actions such as:
+<ul>
+  <li>Copying an organism</li>
+  <li>Deleting an organism</li>
+  <li>Inserting a predefined breed</li>
+  <li>Inserting non-living entities (food)</li>
+  <li>Pausing the simulation</li>
+</ul>
+Finally, the user is able to enter direct commands into the engine of the simulation, to perform similar actions as the key binds, but with more verbosity.<br/><br/>
+
+This minimalistic way of interacting allows for the user interface to remain simple yet powerful, the only elements on screen being a small command strip along the bottom with the rest of the window being dedicated to the simulation.<br/><br/>
+As previously stated, the graphics of the simulation will be very simple and utilitarian. Each organism will be a single colored point, with their color being used to indicate their genetics and/or state. Any interaction between two agents will be brought to attention by graphically highlighting the area which the event took place.
+</p>
+
+
+<p>
+<h2>Specifications</h2>
+<ul>
+  <li><a href="agent-spec.html">Agent specification</a></li>
+  <li><a href="command-spec.html">Command specification</a></li>
+  <li><a href="config-spec.html">Config specification</a></li>
+  <li><a href="graphics-spec.html">Graphics specification</a></li>
+  <li><a href="keyboard-spec.html">Keyboard specification</a></li>
+  <li><a href="ui-spec.html">UI specification</a></li>
+</ul>
+</p>

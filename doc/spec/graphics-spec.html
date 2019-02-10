@@ -1,0 +1,75 @@
+<h2>Introduction</h2>
+This document briefly explains the graphics functions implemented to create the simulation visualisation and the user interface. 
+<h2>Key Terms and Concepts</h2>
+<table>
+  <tr>
+    <th>Term</th></th><th>Description</th>
+  </tr>
+  <tr>
+    <td>Command Prompt</td><td>An area in the user interface which allows commands to be entered</td>
+  </tr>
+  <tr>
+    <td>inner_color</td><td>An argument which represents the fill color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Mode</td><td>The way the user interface handles key presses</td>
+  </tr>
+  <tr>
+    <td>outer_color</td><td>An argument which represents the border color of an item to be drawn</td>
+  </tr>
+  <tr>
+    <td>Quadtree</td><td>The data structure which contains all of the agents</td>
+  </tr>
+  <tr>
+    <td>State</td><td>The current state of an entity. Living or non-living</td>
+  </tr>
+  <tr>
+    <td>text_string</td><td>An argument which represents the text to be written to the screen</td>
+  </tr>
+  <tr>
+    <td>X</td><td>An argument which represents a position in the x axis of the simulation</td>
+  </tr>
+  <tr>
+    <td>Y</td><td>An argument which represents a position in the y axis of the simulation</td>
+  </tr>
+</table>
+
+<h2>Overview</h2>
+<p>In an attempt to conserve as much computing power as possible for the mechanics of the simulation, the graphics in Ecosim are very simple and utilitarian. All graphical elements are created by 3 very simple primitives, which are as follows:
+<ul>
+  <li>Rectangles: For drawing for cornered shapes, which have the ability to have separate outline and fill colors</li>
+  <li>Points: For drawing single points on the screen, at varying sizes, with a fill color</li>
+  <li>Text: For drawing text onto the screen, at a fixed pixel size, in a font color</li>
+</ul>
+For a technical specification of each graphical function used in the program, see below.
+</p>
+
+<h2>Graphics functions</h2>
+<table>
+  <tr>
+    <th>Command Name</th></th><th>Description</th><th>Arguments</th>
+  </tr>
+  <tr>
+    <td>Rectangle</td><td>Draw a rectangle on the screen between the specified <i>x/y<sup>1</sup></i> and <i>x/y<sup>2</sup></i> locations with the supplied inner/outer colors</td><td><i>x</i><sup>1</sup>, <i>y</i><sup>1</sup>, <i>x</i><sup>2</sup>, <i>y</i><sup>2</sup>, <i>inner_color</i>, <i>outer_color</i></td>
+  </tr>
+  <tr>
+    <td>Point</td><td>Draw a single point on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i> </td><td><i>x</i>, <i>y</i>, <i>inner_color</i></td>
+  </tr>
+  <tr>
+    <td>Text</td><td>Draw the <i>text_string</i> on the screen at the location specified by <i>x</i> and <i>y</i> and color it with <i>inner_color</i></td><td><i>x</i>, <i>y</i>, <i>text_string</i>, <i>inner_color</i></td>
+  </tr>
+</table>
+
+<h2>Graphical Elements</h2>
+<p>
+Using a combination of the above functions, the following components of the simulation are able to be created:
+<ul>
+  <li>Agents: Simply a single point drawn on the screen, colored to represent the genetics and <i>state</i> of the agent.</li>
+  <li>Command prompt: Text drawn from the <i>command prompt</i>'s text buffer and a single rectangle to serve as a border</li>
+  <li>Environment: A single rectangle as a border, an option to draw rectangles to represent the <i>quadtree</i> in which the agents occupy</li>
+  <li>Interface bar: A single rectangle as a border</li>
+  <li>Mode Indicator: A single rectangle as a border, with text drawn to indicate which <i>mode</i> the user interface is in</li>
+</ul>
+For a full explanation of the user interface's components and layout, please see the user interface specification.
+</p>
+
