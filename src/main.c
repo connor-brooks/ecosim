@@ -1,14 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
-#include <GL/gl.h>
-#include <GL/freeglut.h>
 
 #include "utils.h"
 #include "graphics.h"
 
 /* Keyboard callback */
-	void
+void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 	if ( action == GLFW_PRESS)
@@ -24,12 +22,12 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 /* Main function */
 
-	int
+int
 main(int argc, char **argv)
 {
 	GLFWwindow* window;
 
-	/* Initalize glfw */
+	/* Initalize glfw and glut*/
 	if (!glfwInit())
 		return -1; //exit
 
@@ -47,10 +45,7 @@ main(int argc, char **argv)
 	glfwMakeContextCurrent(window);
 	glfwSetKeyCallback(window, key_callback);
 
-
-	/* Program setup */
-
-
+	/* Program setup here */
 
 	/* Main loop */
 	while(!glfwWindowShouldClose(window))
@@ -73,9 +68,10 @@ main(int argc, char **argv)
 		free(color);
 
 		/* Text function test */
-		float current = -0.8, end = 0.81;
-		for(; current <= end; current+=0.1)
-		drawText(-0.8, current,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
+//		float current = -0.8, end = 0.81;
+//		for(; current <= end; current+=0.1)
+//		drawText(-0.8, current,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM"); // High CPU, limit framerate
+		drawText(-0.8, 0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
 
 		/* Draw a rectangles via arguments */
 		drawRectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
