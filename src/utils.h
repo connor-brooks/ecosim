@@ -12,13 +12,13 @@ typedef struct {
 } Rectangle;
 
 typedef struct {
-  int red;
-  int green;
-  int blue;
+  int r;
+  int g;
+  int b;
 } RGB;
 
 Rectangle* create_rectangle(float x1, float y1, float x2, float y2);
 
-RGB* create_RGB(float red, float green, float blue); 
+RGB* create_RGB(float r, float g, float b); 
 
 #endif

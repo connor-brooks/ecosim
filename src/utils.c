@@ -7,23 +7,23 @@
 Rectangle* 
 create_rectangle(float x1, float y1, float x2, float y2)
 {
-  Rectangle* temp = malloc(sizeof(Rectangle));
+  Rectangle* tmp = malloc(sizeof(Rectangle));
 
   /* Set points and return rectangle*/
-  temp->p1.x = x1;
-  temp->p1.y = y1;
-  temp->p2.x = x2;
-  temp->p2.y = y2;
-  return temp;
+  tmp->p1.x = x1;
+  tmp->p1.y = y1;
+  tmp->p2.x = x2;
+  tmp->p2.y = y2;
+  return tmp;
 }
 
 RGB*
-create_RGB(float red, float green, float blue)
+create_RGB(float r, float g, float b)
 {
   /* Set color and return */
-  RGB* temp = malloc(sizeof(RGB));
-  temp->red = red;
-  temp->green = green;
-  temp->blue = blue;
-  return temp;
+  RGB* tmp = malloc(sizeof(RGB));
+  tmp->r = r;
+  tmp->g = g;
+  tmp->b = b;
+  return tmp;
 }

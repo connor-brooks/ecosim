@@ -22,23 +22,23 @@ draw_rectangle(float x1, float y1, float x2, float y2, float r, float g, float b
 
 /* Draw from structs */
 void
-draw_rectangle_struct(Rectangle* rectangle, RGB* color)
+draw_rectangle_struct(Rectangle* rect, RGB* c)
 {
   /* Draw counter clockwiswe */
-  glColor3f(color->red, color->green, color->blue);
+  glColor3f(c->r, c->g, c->b);
   glBegin(GL_QUADS);
-  glVertex2f(rectangle->p1.x, rectangle->p1.y);
-  glVertex2f(rectangle->p2.x, rectangle->p1.y);
-  glVertex2f(rectangle->p2.x, rectangle->p2.y);
-  glVertex2f(rectangle->p1.x, rectangle->p2.y);
+  glVertex2f(rect->p1.x, rect->p1.y);
+  glVertex2f(rect->p2.x, rect->p1.y);
+  glVertex2f(rect->p2.x, rect->p2.y);
+  glVertex2f(rect->p1.x, rect->p2.y);
 
   glEnd();
 }
 
 void
-draw_text(float x, float y, const unsigned char* text)
+draw_text(float x, float y, const unsigned char* txt)
 {
   glColor3f(0.0f, 0.0f, 0.0f);
   glRasterPos3d(x, y, 0.0);
-  glutBitmapString(GLUT_BITMAP_9_BY_15, text);
+  glutBitmapString(GLUT_BITMAP_9_BY_15, txt);
 }
