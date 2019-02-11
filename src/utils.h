@@ -17,8 +17,8 @@ typedef struct {
   int blue;
 } RGB;
 
-Rectangle* createRectangle(float x1, float y1, float x2, float y2);
+Rectangle* create_rectangle(float x1, float y1, float x2, float y2);
 
-RGB* createRGB(float red, float green, float blue); 
+RGB* create_RGB(float red, float green, float blue); 
 
 #endif

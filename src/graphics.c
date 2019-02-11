@@ -7,7 +7,7 @@
 
 /* Draw rectangle from args */
 void
-drawRectangle(float x1, float y1, float x2, float y2, float r, float g, float b)
+draw_rectangle(float x1, float y1, float x2, float y2, float r, float g, float b)
 {
   /* Draw counter clockwiswe */
   glColor3f(r, g, b);
@@ -22,7 +22,7 @@ drawRectangle(float x1, float y1, float x2, float y2, float r, float g, float b)
 
 /* Draw from structs */
 void
-drawRectangleStruct(Rectangle* rectangle, RGB* color)
+draw_rectangle_struct(Rectangle* rectangle, RGB* color)
 {
   /* Draw counter clockwiswe */
   glColor3f(color->red, color->green, color->blue);
@@ -36,7 +36,7 @@ drawRectangleStruct(Rectangle* rectangle, RGB* color)
 }
 
 void
-drawText(float x, float y, const unsigned char* text)
+draw_text(float x, float y, const unsigned char* text)
 {
   glColor3f(0.0f, 0.0f, 0.0f);
   glRasterPos3d(x, y, 0.0);

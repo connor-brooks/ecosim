@@ -61,9 +61,9 @@ main(int argc, char **argv)
 		/* TESTING GRAPHICS FUNCTIONS */
 
 		/* Draw a rectangle from a struct */
-		Rectangle* temp = createRectangle(0.9, 0.9, -0.9, -0.9);
-		RGB* color = createRGB(1.0, 1.0, 1.0);
-		drawRectangleStruct(temp, color);
+		Rectangle* temp = create_rectangle(0.9, 0.9, -0.9, -0.9);
+		RGB* color = create_RGB(1.0, 1.0, 1.0);
+		draw_rectangle_struct(temp, color);
 		free(temp);
 		free(color);
 
@@ -71,14 +71,14 @@ main(int argc, char **argv)
 //		float current = -0.8, end = 0.81;
 //		for(; current <= end; current+=0.1)
 //		drawText(-0.8, current,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM"); // High CPU, limit framerate
-		drawText(-0.8, 0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
+		draw_text(-0.8, 0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
 
 		/* Draw a rectangles via arguments */
-		drawRectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
-		drawRectangle(0.0, 0.0, 0.3, -0.3, 0.0, 1.0, 0.0);
-		drawRectangle(0.0, 0.0, 0.3, 0.3, 1.0, 0.0, 1.0);
-		drawRectangle(0.0, 0.0, -0.3, 0.3, 0.0, 1.0, 1.0);
-		drawRectangle(0.0, 0.0, -0.3, -0.3, 1.0, 1.0, 0.0);
+		draw_rectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
+		draw_rectangle(0.0, 0.0, 0.3, -0.3, 0.0, 1.0, 0.0);
+		draw_rectangle(0.0, 0.0, 0.3, 0.3, 1.0, 0.0, 1.0);
+		draw_rectangle(0.0, 0.0, -0.3, 0.3, 0.0, 1.0, 1.0);
+		draw_rectangle(0.0, 0.0, -0.3, -0.3, 1.0, 1.0, 0.0);
 
 
 		/* Swap buffers */

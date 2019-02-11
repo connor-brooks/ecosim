@@ -4,7 +4,8 @@
 typedef struct Rectangle;
 typedef struct RGB;
 
-void drawRectangle(float x1, float y1, float x2, float y2, float r, float g, float b);
-void drawText(float x, float y, const char* text);
-void drawRectangleStruct(Rectangle* rectangle, RGB* color);
+void draw_rectangle(float x1, float y1, float x2, float y2, float r, float g, float b);
+void draw_text(float x, float y, const char* text);
+void draw_point(float x, float y, float r, float g, float b);
+void draw_rectangle_struct(Rectangle* rectangle, RGB* color);
 #endif

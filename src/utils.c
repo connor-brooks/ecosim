@@ -5,7 +5,7 @@
 
 
 Rectangle* 
-createRectangle(float x1, float y1, float x2, float y2)
+create_rectangle(float x1, float y1, float x2, float y2)
 {
   Rectangle* temp = malloc(sizeof(Rectangle));
 
@@ -18,7 +18,7 @@ createRectangle(float x1, float y1, float x2, float y2)
 }
 
 RGB*
-createRGB(float red, float green, float blue)
+create_RGB(float red, float green, float blue)
 {
   /* Set color and return */
   RGB* temp = malloc(sizeof(RGB));
