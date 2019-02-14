@@ -6,12 +6,12 @@ typedef struct {
   float y;
 } Point;
 
-typedef struct {
+typedef struct Rectangle_ {
   Point p1;
   Point p2;
 } Rectangle;
 
-typedef struct {
+typedef struct RGB_ {
   int r;
   int g;
   int b;
