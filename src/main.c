@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
@@ -29,12 +30,42 @@ main(int argc, char **argv)
 {
   GLFWwindow* window;
 
+  float agents_data[] = {
+    0.0f,    0.5f, 0.0f, 1.0f,
+    0.5f, -0.366f, 0.0f, 1.0f,
+    -0.5f, -0.366f, 0.0f, 1.0f,
+    1.0f,    0.0f, 0.0f, 1.0f,
+    0.0f,    1.0f, 0.0f, 1.0f,
+    0.0f,    0.0f, 1.0f, 1.0f,
+  };
+
+  const char* agents_vs =
+    "#version 130\n"
+    "attribute vec4 position;"
+    "attribute vec4 color;"
+    "out vec4 color_out;"
+    "void main() {"
+    "color_out = color;"
+    "  gl_Position = vec4(position);"
+    "  gl_PointSize = 10.0;"
+    "}";
+
+  const char* agents_fs =
+    "#version 130\n"
+    "out vec4 frag_colour;"
+    "in vec4 color_out;"
+    "void main() {"
+    " vec2 test2 = gl_PointCoord - vec2(0.5);"
+    " if(length(test2) > 0.5) discard;"
+    //"  gl_FragColor = color_out * (length(test2) + 0.3);"
+    "  gl_FragColor = color_out ;"
+    "}";
+
+
   /* Initalize glfw and glut*/
   if (!glfwInit())
     return -1; //exit
-
   glutInit(&argc, argv);
-  glewInit();
 
 
   /* Create window */
@@ -49,10 +80,25 @@ main(int argc, char **argv)
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
 
+  /* initalize glew*/
+  glewInit();
+  glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
+
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-  /* Program setup here */
+
+  /* Set up graphics for agents */
+  Agent_graphics* agent_graphics = malloc(sizeof(Agent_graphics));
+  agent_graphics->no_agents = 3;
+  agent_graphics->vert_data = agents_data;
+  agent_graphics->vert_data_len = sizeof(agents_data);
+  agent_graphics->vert_shader = agents_vs;
+  agent_graphics->frag_shader = agents_fs;
+
+  agent_vbo_setup(agent_graphics);
+  agent_shader_setup(agent_graphics);
+
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -76,10 +122,7 @@ main(int argc, char **argv)
     free(color);
 
     /* Text function test */
-    //    float current = -0.8, end = 0.81;
-    //    for(; current <= end; current+=0.1)
-    //    drawText(-0.8, current,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM"); // High CPU, limit framerate
-    draw_text(-0.8, 0.8,"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
+    draw_text(-0.8, 0.8,(const unsigned char *)"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
 
     /* Draw a rectangles via arguments */
     draw_rectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
@@ -89,11 +132,21 @@ main(int argc, char **argv)
     draw_rectangle(0.0, 0.0, -0.3, -0.3, 1.0, 1.0, 0.0);
 
 
+    agents_draw(agent_graphics);
     /* Swap buffers */
     glfwSwapBuffers(window);
 
     /* Poll for events */
     glfwPollEvents();
+
+    // Hackily update the locations of the agents
+    agents_data[0] = sin(glfwGetTime());
+    agents_data[1] = 0.3 * sin( glfwGetTime());
+
+    agents_data[4] = sin(3 + glfwGetTime());
+    agents_data[5] = 0.8* cos(3 + glfwGetTime());
+
+    agents_data[8] = sin(glfwGetTime());
   }
 
   glfwTerminate();
