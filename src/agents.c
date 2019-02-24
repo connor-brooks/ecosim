@@ -6,7 +6,8 @@
 #define AGENT_DIMENTIONS (4)
 #define AGENT_DRAWABLE_FEATURES (2)
 
-int 
+
+int
 agent_vert_elems(int n)
 {
   return AGENT_DRAWABLE_FEATURES *
@@ -15,26 +16,36 @@ agent_vert_elems(int n)
 
 
 float*
-agents_to_vert(Agent* aa, int n) 
+agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
 {
   int i;
   ptrdiff_t p_offset, c_offset;
   size_t verts_len = agent_vert_elems(n) * sizeof(float);
-  float* verts = malloc(verts_len);
+  float* vert_ret;
+
+  vert_ret  = (mode) ? vert_arr : malloc(verts_len);
 
   for(i = 0; i < n; i++) {
     p_offset = i * AGENT_DIMENTIONS;
     c_offset = p_offset + (n * AGENT_DIMENTIONS);
 
-    verts[p_offset++] = aa[i].x; // x
-    verts[p_offset++] = aa[i].y; // y
-    verts[p_offset++] = 0.0f; // z 
-    verts[p_offset++] = 1.0f;
+    switch(mode){
+      case VERTS_NEW:
+        vert_ret[c_offset++] = aa[i].rgb.r; // R
+        vert_ret[c_offset++] = aa[i].rgb.g; // G
+        vert_ret[c_offset++] = aa[i].rgb.b; // B
+        vert_ret[c_offset++] = 1.0f; // A
+      case VERTS_UPDATE:
+        vert_ret[p_offset++] = aa[i].x; // x
+        vert_ret[p_offset++] = aa[i].y; // y
+        vert_ret[p_offset++] = 0.0f; // z
+        vert_ret[p_offset++] = 1.0f;
+        break;
 
-    verts[c_offset++] = 1; // R
-    verts[c_offset++] = 2; // G
-    verts[c_offset++] = 3; // B
-    verts[c_offset++] = 4; // A
+    };
   }
-  return verts;
+  return vert_ret;
+
 }
+
+//agents_update_vert(Agent* aa, float*

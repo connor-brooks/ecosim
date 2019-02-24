@@ -31,15 +31,6 @@ main(int argc, char **argv)
 {
   GLFWwindow* window;
 
-  float agents_data[] = {
-    0.0f,    0.5f, 0.0f, 1.0f,
-    0.5f, -0.366f, 0.0f, 1.0f,
-    -0.5f, -0.366f, 0.0f, 1.0f,
-    1.0f,    0.0f, 0.0f, 1.0f,
-    0.0f,    1.0f, 0.0f, 1.0f,
-    0.0f,    0.0f, 1.0f, 1.0f,
-  };
-
   const char* agents_vs =
     "#version 130\n"
     "attribute vec4 position;"
@@ -89,35 +80,43 @@ main(int argc, char **argv)
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
 
-  /* Set up graphics for agents */
+  /* Setup agents */
+
+  int agent_count = 3;
+  Agent agents[agent_count];
+  agents[0].x = 0.2;
+  agents[0].y = 0.2;
+  agents[0].rgb.r = 1.0;
+  agents[0].rgb.g = 0.0;
+  agents[0].rgb.b = 0.0;
+
+
+  agents[1].x = 0.5;
+  agents[1].y = 0.5;
+  agents[1].rgb.r = 0.0;
+  agents[1].rgb.g = 1.0;
+  agents[1].rgb.b = 0.0;
+
+  agents[2].x = 0.7;
+  agents[2].y = 0.7;
+  agents[2].rgb.r = 0.0;
+  agents[2].rgb.g = 0.0;
+  agents[2].rgb.b = 1.0;
+
+  /* Create agent graphic vertex arrary */
+  float* agent_verts = agents_to_vert(agents, agent_count, NULL, VERTS_NEW);
+
+  /* Set values 4 graphics 4 agents */
   Agent_graphics* agent_graphics = malloc(sizeof(Agent_graphics));
-  agent_graphics->no_agents = 3;
-  agent_graphics->vert_data = agents_data;
-  agent_graphics->vert_data_len = sizeof(agents_data);
+  agent_graphics->no_agents = agent_count;
+  agent_graphics->vert_data = agent_verts;
+  agent_graphics->vert_data_len = agent_vert_elems(agent_count) * sizeof(float);
   agent_graphics->vert_shader = agents_vs;
   agent_graphics->frag_shader = agents_fs;
 
+  /* Setup based on this */
   agent_vbo_setup(agent_graphics);
   agent_shader_setup(agent_graphics);
-
-  Agent agents[3];
-  agents[0].x = 0.2;
-  agents[0].y = 0.2;
-  agents[1].x = 0.5;
-  agents[1].y = 0.5;
-  agents[2].x = 0.7;
-  agents[2].y = 0.7;
-  float* avs = agents_to_vert(agents, 3);
-  int count = agent_vert_elems(3);
-  for(int i = 0; i < count; i++)
-  {
-    printf("val %f...", avs[i]);
-  }
-  printf("\n");
-
-
-
-
 
 
   /* Main loop */
@@ -160,13 +159,14 @@ main(int argc, char **argv)
     glfwPollEvents();
 
     // Hackily update the locations of the agents
-    agents_data[0] = sin(glfwGetTime());
-    agents_data[1] = 0.3 * sin( glfwGetTime());
+    agents[0].x = sin(glfwGetTime());
+    agents[0].y = 0.3 * sin( glfwGetTime());
 
-    agents_data[4] = sin(3 + glfwGetTime());
-    agents_data[5] = 0.8 * cos(3 + glfwGetTime());
+    agents[1].x = sin(3 + glfwGetTime());
+    agents[1].y = 0.8 * cos(3 + glfwGetTime());
 
-    agents_data[8] = sin(glfwGetTime());
+    agents_to_vert(agents, 3, agent_verts, VERTS_UPDATE);
+
   }
 
   glfwTerminate();
