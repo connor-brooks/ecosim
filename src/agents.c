@@ -6,14 +6,12 @@
 #define AGENT_DIMENTIONS (4)
 #define AGENT_DRAWABLE_FEATURES (2)
 
-
 int
 agent_vert_elems(int n)
 {
   return AGENT_DRAWABLE_FEATURES *
     AGENT_DIMENTIONS * n;
 }
-
 
 float*
 agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
@@ -45,7 +43,4 @@ agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
     };
   }
   return vert_ret;
-
 }
-
-//agents_update_vert(Agent* aa, float*

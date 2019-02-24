@@ -16,6 +16,10 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   if ( action == GLFW_PRESS)
     printf("key %c or %d with mod %d\n", key, key, mods);
+  /* Just a little bit of testing */
+  Ui_graphics* temp = glfwGetWindowUserPointer(window);
+  printf("st %s\n", temp->cmd_txt);
+  temp->cmd_txt = "Key x Pressed! :) \0";
   switch(key){
     case 81:
       glfwTerminate();
@@ -63,7 +67,7 @@ main(int argc, char **argv)
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-
+glfwSetWindowUserPointer(window, ui_gfx);
   /* Setup agents */
 
   agents[0].x = 0.2;
@@ -109,6 +113,9 @@ main(int argc, char **argv)
 	/* Setup UI graphics */
 	ui_gfx = malloc(sizeof(Ui_graphics));
 	ui_gfx_setup(ui_gfx);
+  ui_gfx->cmd_txt = "hello world\0";
+  /* keyboard test */
+  glfwSetWindowUserPointer(window, ui_gfx);
 
 
   /* Main loop */
@@ -121,16 +128,11 @@ main(int argc, char **argv)
 
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
-
-
-    /* TESTING GRAPHICS FUNCTIONS */
-
     /* Text function test */
-    draw_text(-0.8, 0.8,(const unsigned char *)"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
 
     agents_draw(agent_gfx);
     ui_draw(ui_gfx);
-    /* Swap buffers */
+
     glfwSwapBuffers(window);
 
     /* Poll for events */
