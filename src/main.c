@@ -38,7 +38,7 @@ main(int argc, char **argv)
   Agent agents[agent_count];
   float* agent_verts;
   Agent_graphics* agent_gfx;
-	Ui_graphics* ui_gfx;
+  Ui_graphics* ui_gfx;
 
   GLFWwindow* window;
 
@@ -67,7 +67,7 @@ main(int argc, char **argv)
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-glfwSetWindowUserPointer(window, ui_gfx);
+  glfwSetWindowUserPointer(window, ui_gfx);
   /* Setup agents */
 
   agents[0].x = 0.2;
@@ -110,9 +110,9 @@ glfwSetWindowUserPointer(window, ui_gfx);
   agent_vbo_setup(agent_gfx);
   agent_shader_setup(agent_gfx);
 
-	/* Setup UI graphics */
-	ui_gfx = malloc(sizeof(Ui_graphics));
-	ui_gfx_setup(ui_gfx);
+  /* Setup UI graphics */
+  ui_gfx = malloc(sizeof(Ui_graphics));
+  ui_gfx_setup(ui_gfx);
   ui_gfx->cmd_txt = "hello world\0";
   /* keyboard test */
   glfwSetWindowUserPointer(window, ui_gfx);
