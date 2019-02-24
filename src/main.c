@@ -8,6 +8,7 @@
 #include "agents.h"
 #include "utils.h"
 #include "graphics.h"
+#include "shaders.h"
 
 /* Keyboard callback */
 void
@@ -29,30 +30,13 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 int
 main(int argc, char **argv)
 {
+  int agent_count = 4;
+  Agent agents[agent_count];
+  float* agent_verts;
+  Agent_graphics* agent_gfx;
+	Ui_graphics* ui_gfx;
+
   GLFWwindow* window;
-
-  const char* agents_vs =
-    "#version 130\n"
-    "attribute vec4 position;"
-    "attribute vec4 color;"
-    "out vec4 color_out;"
-    "void main() {"
-    "color_out = color;"
-    "  gl_Position = vec4(position);"
-    "  gl_PointSize = 10.0;"
-    "}";
-
-  const char* agents_fs =
-    "#version 130\n"
-    "out vec4 frag_colour;"
-    "in vec4 color_out;"
-    "void main() {"
-    " vec2 test2 = gl_PointCoord - vec2(0.5);"
-    " if(length(test2) > 0.5) discard;"
-    //"  gl_FragColor = color_out * (length(test2) + 0.3);"
-    "  gl_FragColor = color_out ;"
-    "}";
-
 
   /* Initalize glfw and glut*/
   if (!glfwInit())
@@ -82,8 +66,6 @@ main(int argc, char **argv)
 
   /* Setup agents */
 
-  int agent_count = 3;
-  Agent agents[agent_count];
   agents[0].x = 0.2;
   agents[0].y = 0.2;
   agents[0].rgb.r = 1.0;
@@ -103,20 +85,30 @@ main(int argc, char **argv)
   agents[2].rgb.g = 0.0;
   agents[2].rgb.b = 1.0;
 
+  agents[3].x = 0.7;
+  agents[3].y = 0.2;
+  agents[3].rgb.r = 1.0;
+  agents[3].rgb.g = 0.0;
+  agents[3].rgb.b = 1.0;
+
   /* Create agent graphic vertex arrary */
-  float* agent_verts = agents_to_vert(agents, agent_count, NULL, VERTS_NEW);
+  agent_verts = agents_to_vert(agents, agent_count, NULL, VERTS_NEW);
 
   /* Set values 4 graphics 4 agents */
-  Agent_graphics* agent_graphics = malloc(sizeof(Agent_graphics));
-  agent_graphics->no_agents = agent_count;
-  agent_graphics->vert_data = agent_verts;
-  agent_graphics->vert_data_len = agent_vert_elems(agent_count) * sizeof(float);
-  agent_graphics->vert_shader = agents_vs;
-  agent_graphics->frag_shader = agents_fs;
+  agent_gfx = malloc(sizeof(Agent_graphics));
+  agent_gfx->no_agents = agent_count;
+  agent_gfx->vert_data = agent_verts;
+  agent_gfx->vert_data_len = agent_vert_elems(agent_count) * sizeof(float);
+  agent_gfx->vert_shader = agents_vs;
+  agent_gfx->frag_shader = agents_fs;
 
   /* Setup based on this */
-  agent_vbo_setup(agent_graphics);
-  agent_shader_setup(agent_graphics);
+  agent_vbo_setup(agent_gfx);
+  agent_shader_setup(agent_gfx);
+
+	/* Setup UI graphics */
+	ui_gfx = malloc(sizeof(Ui_graphics));
+	ui_gfx_setup(ui_gfx);
 
 
   /* Main loop */
@@ -133,25 +125,11 @@ main(int argc, char **argv)
 
     /* TESTING GRAPHICS FUNCTIONS */
 
-    /* Draw a rectangle from a struct */
-    Rectangle* temp = create_rectangle(0.9, 0.9, -0.9, -0.9);
-    RGB* color = create_RGB(1.0, 1.0, 1.0);
-    draw_rectangle_struct(temp, color);
-    free(temp);
-    free(color);
-
     /* Text function test */
     draw_text(-0.8, 0.8,(const unsigned char *)"ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM ECOSIM");
 
-    /* Draw a rectangles via arguments */
-    draw_rectangle(-0.6, -0.6, 0.6, 0.6, 0.0, 0.0, 0.0);
-    draw_rectangle(0.0, 0.0, 0.3, -0.3, 0.0, 1.0, 0.0);
-    draw_rectangle(0.0, 0.0, 0.3, 0.3, 1.0, 0.0, 1.0);
-    draw_rectangle(0.0, 0.0, -0.3, 0.3, 0.0, 1.0, 1.0);
-    draw_rectangle(0.0, 0.0, -0.3, -0.3, 1.0, 1.0, 0.0);
-
-
-    agents_draw(agent_graphics);
+    agents_draw(agent_gfx);
+    ui_draw(ui_gfx);
     /* Swap buffers */
     glfwSwapBuffers(window);
 
@@ -165,7 +143,7 @@ main(int argc, char **argv)
     agents[1].x = sin(3 + glfwGetTime());
     agents[1].y = 0.8 * cos(3 + glfwGetTime());
 
-    agents_to_vert(agents, 3, agent_verts, VERTS_UPDATE);
+    agents_to_vert(agents, agent_count, agent_verts, VERTS_UPDATE);
 
   }
 

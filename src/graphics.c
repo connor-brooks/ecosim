@@ -5,6 +5,7 @@
 #include <GL/freeglut.h>
 
 #include "graphics.h"
+#include "config.h"
 #include "utils.h"
 
 
@@ -53,44 +54,44 @@ agents_draw(Agent_graphics* ag)
   glBufferSubData(GL_ARRAY_BUFFER, 0, ag->vert_data_len, ag->vert_data);
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
-  glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-  glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*) color_offset);
-  glDrawArrays(GL_POINTS, 0, 3);
+  glVertexAttribPointer(0, AGENT_VERT_DIMS, GL_FLOAT, GL_FALSE, 0, 0);
+  glVertexAttribPointer(1, AGENT_VERT_DIMS, GL_FLOAT, GL_FALSE, 0, (void*) color_offset);
+  glDrawArrays(GL_POINTS, 0, ag->no_agents);
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);
   glUseProgram(0);
 }
 
 
-/* Draw rectangle from args */
 void
-draw_rectangle(float x1, float y1, float x2, float y2, float r, float g, float b)
+ui_gfx_setup(Ui_graphics* uig)
 {
-  /* Draw counter clockwiswe */
-  glColor3f(r, g, b);
-  glBegin(GL_QUADS);
-  glVertex2f(x1, y1);
-  glVertex2f(x2, y1);
-  glVertex2f(x2, y2);
-  glVertex2f(x1, y2);
+  uig->height = 0.05;
+  float tmp_v[] = {
+    -1.0f, -1.0f,
+    1.0f, -1.0f,
+    1.0f, -1.0f + uig->height,
+    -1.0f, -1.0f+ uig->height};
+  ptrdiff_t tmp_v_len = sizeof(tmp_v) / sizeof(float);
 
+  uig->vertex_data = malloc((size_t) tmp_v_len * sizeof(float));
+  /* Hacky but fun */
+  for(tmp_v_len--; tmp_v_len + 1; --tmp_v_len)
+    uig->vertex_data[tmp_v_len] = tmp_v[tmp_v_len];
+}
+
+void
+ui_draw(Ui_graphics* uig)
+{
+  float* tmp_ptr = uig->vertex_data;
+  glColor3f(0.5, 0.5, 0.5);
+  glBegin(GL_QUADS);
+  for(int i = 0; i < 4; i++, tmp_ptr += 2)
+    glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
   glEnd();
 }
 
-/* Draw from structs */
-void
-draw_rectangle_struct(Rectangle* rect, RGB* c)
-{
-  /* Draw counter clockwiswe */
-  glColor3f(c->r, c->g, c->b);
-  glBegin(GL_QUADS);
-  glVertex2f(rect->p1.x, rect->p1.y);
-  glVertex2f(rect->p2.x, rect->p1.y);
-  glVertex2f(rect->p2.x, rect->p2.y);
-  glVertex2f(rect->p1.x, rect->p2.y);
 
-  glEnd();
-}
 
 void
 draw_text(float x, float y, const unsigned char* txt)

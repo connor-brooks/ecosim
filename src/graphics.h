@@ -2,7 +2,6 @@
 #define GRAPHICS_H
 #include <GL/glew.h>
 
-typedef struct Rectangle_ Rectangle;
 typedef struct RGB_ RGB;
 
 struct _Agent_graphics {
@@ -15,13 +14,22 @@ struct _Agent_graphics {
   const char* frag_shader;
 };
 
+struct _Ui_graphics {
+  float height;
+  float* vertex_data;
+  RGB* color;
+  char* cmd_txt;
+};
+
 typedef struct _Agent_graphics Agent_graphics;
+typedef struct _Ui_graphics Ui_graphics;
 
 void agent_vbo_setup(Agent_graphics* ag);
 void agent_shader_setup(Agent_graphics* ag);
 void agents_draw(Agent_graphics* ag);
-void draw_rectangle(float x1, float y1, float x2, float y2, float r, float g, float b);
+
+void ui_gfx_setup(Ui_graphics* uig);
+void ui_draw(Ui_graphics* uig);
+
 void draw_text(float x, float y, const unsigned char* txt);
-void draw_point(float x, float y, float r, float g, float b);
-void draw_rectangle_struct(Rectangle* rect, RGB* c);
 #endif
