@@ -4,11 +4,14 @@ LIBS=-lGL -lm -lglut -lglfw -lGLEW
 
 all: ecosim
 
-ecosim: graphics.o utils.o main.o
-	$(CC) $(CFLAGS) $(LIBS) graphics.o utils.o main.o -o ecosim
+ecosim: graphics.o utils.o agents.o main.o
+	$(CC) $(CFLAGS) $(LIBS) graphics.o utils.o agents.o main.o -o ecosim
 
 main.o: main.c
 	$(CC) -c main.c
+
+agents.o: agents.c
+	$(CC) -c agents.c
 
 utils.o: utils.c
 	$(CC) -c utils.c

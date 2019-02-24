@@ -5,6 +5,7 @@
 #include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
 
+#include "agents.h"
 #include "utils.h"
 #include "graphics.h"
 
@@ -99,6 +100,25 @@ main(int argc, char **argv)
   agent_vbo_setup(agent_graphics);
   agent_shader_setup(agent_graphics);
 
+  Agent agents[3];
+  agents[0].x = 0.2;
+  agents[0].y = 0.2;
+  agents[1].x = 0.5;
+  agents[1].y = 0.5;
+  agents[2].x = 0.7;
+  agents[2].y = 0.7;
+  float* avs = agents_to_vert(agents, 3);
+  int count = agent_vert_elems(3);
+  for(int i = 0; i < count; i++)
+  {
+    printf("val %f...", avs[i]);
+  }
+  printf("\n");
+
+
+
+
+
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -144,7 +164,7 @@ main(int argc, char **argv)
     agents_data[1] = 0.3 * sin( glfwGetTime());
 
     agents_data[4] = sin(3 + glfwGetTime());
-    agents_data[5] = 0.8* cos(3 + glfwGetTime());
+    agents_data[5] = 0.8 * cos(3 + glfwGetTime());
 
     agents_data[8] = sin(glfwGetTime());
   }
