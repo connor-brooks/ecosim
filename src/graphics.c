@@ -74,6 +74,7 @@ ui_gfx_setup(Ui_graphics* uig)
     1.0f, -1.0f + uig->height,
     -1.0f, -1.0f+ uig->height};
   size_t tmp_v_size = sizeof(tmp_v);
+  uig->cmd_txt = malloc(sizeof(char) * 64);
 
   uig->vertex_data = malloc(tmp_v_size);
   memcpy(uig->vertex_data, tmp_v, tmp_v_size);

@@ -107,7 +107,6 @@ main(int argc, char **argv)
   /* Setup UI graphics */
   ui_gfx = malloc(sizeof(Ui_graphics));
   ui_gfx_setup(ui_gfx);
-  ui_gfx->cmd_txt = "hello world\0";
 
   /* keyboard test */
   keyboard = malloc(sizeof(Keyboard));

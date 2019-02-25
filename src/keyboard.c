@@ -1,5 +1,6 @@
 #include "keyboard.h"
 #include "graphics.h"
+#include "string.h"
 
 
 void 
@@ -12,5 +13,8 @@ void
 keyboard_action(Keyboard* keyb, int key, int mod)
 {
   printf("Key %c and mod %d\n", key, mod);
-  keyb->uig->cmd_txt = "Key X Pressed! :) \0";
+  char test[] = {key, key, key, '\0'};
+  memcpy(keyb->uig->cmd_txt, test, sizeof(test));
+
+
 }
