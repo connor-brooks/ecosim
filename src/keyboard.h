@@ -10,11 +10,19 @@ enum keyboard_mode {
 };
 
 typedef struct _Keyboard Keyboard;
+typedef struct _Normal_buffer Normal_buffer;
 
 struct _Keyboard {
  int mode; 
  Ui_graphics* uig;
  void (*key_act_mode[3])(Keyboard* keyb, int enc_key);
+ Normal_buffer* norm_buff;
+};
+
+struct _Normal_buffer {
+  int multiplier;
+  int cmd_id;
+  int arg;
 };
 
 void keyboard_setup(Keyboard* keyb);
@@ -30,6 +38,11 @@ void keyboard_mode_insert(Keyboard* keyb, int enc_key);
 void keyboard_mode_select(Keyboard* keyb, int enc_key);
 
 int keyboard_key_to_alpha(int enc_key);
+
+Normal_buffer* keyboard_make_norm_buff(void);
+void keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num);
+void keyboard_to_norm_buff_multi(Normal_buffer* norm_buff, int num);
+void keyboard_cat_num(int* to_int, int num);
 
 
 #endif

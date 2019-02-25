@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <limits.h>
 #include "keyboard.h"
 #include "graphics.h"
 #include "string.h"
@@ -7,11 +9,13 @@
 #define ALPHA_MIN (64)
 #define ALPHA_MAX (91)
 #define CAPS_TO_LOW (32)
+#define CHAR_TO_INT (48)
 #define ESC (256)
 #define SHIFT_BITMASK (1 << 16)
 #define ENC_SHIFT(k, m) (k + (m << 16))
 #define DEC_SHIFT(c) (c + (1 << 16))
 #define BAD_KEY (0)
+#define NO_BUFF_DATA (0)
 
 void
 keyboard_setup(Keyboard* keyb)
@@ -19,6 +23,43 @@ keyboard_setup(Keyboard* keyb)
   keyb->key_act_mode[NORMAL] = &keyboard_mode_normal;
   keyb->key_act_mode[INSERT] = &keyboard_mode_insert;
   keyb->key_act_mode[SELECT] = &keyboard_mode_select;
+  keyb->norm_buff = keyboard_make_norm_buff();
+}
+
+Normal_buffer*
+keyboard_make_norm_buff(void)
+{
+  Normal_buffer* tmp_norm_buff = malloc(sizeof(Normal_buffer));
+  tmp_norm_buff->multiplier = NO_BUFF_DATA;
+  tmp_norm_buff->cmd_id = NO_BUFF_DATA;
+  tmp_norm_buff->arg = NO_BUFF_DATA;
+  return tmp_norm_buff;
+}
+
+void 
+keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
+{
+  if(norm_buff->cmd_id == NO_BUFF_DATA)
+    keyboard_cat_num(&(norm_buff->multiplier), num);
+  else
+    keyboard_cat_num(&(norm_buff->arg), num);
+
+  printf("it's %d\n", norm_buff->multiplier);
+}
+
+void 
+keyboard_cat_num(int* to_int, int num)
+{
+  int tmp = *(to_int) * 10 + num;
+  if(tmp > INT_MAX / 2) return;
+  if(tmp < INT_MIN / 2)  return;
+  if(*to_int) *to_int = tmp;
+  else *to_int = num;
+
+}
+void 
+keyboard_to_norm_buff_arg(Normal_buffer* norm_buff, int num){
+//
 }
 
 void
@@ -45,20 +86,63 @@ void
 keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
   char bad_key_str[] = "Normal mode: BAD keypress!";
+  char buffer_clr_str[] = "Normal mode: Buffer cleared!";
+  char nrm_mode_prmpt[] = "Normal mode:";
   char ch_insert_str[] = "Insert mode:";
 
+  memcpy(keyb->uig->cmd_txt, nrm_mode_prmpt, sizeof(nrm_mode_prmpt));
+
   switch(enc_key){
-    case 'A':
-      printf("Normal A\n");
-      break;
-
-    case DEC_SHIFT('A'):
-      printf("Shifted A\n");
-      break;
-
     case DEC_SHIFT(';'): /* Aka ':' */
       memcpy(keyb->uig->cmd_txt, ch_insert_str, sizeof(ch_insert_str));
       keyboard_set_mode(keyb, INSERT);
+      break;
+
+    case ESC:
+      memcpy(keyb->uig->cmd_txt, buffer_clr_str, sizeof(buffer_clr_str));
+      break;
+
+    case '0':
+    case '1':
+    case '2':
+    case '3':
+    case '4':
+    case '5':
+    case '6':
+    case '7':
+    case '8':
+    case '9':
+      printf("Number\n");
+      keyboard_num_to_norm_buff(keyb->norm_buff, enc_key - CHAR_TO_INT);
+      break;
+
+
+    case 'C':
+      printf("Change\n");
+      break;
+
+    case 'D':
+      printf("Delete\n");
+      break;
+
+    case 'I':
+      printf("Insert\n");
+      break;
+
+    case 'P':
+      printf("Paste\n");
+      break;
+
+    case 'Q':
+      printf("Quit\n");
+      break;
+
+    case 'R':
+      printf("Reload\n");
+      break;
+
+    case 'Y':
+      printf("Yank\n");
       break;
 
     default:

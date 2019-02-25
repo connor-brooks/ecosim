@@ -114,6 +114,7 @@ main(int argc, char **argv)
   keyboard_setup(keyboard);
   keyboard_ui_ptr(keyboard, ui_gfx);
   keyboard_set_mode(keyboard, NORMAL);
+
   glfwSetWindowUserPointer(window, keyboard);
 
 
