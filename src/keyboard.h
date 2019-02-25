@@ -14,7 +14,7 @@ typedef struct _Keyboard Keyboard;
 struct _Keyboard {
  int mode; 
  Ui_graphics* uig;
- void (*key_act_mode[3])(Keyboard* keyb, int key, int mod);
+ void (*key_act_mode[3])(Keyboard* keyb, int enc_key);
 };
 
 void keyboard_setup(Keyboard* keyb);
@@ -25,9 +25,11 @@ void keyboard_set_mode(Keyboard* keyb, int mode);
 
 void keyboard_action(Keyboard* keyb, int key, int mod);
 
-void keyboard_mode_normal(Keyboard* keyb, int key, int mode);
-void keyboard_mode_insert(Keyboard* keyb, int key, int mode);
-void keyboard_mode_select(Keyboard* keyb, int key, int mode);
+void keyboard_mode_normal(Keyboard* keyb, int enc_key);
+void keyboard_mode_insert(Keyboard* keyb, int enc_key);
+void keyboard_mode_select(Keyboard* keyb, int enc_key);
+
+int keyboard_key_to_alpha(int enc_key);
 
 
 #endif

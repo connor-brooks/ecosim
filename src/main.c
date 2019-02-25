@@ -16,7 +16,7 @@ void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   if (action == GLFW_PRESS){
-//    printf("key, %d, mods %d\n", key, mods);
+  //  printf("key, %d, mods %d, scan %d\n", key, mods, scancode); // for debug
     Keyboard* keyb = glfwGetWindowUserPointer(window);
     keyboard_action(keyb, key, mods);
   }
