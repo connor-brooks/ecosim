@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <GL/freeglut.h>
@@ -72,12 +73,10 @@ ui_gfx_setup(Ui_graphics* uig)
     1.0f, -1.0f,
     1.0f, -1.0f + uig->height,
     -1.0f, -1.0f+ uig->height};
-  ptrdiff_t tmp_v_len = sizeof(tmp_v) / sizeof(float);
+  size_t tmp_v_size = sizeof(tmp_v);
 
-  uig->vertex_data = malloc((size_t) tmp_v_len * sizeof(float));
-  /* Hacky but fun */
-  for(tmp_v_len--; tmp_v_len + 1; --tmp_v_len)
-    uig->vertex_data[tmp_v_len] = tmp_v[tmp_v_len];
+  uig->vertex_data = malloc(tmp_v_size);
+  memcpy(uig->vertex_data, tmp_v, tmp_v_size);
 }
 
 void
