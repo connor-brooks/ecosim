@@ -9,24 +9,16 @@
 #include "utils.h"
 #include "graphics.h"
 #include "shaders.h"
+#include "keyboard.h"
 
 /* Keyboard callback */
 void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-  if ( action == GLFW_PRESS)
-    printf("key %c or %d with mod %d\n", key, key, mods);
-  /* Just a little bit of testing */
-  Ui_graphics* temp = glfwGetWindowUserPointer(window);
-  printf("st %s\n", temp->cmd_txt);
-  temp->cmd_txt = "Key x Pressed! :) \0";
-  switch(key){
-    case 81:
-      glfwTerminate();
-      break;
-    default:
-      break;
-  };
+  if (action == GLFW_PRESS){
+    Keyboard* keyb = glfwGetWindowUserPointer(window);
+    keyboard_action(keyb, key, mods);
+  }
 }
 
 /* Main function */
@@ -38,7 +30,9 @@ main(int argc, char **argv)
   Agent agents[agent_count];
   float* agent_verts;
   Agent_graphics* agent_gfx;
+
   Ui_graphics* ui_gfx;
+  Keyboard* keyboard;
 
   GLFWwindow* window;
 
@@ -67,7 +61,7 @@ main(int argc, char **argv)
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-  glfwSetWindowUserPointer(window, ui_gfx);
+  glfwSetWindowUserPointer(window, keyboard);
   /* Setup agents */
 
   agents[0].x = 0.2;
@@ -114,8 +108,11 @@ main(int argc, char **argv)
   ui_gfx = malloc(sizeof(Ui_graphics));
   ui_gfx_setup(ui_gfx);
   ui_gfx->cmd_txt = "hello world\0";
+
   /* keyboard test */
-  glfwSetWindowUserPointer(window, ui_gfx);
+  keyboard = malloc(sizeof(Keyboard));
+  keyboard_ui_ptr(keyboard, ui_gfx);
+  glfwSetWindowUserPointer(window, keyboard);
 
 
   /* Main loop */
