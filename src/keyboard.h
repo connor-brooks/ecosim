@@ -9,6 +9,17 @@ enum keyboard_mode {
   SELECT
 };
 
+enum keyboard_commands {
+  KEYB_CMD_EMPTY,
+  KEYB_CMD_CHANGE,
+  KEYB_CMD_DELETE,
+  KEYB_CMD_INSERT,
+  KEYB_CMD_PASTE,
+  KEYB_CMD_QUIT,
+  KEYB_CMD_RELOAD,
+  KEYB_CMD_YANK
+};
+
 typedef struct _Keyboard Keyboard;
 typedef struct _Normal_buffer Normal_buffer;
 
@@ -41,7 +52,7 @@ int keyboard_key_to_alpha(int enc_key);
 
 Normal_buffer* keyboard_make_norm_buff(void);
 void keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num);
-void keyboard_to_norm_buff_multi(Normal_buffer* norm_buff, int num);
+void keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd);
 void keyboard_cat_num(int* to_int, int num);
 
 

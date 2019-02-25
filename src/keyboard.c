@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <limits.h>
+#include <string.h>
 #include "keyboard.h"
 #include "graphics.h"
-#include "string.h"
+#include "strings.h"
 
 #define PRINTABLE_MIN (20)
 #define PRINTABLE_MAX (127)
@@ -36,7 +37,7 @@ keyboard_make_norm_buff(void)
   return tmp_norm_buff;
 }
 
-void 
+void
 keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
 {
   if(norm_buff->cmd_id == NO_BUFF_DATA)
@@ -47,7 +48,7 @@ keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
   printf("it's %d\n", norm_buff->multiplier);
 }
 
-void 
+void
 keyboard_cat_num(int* to_int, int num)
 {
   int tmp = *(to_int) * 10 + num;
@@ -58,8 +59,13 @@ keyboard_cat_num(int* to_int, int num)
 
 }
 void 
-keyboard_to_norm_buff_arg(Normal_buffer* norm_buff, int num){
-//
+keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
+{
+  if(norm_buff->cmd_id == NO_BUFF_DATA)
+    keyboard_cat_num(&(norm_buff->cmd_id), cmd);
+  else
+    printf("too many\n");
+  printf("got cmd %d\n", norm_buff->cmd_id);
 }
 
 void
@@ -85,21 +91,17 @@ keyboard_action(Keyboard* keyb, int key, int mod)
 void
 keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
-  char bad_key_str[] = "Normal mode: BAD keypress!";
-  char buffer_clr_str[] = "Normal mode: Buffer cleared!";
-  char nrm_mode_prmpt[] = "Normal mode:";
-  char ch_insert_str[] = "Insert mode:";
 
-  memcpy(keyb->uig->cmd_txt, nrm_mode_prmpt, sizeof(nrm_mode_prmpt));
+  memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
 
   switch(enc_key){
     case DEC_SHIFT(';'): /* Aka ':' */
-      memcpy(keyb->uig->cmd_txt, ch_insert_str, sizeof(ch_insert_str));
+      memcpy(keyb->uig->cmd_txt, str_insert_mode, sizeof(str_insert_mode));
       keyboard_set_mode(keyb, INSERT);
       break;
 
     case ESC:
-      memcpy(keyb->uig->cmd_txt, buffer_clr_str, sizeof(buffer_clr_str));
+      memcpy(keyb->uig->cmd_txt, str_buffer_clear, sizeof(str_buffer_clear));
       break;
 
     case '0':
@@ -119,6 +121,7 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
 
     case 'C':
       printf("Change\n");
+      keyboard_cmd_to_norm_buff(keyb->norm_buff, KEYB_CMD_CHANGE);
       break;
 
     case 'D':
@@ -146,7 +149,7 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
       break;
 
     default:
-      memcpy(keyb->uig->cmd_txt, bad_key_str, sizeof(bad_key_str));
+      memcpy(keyb->uig->cmd_txt, str_bad_key, sizeof(str_bad_key));
       break;
   };
 }
@@ -158,7 +161,7 @@ keyboard_mode_insert(Keyboard* keyb, int enc_key)
 
   switch(enc_key){
     case ESC:
-      memcpy(keyb->uig->cmd_txt, ch_norm_str, sizeof(ch_norm_str));
+      memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
       keyboard_set_mode(keyb, NORMAL);
       break;
 
