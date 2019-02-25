@@ -46,16 +46,17 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
   char bad_key_str[] = "Normal mode: BAD keypress!";
   char ch_insert_str[] = "Insert mode:";
+
   switch(enc_key){
     case 'A':
       printf("Normal A\n");
       break;
+
     case DEC_SHIFT('A'):
       printf("Shifted A\n");
       break;
 
-      /* Change to insert mode, for key ':' */
-    case DEC_SHIFT(';'):
+    case DEC_SHIFT(';'): /* Aka ':' */
       memcpy(keyb->uig->cmd_txt, ch_insert_str, sizeof(ch_insert_str));
       keyboard_set_mode(keyb, INSERT);
       break;
@@ -70,17 +71,18 @@ keyboard_mode_insert(Keyboard* keyb, int enc_key)
 {
   char ch_norm_str[] = "Normal mode:";
   int printable_ch;
+
   switch(enc_key){
     case ESC:
       memcpy(keyb->uig->cmd_txt, ch_norm_str, sizeof(ch_norm_str));
       keyboard_set_mode(keyb, NORMAL);
       break;
+
     default:
       printable_ch = keyboard_key_to_alpha(enc_key);
       if(printable_ch)
         printf(":%c\n", printable_ch);
       break;
-
   };
 }
 void
