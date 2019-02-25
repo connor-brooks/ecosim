@@ -51,9 +51,10 @@ void keyboard_mode_select(Keyboard* keyb, int enc_key);
 int keyboard_key_to_alpha(int enc_key);
 
 Normal_buffer* keyboard_make_norm_buff(void);
-void keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num);
-void keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd);
-void keyboard_cat_num(int* to_int, int num);
+int keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num);
+int keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd);
+int keyboard_cat_num(int* to_int, int num);
+void keyboard_clr_norm_buffer(Keyboard* keyb);
 
 
 #endif

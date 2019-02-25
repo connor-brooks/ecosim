@@ -10,7 +10,7 @@
 #define ALPHA_MIN (64)
 #define ALPHA_MAX (91)
 #define CAPS_TO_LOW (32)
-#define CHAR_TO_INT (48)
+#define CHAR_INT_OFFSET (48)
 #define ESC (256)
 #define SHIFT_BITMASK (1 << 16)
 #define ENC_SHIFT(k, m) (k + (m << 16))
@@ -37,28 +37,28 @@ keyboard_make_norm_buff(void)
   return tmp_norm_buff;
 }
 
-void
+int
 keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
 {
   if(norm_buff->cmd_id == NO_BUFF_DATA)
-    keyboard_cat_num(&(norm_buff->multiplier), num);
+    return keyboard_cat_num(&(norm_buff->multiplier), num);
   else
-    keyboard_cat_num(&(norm_buff->arg), num);
+    return keyboard_cat_num(&(norm_buff->arg), num);
 
-  printf("it's %d\n", norm_buff->multiplier);
 }
 
-void
+int
 keyboard_cat_num(int* to_int, int num)
 {
   int tmp = *(to_int) * 10 + num;
-  if(tmp > INT_MAX / 2) return;
-  if(tmp < INT_MIN / 2)  return;
+  if(tmp > INT_MAX / 2) return 0;
+  if(tmp < INT_MIN / 2)  return 0;
   if(*to_int) *to_int = tmp;
   else *to_int = num;
+  return 1;
 
 }
-void 
+int
 keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
 {
   if(norm_buff->cmd_id == NO_BUFF_DATA)
@@ -66,6 +66,15 @@ keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
   else
     printf("too many\n");
   printf("got cmd %d\n", norm_buff->cmd_id);
+}
+void
+keyboard_clr_norm_buffer(Keyboard* keyb)
+{
+  printf("badness\n");
+  keyb->norm_buff->arg = NO_BUFF_DATA;
+  keyb->norm_buff->multiplier= NO_BUFF_DATA;
+  keyb->norm_buff->cmd_id= NO_BUFF_DATA;
+  memcpy(keyb->uig->cmd_txt, str_buffer_clear, sizeof(str_buffer_clear));
 }
 
 void
@@ -91,6 +100,7 @@ keyboard_action(Keyboard* keyb, int key, int mod)
 void
 keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
+  Normal_buffer* norm_buff = keyb->norm_buff;
 
   memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
 
@@ -101,7 +111,7 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
       break;
 
     case ESC:
-      memcpy(keyb->uig->cmd_txt, str_buffer_clear, sizeof(str_buffer_clear));
+      keyboard_clr_norm_buffer(keyb);
       break;
 
     case '0':
@@ -115,37 +125,45 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
     case '8':
     case '9':
       printf("Number\n");
-      keyboard_num_to_norm_buff(keyb->norm_buff, enc_key - CHAR_TO_INT);
+      if(!keyboard_num_to_norm_buff(norm_buff, enc_key - CHAR_INT_OFFSET))
+        keyboard_clr_norm_buffer(keyb);
+      printf("in norm buf %d\n", norm_buff->multiplier);
       break;
-
 
     case 'C':
       printf("Change\n");
-      keyboard_cmd_to_norm_buff(keyb->norm_buff, KEYB_CMD_CHANGE);
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_CHANGE);
+
       break;
 
     case 'D':
       printf("Delete\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_DELETE);
       break;
 
     case 'I':
       printf("Insert\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_INSERT);
       break;
 
     case 'P':
       printf("Paste\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_PASTE);
       break;
 
     case 'Q':
       printf("Quit\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_QUIT);
       break;
 
     case 'R':
       printf("Reload\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_RELOAD);
       break;
 
     case 'Y':
       printf("Yank\n");
+      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_YANK);
       break;
 
     default:
