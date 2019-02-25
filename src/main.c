@@ -16,6 +16,7 @@ void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   if (action == GLFW_PRESS){
+//    printf("key, %d, mods %d\n", key, mods);
     Keyboard* keyb = glfwGetWindowUserPointer(window);
     keyboard_action(keyb, key, mods);
   }
@@ -110,7 +111,9 @@ main(int argc, char **argv)
 
   /* keyboard test */
   keyboard = malloc(sizeof(Keyboard));
+  keyboard_setup(keyboard);
   keyboard_ui_ptr(keyboard, ui_gfx);
+  keyboard_set_mode(keyboard, NORMAL);
   glfwSetWindowUserPointer(window, keyboard);
 
 
