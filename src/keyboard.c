@@ -44,7 +44,6 @@ keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
     return keyboard_cat_num(&(norm_buff->multiplier), num);
   else
     return keyboard_cat_num(&(norm_buff->arg), num);
-
 }
 
 int
@@ -56,8 +55,8 @@ keyboard_cat_num(int* to_int, int num)
   if(*to_int) *to_int = tmp;
   else *to_int = num;
   return 1;
-
 }
+
 int
 keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
 {
@@ -67,6 +66,7 @@ keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
     printf("too many\n");
   printf("got cmd %d\n", norm_buff->cmd_id);
 }
+
 void
 keyboard_clr_norm_buffer(Keyboard* keyb)
 {
@@ -103,7 +103,6 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
   Normal_buffer* norm_buff = keyb->norm_buff;
 
   memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
-
   switch(enc_key){
     case DEC_SHIFT(';'): /* Aka ':' */
       memcpy(keyb->uig->cmd_txt, str_insert_mode, sizeof(str_insert_mode));
@@ -125,6 +124,7 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
     case '8':
     case '9':
       printf("Number\n");
+      // Add to own function
       if(!keyboard_num_to_norm_buff(norm_buff, enc_key - CHAR_INT_OFFSET))
         keyboard_clr_norm_buffer(keyb);
       printf("in norm buf %d\n", norm_buff->multiplier);
@@ -171,6 +171,7 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
       break;
   };
 }
+
 void
 keyboard_mode_insert(Keyboard* keyb, int enc_key)
 {
@@ -190,6 +191,7 @@ keyboard_mode_insert(Keyboard* keyb, int enc_key)
       break;
   };
 }
+
 void
 keyboard_mode_select(Keyboard* keyb, int enc_key)
 {
