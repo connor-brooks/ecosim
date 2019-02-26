@@ -11,8 +11,12 @@
 #define ALPHA_MAX (91)
 #define CAPS_TO_LOW (32)
 #define CHAR_INT_OFFSET (48)
+
 #define ESC (256)
 #define RETURN (257)
+#define BACKSPACE (259)
+#define SHIFT (344)
+
 #define SHIFT_BITMASK (1 << 16)
 #define ENC_SHIFT(k, m) (k + (m << 16))
 #define DEC_SHIFT(c) (c + (1 << 16))
@@ -38,6 +42,15 @@ keyboard_make_norm_buff(void)
   return tmp_norm_buff;
 }
 
+/* Add numbers to the normal buffer. Due to syntax of the keybinds,
+ * this should only happen at the start and end of a command,
+ * if there is a command in normal buffer (a letter) then the number
+ * should sit in the arg buffer, otherwise it should go into the
+ * mutliplier.
+ * If the number being inputted into either of the buffers grows too
+ * large, then 0 is returned, causing the buffers to be cleared because
+ * the keybind command is invalid.
+ * */
 int
 keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
 {
@@ -47,6 +60,9 @@ keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num)
     return keyboard_cat_num(&(norm_buff->arg), num);
 }
 
+/* Add numbers into the buffer,in a base 10 way. For example inputting
+ * two '1's into any number buffer should create the integer 11
+ * if there is anything close to a integer overflow 0 is returned */
 int
 keyboard_cat_num(int* to_int, int num)
 {
@@ -58,6 +74,8 @@ keyboard_cat_num(int* to_int, int num)
   return 1;
 }
 
+/* Add the keyboard command to the normal buffer if there is no previous
+ * value, otherwise return 0 */
 int
 keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
 {
@@ -84,16 +102,15 @@ keyboard_set_mode(Keyboard* keyb, int mode)
   keyb->mode = mode;
 }
 
-/* Returns what event the key press has caused */
+/* Returns what event the key press has caused, running to
+ * function appropriate to the mode*/
 int
 keyboard_act_result(Keyboard* keyb, int key, int mod)
 {
-  //  printf("Key %d and mod %d\n", key, mod); // For debug
-  /* Default */
-  int ret = KEYB_ACT_TXT_UPDATE;
+  int act_result = KEYB_ACT_TXT_UPDATE;
   int shft_enc_key = ENC_SHIFT(key, mod);
-  keyb->key_act_mode[keyb->mode](keyb, shft_enc_key);
-  return ret;
+  act_result = keyb->key_act_mode[keyb->mode](keyb, shft_enc_key);
+  return act_result;
 }
 
 int
@@ -101,19 +118,40 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
   Normal_buffer* norm_buff = keyb->norm_buff;
 
+  /* Default action result is to just update text */
+  int act_result = KEYB_ACT_TXT_UPDATE;
+
+  /* What parameter of the buffer did the action change? */
+  int act_cmd = NO_BUFF_DATA;
+  int act_num = NO_BUFF_DATA;
+
+  // Set default text
   memcpy(keyb->out_txt, str_normal_mode, sizeof(str_normal_mode));
+  printf("commad is m=%d, c=%d, a=%d\n", norm_buff->multiplier, norm_buff->cmd_id, 
+          norm_buff->arg);
+
+  //Switch on keys
   switch(enc_key){
+    case SHIFT:
+      /* Nothing */
+      break;
+
     case DEC_SHIFT(';'): /* Aka ':' */
       memcpy(keyb->out_txt, str_insert_mode, sizeof(str_insert_mode));
       keyboard_set_mode(keyb, INSERT);
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case ESC:
       keyboard_clr_norm_buffer(keyb);
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case RETURN:
-      printf("Attempting to execute command\n");
+      memcpy(keyb->out_txt, str_execute_cmd, sizeof(str_execute_cmd));
+      printf("commad is m=%d, c=%d, a=%d\n", norm_buff->multiplier, norm_buff->cmd_id, 
+          norm_buff->arg);
+      act_result = KEYB_ACT_CMD_EXEC;
       break;
 
     case '0':
@@ -126,55 +164,68 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
     case '7':
     case '8':
     case '9':
-      printf("Number\n");
-      // Add to own function
-      if(!keyboard_num_to_norm_buff(norm_buff, enc_key - CHAR_INT_OFFSET))
-        keyboard_clr_norm_buffer(keyb);
-      printf("in multi buf %d\n", norm_buff->multiplier);
-      printf("in arg buf %d\n", norm_buff->arg);
+      act_num = enc_key - CHAR_INT_OFFSET;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'C':
       printf("Change\n");
-      if(!keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_CHANGE))
-        keyboard_clr_norm_buffer(keyb);
-
+      act_cmd = KEYB_CMD_CHANGE;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'D':
       printf("Delete\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_DELETE);
+      act_cmd = KEYB_CMD_DELETE;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'I':
       printf("Insert\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_INSERT);
+      act_cmd = KEYB_CMD_INSERT;
+      act_result =  KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'P':
       printf("Paste\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_PASTE);
+      act_cmd = KEYB_CMD_PASTE;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'Q':
       printf("Quit\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_QUIT);
+      act_cmd = KEYB_CMD_QUIT;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'R':
       printf("Reload\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_RELOAD);
+      act_cmd = KEYB_CMD_RELOAD;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     case 'Y':
       printf("Yank\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_YANK);
+      act_cmd = KEYB_CMD_YANK;
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
 
     default:
       memcpy(keyb->out_txt, str_bad_key, sizeof(str_bad_key));
+      act_result = KEYB_ACT_TXT_UPDATE;
       break;
   };
+  /* If a command has been made, add it to the buffer, if
+   * the buffer is already full, clear the buffer */
+  if(act_cmd != NO_BUFF_DATA)
+    if(!keyboard_cmd_to_norm_buff(norm_buff, act_cmd))
+      keyboard_clr_norm_buffer(keyb);
+
+  if(act_num != NO_BUFF_DATA)
+    if(!keyboard_num_to_norm_buff(norm_buff, act_num))
+      keyboard_clr_norm_buffer(keyb);
+
+  return act_result;
 }
 
 int
@@ -186,6 +237,7 @@ keyboard_mode_insert(Keyboard* keyb, int enc_key)
     case ESC:
       memcpy(keyb->out_txt, str_normal_mode, sizeof(str_normal_mode));
       keyboard_set_mode(keyb, NORMAL);
+      return KEYB_ACT_TXT_UPDATE;
       break;
 
     default:
@@ -194,8 +246,9 @@ keyboard_mode_insert(Keyboard* keyb, int enc_key)
         size_t o_txt_len = strlen(keyb->out_txt);
         keyb->out_txt[o_txt_len++] = printable_ch;
         keyb->out_txt[o_txt_len] = '\0';
-        printf(":%c\n", printable_ch);
+        printf("%c\n", printable_ch);
       }
+      return KEYB_ACT_TXT_UPDATE;
       break;
   };
 }

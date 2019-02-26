@@ -25,6 +25,7 @@ void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   /* Grab pointers needed */
+  //printf("key %d\n", key);
   struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
   Keyboard* keyb = user_ptrs->keyb;
   Ui_graphics* uig = user_ptrs->uig;
@@ -40,6 +41,8 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
         break;
 
       case(KEYB_ACT_CMD_EXEC):
+        printf("%s\n", keyb->out_txt);
+        memcpy(uig->cmd_txt, keyb->out_txt, sizeof(keyb->out_txt));
         break;
     };
   }
