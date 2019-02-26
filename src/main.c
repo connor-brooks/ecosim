@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
@@ -11,14 +12,36 @@
 #include "shaders.h"
 #include "keyboard.h"
 
+/* For passing structs between main and callbacks, using glfw's
+ * glfwGetWindowUserPointer(); function, as there is no way to pass
+ * arguments to them */
+struct User_ptrs{
+  Keyboard* keyb;
+  Ui_graphics* uig;
+};
+
 /* Keyboard callback */
 void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+  /* Grab pointers needed */
+  struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
+  Keyboard* keyb = user_ptrs->keyb;
+  Ui_graphics* uig = user_ptrs->uig;
+
   if (action == GLFW_PRESS){
-  //  printf("key, %d, mods %d, scan %d\n", key, mods, scancode); // for debug
-    Keyboard* keyb = glfwGetWindowUserPointer(window);
-    keyboard_action(keyb, key, mods);
+    // The update the keyboard output params
+    int act_res = keyboard_act_result(keyb, key, mods);
+
+    switch(act_res) {
+      case(KEYB_ACT_TXT_UPDATE):
+        memcpy(uig->cmd_txt, keyb->out_txt, sizeof(keyb->out_txt));
+        printf("Out: %s\n", keyb->out_txt);
+        break;
+
+      case(KEYB_ACT_CMD_EXEC):
+        break;
+    };
   }
 }
 
@@ -36,6 +59,9 @@ main(int argc, char **argv)
   Keyboard* keyboard;
 
   GLFWwindow* window;
+
+  // For passing structs between callbacks in glfw
+  struct User_ptrs user_ptrs;
 
   /* Initalize glfw and glut*/
   if (!glfwInit())
@@ -112,10 +138,14 @@ main(int argc, char **argv)
   /* keyboard test */
   keyboard = malloc(sizeof(Keyboard));
   keyboard_setup(keyboard);
-  keyboard_ui_ptr(keyboard, ui_gfx);
   keyboard_set_mode(keyboard, NORMAL);
 
-  glfwSetWindowUserPointer(window, keyboard);
+  /* This is to pass needed structs between glfw keyboard callback function and
+   * main function, as they cannot be passed via arguments.
+   * It's pretty hacky but an okay workaround*/
+  user_ptrs.keyb = keyboard;
+  user_ptrs.uig = ui_gfx;
+  glfwSetWindowUserPointer(window, &user_ptrs);
 
 
   /* Main loop */

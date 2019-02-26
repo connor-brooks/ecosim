@@ -12,6 +12,7 @@
 #define CAPS_TO_LOW (32)
 #define CHAR_INT_OFFSET (48)
 #define ESC (256)
+#define RETURN (257)
 #define SHIFT_BITMASK (1 << 16)
 #define ENC_SHIFT(k, m) (k + (m << 16))
 #define DEC_SHIFT(c) (c + (1 << 16))
@@ -61,27 +62,21 @@ int
 keyboard_cmd_to_norm_buff(Normal_buffer* norm_buff, int cmd)
 {
   if(norm_buff->cmd_id == NO_BUFF_DATA)
-    keyboard_cat_num(&(norm_buff->cmd_id), cmd);
+    return keyboard_cat_num(&(norm_buff->cmd_id), cmd);
   else
-    printf("too many\n");
+    return 0;
   printf("got cmd %d\n", norm_buff->cmd_id);
 }
 
 void
 keyboard_clr_norm_buffer(Keyboard* keyb)
 {
-  printf("badness\n");
   keyb->norm_buff->arg = NO_BUFF_DATA;
   keyb->norm_buff->multiplier= NO_BUFF_DATA;
   keyb->norm_buff->cmd_id= NO_BUFF_DATA;
-  memcpy(keyb->uig->cmd_txt, str_buffer_clear, sizeof(str_buffer_clear));
+  memcpy(keyb->out_txt, str_buffer_clear, sizeof(str_buffer_clear));
 }
 
-void
-keyboard_ui_ptr(Keyboard *keyb, Ui_graphics* uig)
-{
-  keyb->uig = uig;
-}
 
 void
 keyboard_set_mode(Keyboard* keyb, int mode)
@@ -89,28 +84,36 @@ keyboard_set_mode(Keyboard* keyb, int mode)
   keyb->mode = mode;
 }
 
-void
-keyboard_action(Keyboard* keyb, int key, int mod)
+/* Returns what event the key press has caused */
+int
+keyboard_act_result(Keyboard* keyb, int key, int mod)
 {
   //  printf("Key %d and mod %d\n", key, mod); // For debug
+  /* Default */
+  int ret = KEYB_ACT_TXT_UPDATE;
   int shft_enc_key = ENC_SHIFT(key, mod);
   keyb->key_act_mode[keyb->mode](keyb, shft_enc_key);
+  return ret;
 }
 
-void
+int
 keyboard_mode_normal(Keyboard* keyb, int enc_key)
 {
   Normal_buffer* norm_buff = keyb->norm_buff;
 
-  memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
+  memcpy(keyb->out_txt, str_normal_mode, sizeof(str_normal_mode));
   switch(enc_key){
     case DEC_SHIFT(';'): /* Aka ':' */
-      memcpy(keyb->uig->cmd_txt, str_insert_mode, sizeof(str_insert_mode));
+      memcpy(keyb->out_txt, str_insert_mode, sizeof(str_insert_mode));
       keyboard_set_mode(keyb, INSERT);
       break;
 
     case ESC:
       keyboard_clr_norm_buffer(keyb);
+      break;
+
+    case RETURN:
+      printf("Attempting to execute command\n");
       break;
 
     case '0':
@@ -127,12 +130,14 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
       // Add to own function
       if(!keyboard_num_to_norm_buff(norm_buff, enc_key - CHAR_INT_OFFSET))
         keyboard_clr_norm_buffer(keyb);
-      printf("in norm buf %d\n", norm_buff->multiplier);
+      printf("in multi buf %d\n", norm_buff->multiplier);
+      printf("in arg buf %d\n", norm_buff->arg);
       break;
 
     case 'C':
       printf("Change\n");
-      keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_CHANGE);
+      if(!keyboard_cmd_to_norm_buff(norm_buff, KEYB_CMD_CHANGE))
+        keyboard_clr_norm_buffer(keyb);
 
       break;
 
@@ -167,32 +172,35 @@ keyboard_mode_normal(Keyboard* keyb, int enc_key)
       break;
 
     default:
-      memcpy(keyb->uig->cmd_txt, str_bad_key, sizeof(str_bad_key));
+      memcpy(keyb->out_txt, str_bad_key, sizeof(str_bad_key));
       break;
   };
 }
 
-void
+int
 keyboard_mode_insert(Keyboard* keyb, int enc_key)
 {
-  char ch_norm_str[] = "Normal mode:";
   int printable_ch;
 
   switch(enc_key){
     case ESC:
-      memcpy(keyb->uig->cmd_txt, str_normal_mode, sizeof(str_normal_mode));
+      memcpy(keyb->out_txt, str_normal_mode, sizeof(str_normal_mode));
       keyboard_set_mode(keyb, NORMAL);
       break;
 
     default:
       printable_ch = keyboard_key_to_alpha(enc_key);
-      if(printable_ch)
+      if(printable_ch){
+        size_t o_txt_len = strlen(keyb->out_txt);
+        keyb->out_txt[o_txt_len++] = printable_ch;
+        keyb->out_txt[o_txt_len] = '\0';
         printf(":%c\n", printable_ch);
+      }
       break;
   };
 }
 
-void
+int
 keyboard_mode_select(Keyboard* keyb, int enc_key)
 {
   printf("I am in select mode!\n");
@@ -202,17 +210,17 @@ keyboard_mode_select(Keyboard* keyb, int enc_key)
  * So far this function only shifts between caps and
  * lower, need to get it working with symbols too */
 int
-keyboard_key_to_alpha(int the_key)
+keyboard_key_to_alpha(int key)
 {
   int was_shifted = 0;
   // If the key has had shift pressed, remove shift from the key
-  if(the_key > SHIFT_BITMASK)
+  if(key > SHIFT_BITMASK)
   {
     was_shifted = 1;
-    the_key = the_key - SHIFT_BITMASK;
+    key = key - SHIFT_BITMASK;
   }
   // If the key wasn't shifted but is a letter key, put it in lower case
-  if((the_key > ALPHA_MIN) & (the_key < ALPHA_MAX))
-    the_key = the_key + ((!was_shifted) * CAPS_TO_LOW);
-  return ((the_key > PRINTABLE_MIN) & (the_key < PRINTABLE_MAX))? the_key : BAD_KEY;
+  if((key > ALPHA_MIN) & (key < ALPHA_MAX))
+    key = key + ((!was_shifted) * CAPS_TO_LOW);
+  return ((key > PRINTABLE_MIN) & (key < PRINTABLE_MAX))? key : BAD_KEY;
 }

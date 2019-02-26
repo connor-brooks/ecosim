@@ -20,14 +20,19 @@ enum keyboard_commands {
   KEYB_CMD_YANK
 };
 
+enum keyboard_act_results {
+  KEYB_ACT_TXT_UPDATE,
+  KEYB_ACT_CMD_EXEC
+};
+
 typedef struct _Keyboard Keyboard;
 typedef struct _Normal_buffer Normal_buffer;
 
 struct _Keyboard {
  int mode; 
- Ui_graphics* uig;
- void (*key_act_mode[3])(Keyboard* keyb, int enc_key);
+ int (*key_act_mode[3])(Keyboard* keyb, int enc_key);
  Normal_buffer* norm_buff;
+ char out_txt[64];
 };
 
 struct _Normal_buffer {
@@ -38,17 +43,16 @@ struct _Normal_buffer {
 
 void keyboard_setup(Keyboard* keyb);
 
-void keyboard_ui_ptr(Keyboard* keyb, Ui_graphics* uig);
 
 void keyboard_set_mode(Keyboard* keyb, int mode);
 
-void keyboard_action(Keyboard* keyb, int key, int mod);
+int keyboard_act_result(Keyboard* keyb, int key, int mod);
 
-void keyboard_mode_normal(Keyboard* keyb, int enc_key);
-void keyboard_mode_insert(Keyboard* keyb, int enc_key);
-void keyboard_mode_select(Keyboard* keyb, int enc_key);
+int keyboard_mode_normal(Keyboard* keyb, int enc_key);
+int keyboard_mode_insert(Keyboard* keyb, int enc_key);
+int keyboard_mode_select(Keyboard* keyb, int enc_key);
 
-int keyboard_key_to_alpha(int enc_key);
+int keyboard_key_to_alpha(int key);
 
 Normal_buffer* keyboard_make_norm_buff(void);
 int keyboard_num_to_norm_buff(Normal_buffer* norm_buff, int num);
