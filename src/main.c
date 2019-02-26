@@ -29,7 +29,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   if(action == GLFW_PRESS)
   {
     Keyboard_event* k_event = keyboard_enc_event(key, mods);
-    printf("key %c, special %d \n", k_event->ch, k_event->special);
+    printf("key %c, special %d, numi %d\n", k_event->ch, k_event->special, k_event->as_int);
     struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
     Ui_graphics* uig = user_ptrs->uig;
   }
