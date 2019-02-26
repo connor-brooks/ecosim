@@ -94,10 +94,10 @@ ui_draw(Ui_graphics* uig)
   {
     glColor3f(0.5, 0.5, 0.9);
     glBegin(GL_LINE_LOOP);
-    glVertex3f(uig->sel_x2, uig->sel_y1, 0.0);
     glVertex3f(uig->sel_x1, uig->sel_y1, 0.0);
-    glVertex3f(uig->sel_x1, uig->sel_y2, 0.0);
+    glVertex3f(uig->sel_x2, uig->sel_y1, 0.0);
     glVertex3f(uig->sel_x2, uig->sel_y2, 0.0);
+    glVertex3f(uig->sel_x1, uig->sel_y2, 0.0);
     glEnd();
   }
 
@@ -115,13 +115,14 @@ ui_draw(Ui_graphics* uig)
 void
 ui_gfx_update(Ui* ui, Ui_graphics* uig)
 {
-  if(ui->resp == (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
+  /* Update text from UI */
+  if(ui->resp && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
     strcpy(uig->cmd_txt, ui->out_buff);
-  if(ui->resp == (UI_RESP_SEL_MODE + UI_RESP_UPDATE_TEXT))
+
+  /* Update select drwaing */
+  if(ui->resp & UI_RESP_SEL_MODE )
   {
-    strcpy(uig->cmd_txt, ui->out_buff);
     uig->show_sel = 1;
-    printf("sel mode\n");
     uig->sel_x1 = ui->sel_x1;
     uig->sel_y1 = ui->sel_y1;
     uig->sel_x2 = ui->sel_x2;
