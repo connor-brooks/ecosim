@@ -20,6 +20,11 @@ struct _Ui_graphics {
   float* vertex_data;
   RGB* color;
   char* cmd_txt;
+  int show_sel;
+  float sel_x1;
+  float sel_y1;
+  float sel_x2;
+  float sel_y2;
 };
 
 typedef struct _Agent_graphics Agent_graphics;

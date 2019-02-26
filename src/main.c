@@ -17,7 +17,6 @@
  * glfwGetWindowUserPointer(); function, as there is no way to pass
  * arguments to them */
 struct User_ptrs{
-  //  Keyboard* keyb;
   Ui* ui;
   Ui_graphics* uig;
 };
@@ -26,16 +25,18 @@ struct User_ptrs{
 void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-  /* Grab pointers needed */
-  //printf("key %d\n", key);
-  if(action == GLFW_PRESS)
+  if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
-    Keyboard_event* k_event = keyboard_enc_event(key, mods);
-    printf("key %c, special %d, numi %d\n", k_event->ch, k_event->special, k_event->as_int);
+    //printf("key %c, special %d, numi %d\n", k_event->ch, k_event->special, k_event->as_int);
+    /* For pointer passing between callback and main */
     struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
     Ui_graphics* uig = user_ptrs->uig;
     Ui* ui = user_ptrs->ui;
-    Ui_get_resp(ui, k_event);
+
+    Keyboard_event* k_event = keyboard_enc_event(key, mods);
+
+    /* Get keyboard response, and act upon it */
+    ui_get_resp(ui, k_event);
     ui_gfx_update(ui, uig);
   }
 
@@ -136,7 +137,7 @@ main(int argc, char **argv)
   //  keyboard = malloc(sizeof(Keyboard));
   // keyboard_setup(keyboard);
   // keyboard_set_mode(keyboard, NORMAL);
-  ui = Ui_setup();
+  ui = ui_setup();
 
   /* This is to pass needed structs between glfw keyboard callback function and
    * main function, as they cannot be passed via arguments.
