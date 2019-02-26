@@ -75,6 +75,7 @@ ui_gfx_setup(Ui_graphics* uig)
     -1.0f, -1.0f+ uig->height};
   size_t tmp_v_size = sizeof(tmp_v);
   uig->cmd_txt = malloc(sizeof(char) * 64);
+  strcpy(uig->cmd_txt, " ");
 
   uig->vertex_data = malloc(tmp_v_size);
   memcpy(uig->vertex_data, tmp_v, tmp_v_size);
@@ -93,6 +94,13 @@ ui_draw(Ui_graphics* uig)
   /* Swap buffers */
 }
 
+void 
+ui_gfx_update(Ui* ui, Ui_graphics* uig)
+{
+  if((ui->resp == UI_RESP_UPDATE_TEXT) || 
+     (ui->resp == UI_RESP_BOTH))
+    strcpy(uig->cmd_txt, ui->out_buff);       
+}
 
 
 void

@@ -1,7 +1,6 @@
 #ifndef KEYBOARD_H
 #define KEYBOARD_H
 #include "agents.h"
-#include "graphics.h"
 
 struct _Keyboard_event {
   int ch;

@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 #include <GL/glew.h>
+#include "ui.h"
 
 typedef struct RGB_ RGB;
 
@@ -30,6 +31,7 @@ void agents_draw(Agent_graphics* ag);
 
 void ui_gfx_setup(Ui_graphics* uig);
 void ui_draw(Ui_graphics* uig);
+void ui_gfx_update(Ui* ui, Ui_graphics* uig);
 
 void draw_text(float x, float y, const unsigned char* txt);
 #endif
