@@ -16,7 +16,7 @@
  * glfwGetWindowUserPointer(); function, as there is no way to pass
  * arguments to them */
 struct User_ptrs{
-  Keyboard* keyb;
+  //  Keyboard* keyb;
   Ui_graphics* uig;
 };
 
@@ -26,8 +26,13 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   /* Grab pointers needed */
   //printf("key %d\n", key);
-  struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
-  Ui_graphics* uig = user_ptrs->uig;
+  if(action == GLFW_PRESS)
+  {
+    Keyboard_event* k_event = keyboard_enc_event(key, mods);
+    printf("key %c, special %d \n", k_event->ch, k_event->special);
+    struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
+    Ui_graphics* uig = user_ptrs->uig;
+  }
 
 }
 
@@ -74,7 +79,7 @@ main(int argc, char **argv)
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
-//  glfwSetWindowUserPointer(window, keyboard);
+  //  glfwSetWindowUserPointer(window, keyboard);
   /* Setup agents */
 
   agents[0].x = 0.2;
@@ -122,9 +127,9 @@ main(int argc, char **argv)
   ui_gfx_setup(ui_gfx);
 
   /* keyboard test */
-//  keyboard = malloc(sizeof(Keyboard));
- // keyboard_setup(keyboard);
- // keyboard_set_mode(keyboard, NORMAL);
+  //  keyboard = malloc(sizeof(Keyboard));
+  // keyboard_setup(keyboard);
+  // keyboard_set_mode(keyboard, NORMAL);
 
   /* This is to pass needed structs between glfw keyboard callback function and
    * main function, as they cannot be passed via arguments.
