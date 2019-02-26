@@ -25,19 +25,42 @@ struct User_ptrs{
 void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+  struct User_ptrs* user_ptrs;
+  Ui_graphics* uig;
+  Ui* ui;
+  Keyboard_event* k_event;
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
     //printf("key %c, special %d, numi %d\n", k_event->ch, k_event->special, k_event->as_int);
     /* For pointer passing between callback and main */
-    struct User_ptrs* user_ptrs = glfwGetWindowUserPointer(window);
-    Ui_graphics* uig = user_ptrs->uig;
-    Ui* ui = user_ptrs->ui;
+    user_ptrs = glfwGetWindowUserPointer(window);
+    uig = user_ptrs->uig;
+    ui = user_ptrs->ui;
 
-    Keyboard_event* k_event = keyboard_enc_event(key, mods);
+    /* Encode the key event to k_event struct */
+    k_event = keyboard_enc_event(key, mods);
 
     /* Get keyboard response, and act upon it */
     ui_get_resp(ui, k_event);
+    /* ^ should stay in normal mode, unless CMD_WAIT_SEL from cmd is set,
+     * if so, go into select mode. if select sucessful with ENTER, return UI_RESP_SELECTION
+     * if no selection, just keep drawing as usual
+     * if ESC, send UI_RESP_EXIT_CMD */
     ui_gfx_update(ui, uig);
+
+    /* cmd_run(ui) // run cmd from ui
+     * ^ can respond in two ways:
+     * 1) sending the enum CMD_RAN_OKAY ( the command ran fine)
+     * 2) storing cmd and waiting for select data send CMD_WAIT_SEL, only stop sending
+     *    if UI_RESP_SELECTION is sent (sucesss) or UI_RESP_EXIT_CMD is sent
+     *    (if exit is the case, drop all command buffer info and go into CMD_SEL_CANCEL
+     *
+     * ui_update_mode()
+     * ^ update the mode as needed, set it to select mode if CMD_WAIT_SEL
+     *   this will prompt the user to do a keypress, starting to selecting
+     *   which is done via ui_get_resp()
+     *   set it back to normal mode if CMD_SEL_CANCEL
+     *   set it back to normal if CMD_RAN_OKAY */
   }
 
 }

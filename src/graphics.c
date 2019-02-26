@@ -117,7 +117,7 @@ ui_gfx_update(Ui* ui, Ui_graphics* uig)
 {
   /* Update text from UI */
   if(ui->resp && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
-    strcpy(uig->cmd_txt, ui->out_buff);
+    strcpy(uig->cmd_txt, ui->buff);
 
   /* Update select drwaing */
   if(ui->resp & UI_RESP_SEL_MODE )
