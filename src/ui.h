@@ -21,10 +21,16 @@ struct _Ui {
   int mode;
   int resp;
   char* tmp_buff;
+  size_t tmp_buff_len;
   char* out_buff;
+  int last_out_msg;
+  size_t out_buff_len;
 };
 typedef struct _Ui Ui;
 
 Ui* Ui_setup(void);
-Ui* Ui_get_resp(Ui* ui, Keyboard_event* key_ev);
+Ui* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
+int ui_cat_to_buff_any(int ch, char* buff, size_t *buff_len, int* last_out_msg);
+int ui_clear_buff_any(char* buff, size_t *buff_len);
+int ui_backspace_buff_any(char* buff, size_t *buff_len);
 #endif

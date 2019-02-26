@@ -90,7 +90,7 @@ ui_draw(Ui_graphics* uig)
   for(int i = 0; i < 4; i++, tmp_ptr += 2)
     glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
   glEnd();
-  draw_text(-1.0, -0.98,(const unsigned char *) uig->cmd_txt);
+  draw_text(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
   /* Swap buffers */
 }
 
