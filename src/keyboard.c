@@ -33,16 +33,18 @@ keyboard_enc_event(int key, int mod)
   k_event->special= NO_KEY_DATA;
   k_event->with_shift= mod;
 
-  /* if key is alphabet*/
+  /* if key is alphabetical, keep put ot ch */
   k_event->ch = ((key > ALPHA_MIN) && (key < ALPHA_MAX)) ? 
     key : 
     NO_KEY_DATA;
-  /* If key should be caps */
+
+  /* If alphabetical hasn't been shifted, shift it to lower */
   k_event->ch = (k_event->ch && !(k_event->with_shift)) ? 
     key + ALOW_OFFSET : 
     k_event->ch;
 
-  /* If key still isn't set, it should be a number or a symbol */
+  /* If key still isn't set, it should be a number or a symbol,
+   * more work is needed. */
   if((!k_event->ch) && (key > PRINTABLE_MIN) && (key < PRINTABLE_MAX))
   {
     /* Encrypt the key with it's mod for use in switch */
@@ -79,13 +81,13 @@ keyboard_enc_event(int key, int mod)
     };
     k_event->ch = k;
   }
-  /* Convert any numerical chars into ints */
+  /* Convert any numerical chars into ints for any math needed */
   k_event->as_int = ((k_event->ch > CINT_MIN) & (k_event->ch < CINT_MAX)) ? 
       k_event->ch - CHAR_INT_OFFSET :
       NO_INT_DATA;
 
 
-  /* If the key is a special key */
+  /* If the key is a special key, save it to special */
   if(key > 255)
   {
     int sk = NO_KEY_DATA;

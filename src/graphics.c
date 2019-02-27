@@ -9,6 +9,17 @@
 #include "config.h"
 #include "utils.h"
 
+Agent_graphics* 
+agent_gfx_setup(int count, float* verts, const char* v_shader, const char* f_shader){
+  Agent_graphics* tmp = malloc(sizeof(Agent_graphics));
+  tmp->no_agents = count;
+  tmp->vert_data = verts;
+  tmp->vert_data_len = agent_vert_elems(count) * sizeof(float);
+  tmp->vert_shader = v_shader;
+  tmp->frag_shader = f_shader;;
+  return tmp;
+}
+
 
 void
 agent_vbo_setup(Agent_graphics* ag)
@@ -45,7 +56,7 @@ agent_shader_setup(Agent_graphics* ag)
 }
 
 void
-agents_draw(Agent_graphics* ag)
+gfx_agents_draw(Agent_graphics* ag)
 {
   int agent_dims = 4;
   size_t color_offset = ag->no_agents * agent_dims * sizeof(float);
@@ -64,26 +75,28 @@ agents_draw(Agent_graphics* ag)
 }
 
 
-void
-ui_gfx_setup(Ui_graphics* uig)
+Ui_graphics* 
+ui_gfx_setup(void)
 {
-  uig->height = 0.05;
-  uig->show_sel = 0;
-  uig->sel_x1 = 0.0f;
-  uig->sel_y1 = 0.0f;
-  uig->sel_x2 = 0.0f;
-  uig->sel_y2 = 0.0f;
+  Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
+  tmp->height = 0.05;
+  tmp->show_sel = 0;
+  tmp->sel_x1 = 0.0f;
+  tmp->sel_y1 = 0.0f;
+  tmp->sel_x2 = 0.0f;
+  tmp->sel_y2 = 0.0f;
   float tmp_v[] = {
     -1.0f, -1.0f,
     1.0f, -1.0f,
-    1.0f, -1.0f + uig->height,
-    -1.0f, -1.0f+ uig->height};
+    1.0f, -1.0f + tmp->height,
+    -1.0f, -1.0f+ tmp->height};
   size_t tmp_v_size = sizeof(tmp_v);
-  uig->cmd_txt = malloc(sizeof(char) * 64);
-  strcpy(uig->cmd_txt, " ");
+  tmp->cmd_txt = malloc(sizeof(char) * 64);
+  strcpy(tmp->cmd_txt, " ");
 
-  uig->vertex_data = malloc(tmp_v_size);
-  memcpy(uig->vertex_data, tmp_v, tmp_v_size);
+  tmp->vertex_data = malloc(tmp_v_size);
+  memcpy(tmp->vertex_data, tmp_v, tmp_v_size);
+  return tmp;
 }
 
 void

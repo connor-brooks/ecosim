@@ -142,19 +142,11 @@ main(int argc, char **argv)
   /* Create agent graphic vertex arrary */
   agent_verts = agents_to_vert(agents, agent_count, NULL, VERTS_NEW);
 
-  /* Set values 4 graphics 4 agents */
 
+  /* Setup agent graphics */
+  agent_gfx = agent_gfx_setup(agent_count, agent_verts, agents_vs, agents_fs);
 
-//  agent_gfx = malloc(sizeof(Agent_graphics));
-//  agent_gfx->no_agents = agent_count;
-//  agent_gfx->vert_data = agent_verts;
-//  agent_gfx->vert_data_len = agent_vert_elems(agent_count) * sizeof(float);
-//  agent_gfx->vert_shader = agents_vs;
-//  agent_gfx->frag_shader = agents_fs;
-//
- agent_gfx = agent_gfx_setup(agent_count, agent_verts, agents_vs, agents_fs);
-
-  /* Setup based on this */
+  /* Maybe push this into setup soon too? */
   agent_vbo_setup(agent_gfx);
   agent_shader_setup(agent_gfx);
 

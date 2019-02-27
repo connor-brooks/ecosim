@@ -10,10 +10,10 @@ enum ui_modes {
 };
 
 enum ui_resp {
-  UI_RESP_NONE = 0,
-  UI_RESP_UPDATE_TEXT = 1,
-  UI_RESP_RUN_CMD = 2,
-  UI_RESP_SEL_MODE = 4
+  UI_RESP_NONE        = 0,
+  UI_RESP_UPDATE_TEXT = 1 << 0,
+  UI_RESP_RUN_CMD     = 2 << 1,
+  UI_RESP_SEL_MODE    = 4 << 2
 /*UI_RESP_SEL_RETURN = 8? */
 };
 
