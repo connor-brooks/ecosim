@@ -125,7 +125,7 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
         amt =  +small;
         break;
     };
-    ui->selection[axis] =ui_resize_sel(ui->selection[axis], amt);
+    ui_resize_sel(&ui->selection[axis], amt);
   }
 
   /* Set response */
@@ -197,14 +197,13 @@ ui_msg_buff(Ui* ui, char* msg)
   ui->last_out_msg = 1;
 }
 
-/* could just take the pointer of the position instead
- * and set it if a change is okay*/
-float
-ui_resize_sel(float cur, float diff)
+/* resize only when appropriate */
+void
+ui_resize_sel(float* cur, float diff)
 {
-  float new = cur + diff;
+  float new = *cur + diff;
 
-  return (new < 1.0f && new > -1.0f) ?
+  *cur = (new < 1.0f && new > -1.0f) ?
     new:
-    cur;
+    *cur;
 }
