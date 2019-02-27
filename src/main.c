@@ -41,9 +41,6 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     /* Encode the key event to k_event struct, get response from UI */
     k_event = keyboard_enc_event(key, mods);
     ui_resp = ui_get_resp(ui, k_event);
-
-    /* Get keyboard response, and act upon it */
-    //ui_get_resp(ui, k_event);
     /* ^ should stay in normal mode, unless CMD_WAIT_SEL from cmd is set,
      * if so, go into select mode. if select sucessful with ENTER, return UI_RESP_SELECTION
      * if no selection, just keep drawing as usual
@@ -66,7 +63,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
      *   set it back to normal if CMD_RAN_OKAY */
 
     /* Bit of debug */
-    printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
+  //  printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
     free(k_event);
     free(ui_resp);
   }

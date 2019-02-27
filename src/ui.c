@@ -26,58 +26,62 @@ ui_setup(void)
   return tmp;
 }
 
+/* Return ui response */
 Ui_resp*
 ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 {
   Ui_resp* resp = malloc(sizeof(Ui_resp));
-  int ch = key_ev->ch;
-  //if(ui->mode == UI_MODE_NORM) printf("Norm mode\n");
-  //if(ui->mode == UI_MODE_SELECT) printf("Select mode\n");
 
-  /* UI testing functions
-   * Very messy, just for experimentation */
-  /* Key not special */
-  if(!key_ev->special){
-
-  if(ch == ':')  {
-    ui->mode = !ui->mode;
-    ui->last_out_msg =1;
-  }
-    /* in sel mode */
-    if(ui->mode == UI_MODE_SELECT){
-      if(ch == 'h') ui->selection[0] -=0.05;
-      if(ch == 'H') ui->selection[0] -=0.01;
-
-      if(ch == 'j') ui->selection[1] -=0.05;
-      if(ch == 'J') ui->selection[1] -=0.01;
-
-      if(ch == 'l') ui->selection[0] +=0.05;
-      if(ch == 'L') ui->selection[0] +=0.01;
-
-      if(ch == 'k') ui->selection[1] +=0.05;
-      if(ch == 'K') ui->selection[1] +=0.01;
-
-      ui_msg_buff(ui, "Select Size");
-
-      resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
-      resp->selection = ui->selection;
-      resp->buff_txt = ui->buff;
-    }
-    /* in norm mode */
-    else
+  if(key_ev->special){
+    if(key_ev->special == RETURN)
     {
-      ui_cat_to_buff(ch, ui);
-      resp->code = UI_RESP_UPDATE_TEXT;
-      resp->buff_txt = ui->buff;
+      ui->mode = !ui->mode;
+      printf("mode %d\n", ui->mode);
     }
   }
-  /* special */
-  else {
-    ui_backspace_buff(ui);
-    resp->code = UI_RESP_UPDATE_TEXT;
-    resp->buff_txt = ui->buff;
-  }
+  switch(ui->mode){
+    case UI_MODE_NORM:
+      ui_resp_norm_mode(ui, key_ev, resp);
+      break;
+    case UI_MODE_SELECT:
+      ui_resp_sel_mode(ui, key_ev, resp);
+      break;
+  };
   return resp;
+}
+
+/* responding in normal mode */
+void
+ui_resp_norm_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
+{
+  int ch = key_ev->ch;
+  ui_cat_to_buff(ch, ui);
+  resp->code = UI_RESP_UPDATE_TEXT;
+  resp->buff_txt = ui->buff;
+}
+
+/* responding in select mode */
+void
+ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
+{
+  int ch = key_ev->ch;
+  if(ch == 'h') ui->selection[0] -=0.05;
+  if(ch == 'H') ui->selection[0] -=0.01;
+
+  if(ch == 'j') ui->selection[1] -=0.05;
+  if(ch == 'J') ui->selection[1] -=0.01;
+
+  if(ch == 'l') ui->selection[0] +=0.05;
+  if(ch == 'L') ui->selection[0] +=0.01;
+
+  if(ch == 'k') ui->selection[1] +=0.05;
+  if(ch == 'K') ui->selection[1] +=0.01;
+
+  ui_msg_buff(ui, "Select Size");
+
+  resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
+  resp->selection = ui->selection;
+  resp->buff_txt = ui->buff;
 }
 
 /* cat char to buffer */
