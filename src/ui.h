@@ -10,40 +10,18 @@ enum ui_modes {
   UI_MODE_SELECT
 };
 
-// enum ui_resp_code {
-//   UI_RESP_NONE        = 0,
-//   UI_RESP_UPDATE_TEXT = 1 << 0,
-//   UI_RESP_RUN_CMD     = 2 << 1,
-//   UI_RESP_SEL_MODE    = 4 << 2
-// /*UI_RESP_SEL_RETURN = 8? */
-// };
-// 
-
 struct _Ui {
   int mode;
-  int resp;
   int last_out_msg;
   char* buff;
   size_t buff_len;
-
-  /* maybe add Ui_resp struct? 
-   * Ui_resp resp
-   * resp->resp
-   * resp->sels
-   * resp->txt_buff*/
-
-  /* convert this to a float array 
-   * float sel_pos[4]; */
-  float sel_x1;
-  float sel_y1;
-  float sel_x2;
-  float sel_y2;
+  float selection[4];
 };
+
 typedef struct _Ui Ui;
 
 Ui* ui_setup(void);
 
-/* This could return Ui_resp only, not the whole ui struct */
 Ui_resp* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
 
 /* All these should use the UI struct instead of passing values like this */

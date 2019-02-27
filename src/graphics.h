@@ -1,7 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 #include <GL/glew.h>
-#include "ui.h"
+#include "ui_response.h"
 
 typedef struct RGB_ RGB;
 
@@ -21,10 +21,7 @@ struct _Ui_graphics {
   RGB* color;
   char* cmd_txt;
   int show_sel;
-  float sel_x1;
-  float sel_y1;
-  float sel_x2;
-  float sel_y2;
+  float selection[4];
 };
 
 typedef struct _Agent_graphics Agent_graphics;

@@ -6,9 +6,11 @@
 #include <GL/freeglut.h>
 
 #include "graphics.h"
+#include "agents.h"
 #include "config.h"
 #include "utils.h"
 #include "ui_response.h"
+
 
 Agent_graphics* 
 agent_gfx_setup(int count, float* verts, const char* v_shader, const char* f_shader){
@@ -82,10 +84,6 @@ ui_gfx_setup(void)
   Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
   tmp->height = 0.05;
   tmp->show_sel = 0;
-  tmp->sel_x1 = 0.0f;
-  tmp->sel_y1 = 0.0f;
-  tmp->sel_x2 = 0.0f;
-  tmp->sel_y2 = 0.0f;
   float tmp_v[] = {
     -1.0f, -1.0f,
     1.0f, -1.0f,
@@ -103,27 +101,28 @@ ui_gfx_setup(void)
 void
 ui_draw(Ui_graphics* uig)
 {
+  float* tmp_ptr = uig->vertex_data;
 
+  glColor3f(0.5, 0.5, 0.5);
+  glBegin(GL_QUADS);
+
+  for(int i = 0; i < 4; i++, tmp_ptr += 2)
+    glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
+  glEnd();
+
+  draw_text(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
+
+  /* Draw the selector (temp bit of code) */
   if(uig->show_sel)
   {
     glColor3f(0.5, 0.5, 0.9);
     glBegin(GL_LINE_LOOP);
-    glVertex3f(uig->sel_x1, uig->sel_y1, 0.0);
-    glVertex3f(uig->sel_x2, uig->sel_y1, 0.0);
-    glVertex3f(uig->sel_x2, uig->sel_y2, 0.0);
-    glVertex3f(uig->sel_x1, uig->sel_y2, 0.0);
+    glVertex3f(uig->selection[0], uig->selection[1], 0.0);
+    glVertex3f(uig->selection[2], uig->selection[1], 0.0);
+    glVertex3f(uig->selection[2], uig->selection[3], 0.0);
+    glVertex3f(uig->selection[0], uig->selection[3], 0.0);
     glEnd();
   }
-
-  float* tmp_ptr = uig->vertex_data;
-  glColor3f(0.5, 0.5, 0.5);
-  glBegin(GL_QUADS);
-  for(int i = 0; i < 4; i++, tmp_ptr += 2)
-    glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
-  glEnd();
-  draw_text(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
-
-
 }
 
 void
@@ -137,10 +136,7 @@ ui_gfx_update(Ui_resp* resp, Ui_graphics* uig)
   if(resp->code & UI_RESP_SEL_MODE )
   {
     uig->show_sel = 1;
-    uig->sel_x1 = resp->selection[0];
-    uig->sel_y1 = resp->selection[1];
-    uig->sel_x2 = resp->selection[2];
-    uig->sel_y2 = resp->selection[3];
+    memcpy(uig->selection, resp->selection, sizeof(float) * 3);
   }
   else uig->show_sel = 0;
 }

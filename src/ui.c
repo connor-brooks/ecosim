@@ -12,15 +12,15 @@ Ui*
 ui_setup(void)
 {
   Ui* tmp = malloc(sizeof(Ui));
+
   tmp->mode = UI_MODE_NORM;
-  tmp->resp = UI_RESP_NONE;
   tmp->buff = malloc(sizeof(char) * MAX_BUFF_LEN);
   tmp->buff_len = 0;
   tmp->last_out_msg = 0;
-  tmp->sel_x1 = -0.5f;
-  tmp->sel_y1 = 0.5f;
-  tmp->sel_x2 = 0.0f;
-  tmp->sel_y2 = 0.0f;
+  tmp->selection[0] = -0.5f;
+  tmp->selection[1] = 0.5f;
+  tmp->selection[2] = 0.0f;
+  tmp->selection[3] = 0.0f;
   strcpy(tmp->buff, "\0");
 
   return tmp;
@@ -30,36 +30,32 @@ Ui_resp*
 ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 {
   Ui_resp* resp = malloc(sizeof(Ui_resp));
+  int ch = key_ev->ch;
 
   /* UI testing functions
    * Very messy, just for experimentation */
-  int ch = key_ev->ch;
   if(key_ev->as_int == -1){
-    if(ch == 'h') ui->sel_x1 -=0.05;
-    if(ch == 'H') ui->sel_x1 -=0.01;
+    if(ch == 'h') ui->selection[0] -=0.05;
+    if(ch == 'H') ui->selection[0] -=0.01;
 
-    if(ch == 'j') ui->sel_y1 -=0.05;
-    if(ch == 'J') ui->sel_y1 -=0.01;
+    if(ch == 'j') ui->selection[1] -=0.05;
+    if(ch == 'J') ui->selection[1] -=0.01;
 
-    if(ch == 'l') ui->sel_x1 +=0.05;
-    if(ch == 'L') ui->sel_x1 +=0.01;
+    if(ch == 'l') ui->selection[0] +=0.05;
+    if(ch == 'L') ui->selection[0] +=0.01;
 
-    if(ch == 'k') ui->sel_y1 +=0.05;
-    if(ch == 'K') ui->sel_y1 +=0.01;
+    if(ch == 'k') ui->selection[1] +=0.05;
+    if(ch == 'K') ui->selection[1] +=0.01;
 
     ui_msg_buff_any(ui->buff, &ui->buff_len, "Select size", &ui->last_out_msg);
-    ui->resp = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
+
     resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
-    resp->selection[0] = ui->sel_x1;
-    resp->selection[1] = ui->sel_y1;
-    resp->selection[2] = ui->sel_x2;
-    resp->selection[3] = ui->sel_y2;
+    resp->selection = ui->selection;
     resp->buff_txt = ui->buff;
   }
   else
   {
     ui_cat_to_buff_any(ch, ui->buff, &ui->buff_len, &ui->last_out_msg);
-    ui->resp = UI_RESP_UPDATE_TEXT;
     resp->code = UI_RESP_UPDATE_TEXT;
     resp->buff_txt = ui->buff;
   }

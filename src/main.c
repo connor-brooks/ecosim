@@ -30,15 +30,15 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   Ui* ui;
   Ui_resp* ui_resp;
   Keyboard_event* k_event;
+
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
-    //printf("key %c, special %d, numi %d\n", k_event->ch, k_event->special, k_event->as_int);
     /* For pointer passing between callback and main */
     user_ptrs = glfwGetWindowUserPointer(window);
     uig = user_ptrs->uig;
     ui = user_ptrs->ui;
 
-    /* Encode the key event to k_event struct */
+    /* Encode the key event to k_event struct, get response from UI */
     k_event = keyboard_enc_event(key, mods);
     ui_resp = ui_get_resp(ui, k_event);
 

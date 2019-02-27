@@ -11,7 +11,7 @@ enum ui_resp_code {
 
 struct _Ui_resp{
   int code;
-  float selection[4];
+  float* selection;
   char* buff_txt;
 };
 
