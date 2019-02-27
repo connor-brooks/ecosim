@@ -31,5 +31,7 @@ int ui_clear_buff(Ui* ui);
 int ui_backspace_buff(Ui* ui);
 int ui_msg_buff(Ui* ui, char* msg);
 
+float ui_resize_sel(float cur, float diff);
+
 /* add function to take command response, probabl from cmd_resp struct? */
 #endif

@@ -82,6 +82,7 @@ Ui_graphics*
 ui_gfx_setup(void)
 {
   Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
+
   tmp->height = 0.05;
   tmp->show_sel = 0;
   float tmp_v[] = {

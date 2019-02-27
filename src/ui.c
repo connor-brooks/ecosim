@@ -5,22 +5,16 @@
 #include "keyboard.h"
 #define MAX_BUFF_LEN (64)
 
-typedef struct RGB_ RGB;
-
-
 Ui*
 ui_setup(void)
 {
   Ui* tmp = malloc(sizeof(Ui));
+  float tmp_sel[] = {-0.1f, -0.5f, 0.0f, 0.0f};
 
   tmp->mode = UI_MODE_NORM;
   tmp->buff = malloc(sizeof(char) * MAX_BUFF_LEN);
-  tmp->buff_len = 0;
-  tmp->last_out_msg = 0;
-  tmp->selection[0] = -0.1f;
-  tmp->selection[1] = 0.5f;
-  tmp->selection[2] = 0.0f;
-  tmp->selection[3] = 0.0f;
+  tmp->buff_len = 0, tmp->last_out_msg = 0;
+  memcpy(tmp->selection, tmp_sel, sizeof(tmp_sel));
   strcpy(tmp->buff, "\0");
 
   return tmp;
@@ -55,7 +49,11 @@ void
 ui_resp_norm_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 {
   int ch = key_ev->ch;
+
+  /* Do action */
   ui_cat_to_buff(ch, ui);
+
+  /* Set response */
   resp->code = UI_RESP_UPDATE_TEXT;
   resp->buff_txt = ui->buff;
 }
@@ -65,20 +63,39 @@ void
 ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 {
   int ch = key_ev->ch;
-  if(ch == 'h') ui->selection[0] -=0.05;
-  if(ch == 'H') ui->selection[0] -=0.01;
 
-  if(ch == 'j') ui->selection[1] -=0.05;
-  if(ch == 'J') ui->selection[1] -=0.01;
-
-  if(ch == 'l') ui->selection[0] +=0.05;
-  if(ch == 'L') ui->selection[0] +=0.01;
-
-  if(ch == 'k') ui->selection[1] +=0.05;
-  if(ch == 'K') ui->selection[1] +=0.01;
-
+  /* Do action */
   ui_msg_buff(ui, "Select Size");
 
+  /* h */
+  if(ch == 'h') ui->selection[0] =
+    ui_resize_sel(ui->selection[0], -0.05);
+
+  if(ch == 'H') ui->selection[0] =
+    ui_resize_sel(ui->selection[0], -0.01);
+
+  /* j */
+  if(ch == 'j') ui->selection[1] =
+    ui_resize_sel(ui->selection[1], -0.05);
+
+  if(ch == 'J') ui->selection[1] =
+    ui_resize_sel(ui->selection[1], -0.01);
+
+  /* l */
+  if(ch == 'l') ui->selection[0] =
+    ui_resize_sel(ui->selection[0], +0.05);
+
+  if(ch == 'L') ui->selection[0] =
+    ui_resize_sel(ui->selection[0], +0.01);
+
+  /* k */
+  if(ch == 'k') ui->selection[1] =
+    ui_resize_sel(ui->selection[1], +0.05);
+
+  if(ch == 'K') ui->selection[1] =
+    ui_resize_sel(ui->selection[1], +0.01);
+
+  /* Set response */
   resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
   resp->selection = ui->selection;
   resp->buff_txt = ui->buff;
@@ -113,7 +130,6 @@ int ui_cat_to_buff(int ch, Ui* ui)
 }
 
 /* Write null-byte to buffer */
-
 int
 ui_clear_buff(Ui* ui){
   char blank[] = "\0";
@@ -136,7 +152,6 @@ ui_backspace_buff(Ui* ui){
 }
 
 /* Copy a message to the buffer */
-
 int
 ui_msg_buff(Ui* ui, char* msg)
 {
@@ -147,4 +162,14 @@ ui_msg_buff(Ui* ui, char* msg)
   strcpy(ui->buff, msg);
   ui->buff_len = sizeof(msg);
   ui->last_out_msg = 1;
+}
+
+float
+ui_resize_sel(float cur, float diff)
+{
+  float new = cur + diff;
+
+  return (new < 1.0f && new > -1.0f) ?
+    new:
+    cur;
 }
