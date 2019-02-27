@@ -63,12 +63,17 @@ void
 ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 {
   int ch = key_ev->ch;
+  int co_ord = 0;
+  float amt = 0;
+  float small = 0.01f;
+  float big = 0.05f;
+
 
   /* Do action */
   ui_msg_buff(ui, "Select Size");
 
   /* Put into function
-   * ui_sel_mode_mod(ui, offset) 
+   * ui_sel_mode_mod(ui, offset)
    * if offset is 0, thats the first corner of sel
    * if offset is 1, thats the other side of sel
    *
@@ -77,37 +82,50 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
    * 1 offset sucess = UI_RESP_SEL_SECOND - UI_RESP_SEL_MODe (leave sel mode, 0 offset)
    * * offset fail   = UI_RESP_SEL_CANCEL  - UI_RESP_SEL_MODE (leave sel mode, 0 offset)
    *
-   * move function to bottom, change to case, have each case
-   * modding the paramers of resize_sel, so, (offset + dir, amt); 
-   * At end send existing resp code plus correct UI_RESP*/
+   * At end send existing resp code plus correct UI_RESP
+   *
+   * amt_small = 0.01, amt_big = 0.05
+   * */
 
   /* h */
-  if(ch == 'h') ui->selection[0] =
-    ui_resize_sel(ui->selection[0], -0.05);
-
-  if(ch == 'H') ui->selection[0] =
-    ui_resize_sel(ui->selection[0], -0.01);
-
-  /* j */
-  if(ch == 'j') ui->selection[1] =
-    ui_resize_sel(ui->selection[1], -0.05);
-
-  if(ch == 'J') ui->selection[1] =
-    ui_resize_sel(ui->selection[1], -0.01);
-
-  /* l */
-  if(ch == 'l') ui->selection[0] =
-    ui_resize_sel(ui->selection[0], +0.05);
-
-  if(ch == 'L') ui->selection[0] =
-    ui_resize_sel(ui->selection[0], +0.01);
-
-  /* k */
-  if(ch == 'k') ui->selection[1] =
-    ui_resize_sel(ui->selection[1], +0.05);
-
-  if(ch == 'K') ui->selection[1] =
-    ui_resize_sel(ui->selection[1], +0.01);
+  if(!key_ev->special)
+  {
+    switch(ch) {
+      case 'h':
+        co_ord = 0;
+        amt =  -big;
+        break;
+      case 'H':
+        co_ord = 0;
+        amt =  -small;
+        break;
+      case 'j':
+        co_ord = 1;
+        amt =  -big;
+        break;
+      case 'J':
+        co_ord = 1;
+        amt =  -small;
+        break;
+      case 'l':
+        co_ord = 0;
+        amt =  +big;
+        break;
+      case 'L':
+        co_ord = 0;
+        amt =  +small;
+        break;
+      case 'k':
+        co_ord = 1;
+        amt =  +big;
+        break;
+      case 'K':
+        co_ord = 1;
+        amt =  +small;
+        break;
+    };
+    ui->selection[co_ord] =ui_resize_sel(ui->selection[co_ord], amt);
+  }
 
   /* Set response */
   resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
@@ -178,7 +196,7 @@ ui_msg_buff(Ui* ui, char* msg)
   ui->last_out_msg = 1;
 }
 
-/* could just take the pointer of the position instead 
+/* could just take the pointer of the position instead
  * and set it if a change is okay*/
 float
 ui_resize_sel(float cur, float diff)
