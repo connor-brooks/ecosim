@@ -6,7 +6,6 @@
 
 enum ui_modes {
   UI_MODE_NORM,
-  UI_MODE_INSERT,
   UI_MODE_SELECT
 };
 
@@ -24,7 +23,6 @@ Ui* ui_setup(void);
 
 Ui_resp* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
 
-/* All these should use the UI struct instead of passing values like this */
 int ui_cat_to_buff(int ch, Ui* ui);
 int ui_clear_buff(Ui* ui);
 int ui_backspace_buff(Ui* ui);

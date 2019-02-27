@@ -17,7 +17,7 @@ ui_setup(void)
   tmp->buff = malloc(sizeof(char) * MAX_BUFF_LEN);
   tmp->buff_len = 0;
   tmp->last_out_msg = 0;
-  tmp->selection[0] = -0.5f;
+  tmp->selection[0] = -0.1f;
   tmp->selection[1] = 0.5f;
   tmp->selection[2] = 0.0f;
   tmp->selection[3] = 0.0f;
@@ -31,31 +31,49 @@ ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 {
   Ui_resp* resp = malloc(sizeof(Ui_resp));
   int ch = key_ev->ch;
+  //if(ui->mode == UI_MODE_NORM) printf("Norm mode\n");
+  //if(ui->mode == UI_MODE_SELECT) printf("Select mode\n");
 
   /* UI testing functions
    * Very messy, just for experimentation */
-  if(key_ev->as_int == -1){
-    if(ch == 'h') ui->selection[0] -=0.05;
-    if(ch == 'H') ui->selection[0] -=0.01;
+  /* Key not special */
+  if(!key_ev->special){
 
-    if(ch == 'j') ui->selection[1] -=0.05;
-    if(ch == 'J') ui->selection[1] -=0.01;
-
-    if(ch == 'l') ui->selection[0] +=0.05;
-    if(ch == 'L') ui->selection[0] +=0.01;
-
-    if(ch == 'k') ui->selection[1] +=0.05;
-    if(ch == 'K') ui->selection[1] +=0.01;
-
-    ui_msg_buff(ui, "Select Size");
-
-    resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
-    resp->selection = ui->selection;
-    resp->buff_txt = ui->buff;
+  if(ch == ':')  {
+    ui->mode = !ui->mode;
+    ui->last_out_msg =1;
   }
-  else
-  {
-    ui_cat_to_buff(ch, ui);
+    /* in sel mode */
+    if(ui->mode == UI_MODE_SELECT){
+      if(ch == 'h') ui->selection[0] -=0.05;
+      if(ch == 'H') ui->selection[0] -=0.01;
+
+      if(ch == 'j') ui->selection[1] -=0.05;
+      if(ch == 'J') ui->selection[1] -=0.01;
+
+      if(ch == 'l') ui->selection[0] +=0.05;
+      if(ch == 'L') ui->selection[0] +=0.01;
+
+      if(ch == 'k') ui->selection[1] +=0.05;
+      if(ch == 'K') ui->selection[1] +=0.01;
+
+      ui_msg_buff(ui, "Select Size");
+
+      resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
+      resp->selection = ui->selection;
+      resp->buff_txt = ui->buff;
+    }
+    /* in norm mode */
+    else
+    {
+      ui_cat_to_buff(ch, ui);
+      resp->code = UI_RESP_UPDATE_TEXT;
+      resp->buff_txt = ui->buff;
+    }
+  }
+  /* special */
+  else {
+    ui_backspace_buff(ui);
     resp->code = UI_RESP_UPDATE_TEXT;
     resp->buff_txt = ui->buff;
   }
@@ -104,10 +122,13 @@ ui_clear_buff(Ui* ui){
 /* Clear the null-byte and the previous letter */
 int
 ui_backspace_buff(Ui* ui){
-  size_t dest_len = strlen(ui->buff);
-  ui->buff[dest_len--] = '\0';
-  ui->buff[dest_len--] = '\0';
-  ui->buff_len = strlen(ui->buff);
+  if(ui->last_out_msg) ui_clear_buff(ui);
+  else{
+    size_t dest_len = strlen(ui->buff);
+    ui->buff[dest_len--] = '\0';
+    ui->buff[dest_len--] = '\0';
+    ui->buff_len = strlen(ui->buff);
+  }
 }
 
 /* Copy a message to the buffer */

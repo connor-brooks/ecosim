@@ -34,13 +34,13 @@ keyboard_enc_event(int key, int mod)
   k_event->with_shift= mod;
 
   /* if key is alphabetical, keep put ot ch */
-  k_event->ch = ((key > ALPHA_MIN) && (key < ALPHA_MAX)) ? 
-    key : 
+  k_event->ch = ((key > ALPHA_MIN) && (key < ALPHA_MAX)) ?
+    key :
     NO_KEY_DATA;
 
   /* If alphabetical hasn't been shifted, shift it to lower */
-  k_event->ch = (k_event->ch && !(k_event->with_shift)) ? 
-    key + ALOW_OFFSET : 
+  k_event->ch = (k_event->ch && !(k_event->with_shift)) ?
+    key + ALOW_OFFSET :
     k_event->ch;
 
   /* If key still isn't set, it should be a number or a symbol,
@@ -54,37 +54,31 @@ keyboard_enc_event(int key, int mod)
       case DEC_SHIFT(';'):
         k = ':';
         break;
-
       case DEC_SHIFT('1'):
         k = '!';
         break;
-
       case DEC_SHIFT('2'):
         k = '"';
         break;
-
       case DEC_SHIFT('3'):
         k = '#';
         break;
-
       case DEC_SHIFT('4'):
         k = '$';
         break;
-
       case DEC_SHIFT('5'):
         k = '%';
         break;
-
-      default: 
+      default:
         k = key;
 
     };
     k_event->ch = k;
   }
   /* Convert any numerical chars into ints for any math needed */
-  k_event->as_int = ((k_event->ch > CINT_MIN) & (k_event->ch < CINT_MAX)) ? 
-      k_event->ch - CHAR_INT_OFFSET :
-      NO_INT_DATA;
+  k_event->as_int = ((k_event->ch > CINT_MIN) & (k_event->ch < CINT_MAX)) ?
+    k_event->ch - CHAR_INT_OFFSET :
+    NO_INT_DATA;
 
 
   /* If the key is a special key, save it to special */
@@ -93,18 +87,12 @@ keyboard_enc_event(int key, int mod)
     int sk = NO_KEY_DATA;
     switch(key){
       case ESC:
-        sk = ESC;
-        break;
-
       case BACKSPACE:
-        sk = BACKSPACE;
-        break;
-
       case RETURN:
-        sk = RETURN;
+        sk = key;
         break;
       default:
-        sk = 0;
+        sk = NO_KEY_DATA;
     };
     k_event->special = sk;
   }

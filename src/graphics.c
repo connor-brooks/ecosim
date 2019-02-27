@@ -136,7 +136,7 @@ ui_gfx_update(Ui_resp* resp, Ui_graphics* uig)
   if(resp->code & UI_RESP_SEL_MODE )
   {
     uig->show_sel = 1;
-    memcpy(uig->selection, resp->selection, sizeof(float) * 3);
+    memcpy(uig->selection, resp->selection, sizeof(float) * 4);
   }
   else uig->show_sel = 0;
 }

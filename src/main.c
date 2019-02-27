@@ -64,6 +64,9 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
      *   which is done via ui_get_resp()
      *   set it back to normal mode if CMD_SEL_CANCEL
      *   set it back to normal if CMD_RAN_OKAY */
+
+    /* Bit of debug */
+    printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
     free(k_event);
     free(ui_resp);
   }
