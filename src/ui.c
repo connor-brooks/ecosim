@@ -67,6 +67,20 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
   /* Do action */
   ui_msg_buff(ui, "Select Size");
 
+  /* Put into function
+   * ui_sel_mode_mod(ui, offset) 
+   * if offset is 0, thats the first corner of sel
+   * if offset is 1, thats the other side of sel
+   *
+   * default         = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE
+   * 0 offset sucess = UI_RESP_SEL_FIRST (stay in sel mode, inc offset)
+   * 1 offset sucess = UI_RESP_SEL_SECOND - UI_RESP_SEL_MODe (leave sel mode, 0 offset)
+   * * offset fail   = UI_RESP_SEL_CANCEL  - UI_RESP_SEL_MODE (leave sel mode, 0 offset)
+   *
+   * move function to bottom, change to case, have each case
+   * modding the paramers of resize_sel, so, (offset + dir, amt); 
+   * At end send existing resp code plus correct UI_RESP*/
+
   /* h */
   if(ch == 'h') ui->selection[0] =
     ui_resize_sel(ui->selection[0], -0.05);
@@ -164,6 +178,8 @@ ui_msg_buff(Ui* ui, char* msg)
   ui->last_out_msg = 1;
 }
 
+/* could just take the pointer of the position instead 
+ * and set it if a change is okay*/
 float
 ui_resize_sel(float cur, float diff)
 {
