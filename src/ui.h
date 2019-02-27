@@ -9,6 +9,11 @@ enum ui_modes {
   UI_MODE_SELECT
 };
 
+enum ui_sel_dirs {
+  UI_SEL_AXIS_X,
+  UI_SEL_AXIS_Y
+};
+
 struct _Ui {
   int mode;
   int last_out_msg;

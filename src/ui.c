@@ -63,7 +63,7 @@ void
 ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 {
   int ch = key_ev->ch;
-  int co_ord = 0;
+  int axis = UI_SEL_AXIS_X;
   float amt = 0;
   float small = 0.01f;
   float big = 0.05f;
@@ -85,6 +85,7 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
    * At end send existing resp code plus correct UI_RESP
    *
    * amt_small = 0.01, amt_big = 0.05
+   * change co-ord to axis, an enum
    * */
 
   /* h */
@@ -92,39 +93,39 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
   {
     switch(ch) {
       case 'h':
-        co_ord = 0;
+        axis = UI_SEL_AXIS_X;
         amt =  -big;
         break;
       case 'H':
-        co_ord = 0;
+        axis = UI_SEL_AXIS_X;
         amt =  -small;
         break;
       case 'j':
-        co_ord = 1;
+        axis = UI_SEL_AXIS_Y;
         amt =  -big;
         break;
       case 'J':
-        co_ord = 1;
+        axis = UI_SEL_AXIS_Y;
         amt =  -small;
         break;
       case 'l':
-        co_ord = 0;
+        axis = UI_SEL_AXIS_X;
         amt =  +big;
         break;
       case 'L':
-        co_ord = 0;
+        axis = UI_SEL_AXIS_X;
         amt =  +small;
         break;
       case 'k':
-        co_ord = 1;
+        axis = UI_SEL_AXIS_Y;
         amt =  +big;
         break;
       case 'K':
-        co_ord = 1;
+        axis = UI_SEL_AXIS_Y;
         amt =  +small;
         break;
     };
-    ui->selection[co_ord] =ui_resize_sel(ui->selection[co_ord], amt);
+    ui->selection[axis] =ui_resize_sel(ui->selection[axis], amt);
   }
 
   /* Set response */
