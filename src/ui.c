@@ -137,7 +137,8 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 /* cat char to buffer */
 int ui_cat_to_buff(int ch, Ui* ui)
 {
-  /* Instant clear if the previous buffer write was from a msg */
+  /*  add to own function ui_buff_clear_last_msg(ui);
+   * Instant clear if the previous buffer write was from a msg */
   if(ui->last_out_msg)
   {
     ui_clear_buff(ui);
