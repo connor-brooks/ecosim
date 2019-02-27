@@ -47,7 +47,7 @@ ui_get_resp(Ui* ui, Keyboard_event* key_ev)
     if(ch == 'k') ui->selection[1] +=0.05;
     if(ch == 'K') ui->selection[1] +=0.01;
 
-    ui_msg_buff_any(ui->buff, &ui->buff_len, "Select size", &ui->last_out_msg);
+    ui_msg_buff(ui, "Select Size");
 
     resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
     resp->selection = ui->selection;
@@ -55,7 +55,7 @@ ui_get_resp(Ui* ui, Keyboard_event* key_ev)
   }
   else
   {
-    ui_cat_to_buff_any(ch, ui->buff, &ui->buff_len, &ui->last_out_msg);
+    ui_cat_to_buff(ch, ui);
     resp->code = UI_RESP_UPDATE_TEXT;
     resp->buff_txt = ui->buff;
   }
@@ -63,61 +63,63 @@ ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 }
 
 /* cat char to buffer */
-int
-ui_cat_to_buff_any(int ch, char* buff, size_t *buff_len, int* last_out_msg)
+int ui_cat_to_buff(int ch, Ui* ui)
 {
   /* Instant clear if the previous buffer write was from a msg */
-  if((*last_out_msg))
+  if(ui->last_out_msg)
   {
-    ui_clear_buff_any(buff, buff_len);
-    *last_out_msg = 0;
+    ui_clear_buff(ui);
+    ui->last_out_msg = 0;
   }
 
   /* If there is space, add the char to the buffer */
-  if((*buff_len) + 1 < MAX_BUFF_LEN)
+  if(ui->buff_len + 1 < MAX_BUFF_LEN)
   {
-    size_t dest_len = strlen(buff);
-    buff[dest_len++] = ch;
-    buff[dest_len] = '\0';
-    (*buff_len)++;
+    size_t dest_len = strlen(ui->buff);
+    ui->buff[dest_len++] = ch;
+    ui->buff[dest_len] = '\0';
+    ui->buff_len++;
     return 1;
   }
 
   /* Otherwise send a warning to the buffer */
   else
   {
-    ui_msg_buff_any(buff, buff_len, "Buffer too full!", last_out_msg);
+    ui_msg_buff(ui, "Buffer too full!");
     return 0;
   }
 }
 
 /* Write null-byte to buffer */
+
 int
-ui_clear_buff_any(char* buff, size_t* buff_len){
+ui_clear_buff(Ui* ui){
   char blank[] = "\0";
-  *buff_len = strlen(blank);
-  strcpy(buff, blank);
+  ui->buff_len = strlen(blank);
+  strcpy(ui->buff, blank);
   return 0;
 }
 
+
 /* Clear the null-byte and the previous letter */
 int
-ui_backspace_buff_any(char* buff, size_t *buff_len){
-  size_t dest_len = strlen(buff);
-  buff[dest_len--] = '\0';
-  buff[dest_len--] = '\0';
-  *buff_len = strlen(buff);
+ui_backspace_buff(Ui* ui){
+  size_t dest_len = strlen(ui->buff);
+  ui->buff[dest_len--] = '\0';
+  ui->buff[dest_len--] = '\0';
+  ui->buff_len = strlen(ui->buff);
 }
 
 /* Copy a message to the buffer */
+
 int
-ui_msg_buff_any(char* buff, size_t *buff_len, char* msg, int* last_out_msg)
+ui_msg_buff(Ui* ui, char* msg)
 {
   /* Stop printing same msg */
-  if(strcmp(buff, msg))  printf("%s\n", msg);
+  if(strcmp(ui->buff, msg))  printf("%s\n", msg);
 
   /* Copy to buffer */
-  *buff_len = sizeof(msg);
-  strcpy(buff, msg);
-  *last_out_msg = 1;
+  strcpy(ui->buff, msg);
+  ui->buff_len = sizeof(msg);
+  ui->last_out_msg = 1;
 }

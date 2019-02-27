@@ -25,10 +25,10 @@ Ui* ui_setup(void);
 Ui_resp* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
 
 /* All these should use the UI struct instead of passing values like this */
-int ui_cat_to_buff_any(int ch, char* buff, size_t *buff_len, int* last_out_msg);
-int ui_clear_buff_any(char* buff, size_t *buff_len);
-int ui_backspace_buff_any(char* buff, size_t *buff_len);
-int ui_msg_buff_any(char* buff, size_t *buff_len, char* msg, int* last_out_msg);
+int ui_cat_to_buff(int ch, Ui* ui);
+int ui_clear_buff(Ui* ui);
+int ui_backspace_buff(Ui* ui);
+int ui_msg_buff(Ui* ui, char* msg);
 
 /* add function to take command response, probabl from cmd_resp struct? */
 #endif
