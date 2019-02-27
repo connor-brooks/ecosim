@@ -2,6 +2,7 @@
 #define UI_H
 #include "keyboard.h"
 #include "ui.h"
+#include "ui_response.h"
 
 enum ui_modes {
   UI_MODE_NORM,
@@ -9,14 +10,14 @@ enum ui_modes {
   UI_MODE_SELECT
 };
 
-enum ui_resp {
-  UI_RESP_NONE        = 0,
-  UI_RESP_UPDATE_TEXT = 1 << 0,
-  UI_RESP_RUN_CMD     = 2 << 1,
-  UI_RESP_SEL_MODE    = 4 << 2
-/*UI_RESP_SEL_RETURN = 8? */
-};
-
+// enum ui_resp_code {
+//   UI_RESP_NONE        = 0,
+//   UI_RESP_UPDATE_TEXT = 1 << 0,
+//   UI_RESP_RUN_CMD     = 2 << 1,
+//   UI_RESP_SEL_MODE    = 4 << 2
+// /*UI_RESP_SEL_RETURN = 8? */
+// };
+// 
 
 struct _Ui {
   int mode;
@@ -43,7 +44,7 @@ typedef struct _Ui Ui;
 Ui* ui_setup(void);
 
 /* This could return Ui_resp only, not the whole ui struct */
-Ui* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
+Ui_resp* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
 
 /* All these should use the UI struct instead of passing values like this */
 int ui_cat_to_buff_any(int ch, char* buff, size_t *buff_len, int* last_out_msg);

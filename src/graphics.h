@@ -38,7 +38,7 @@ void gfx_agents_draw(Agent_graphics* ag);
 
 Ui_graphics* ui_gfx_setup(void);
 void ui_draw(Ui_graphics* uig);
-void ui_gfx_update(Ui* ui, Ui_graphics* uig);
+void ui_gfx_update(Ui_resp* resp, Ui_graphics* uig);
 
 void draw_text(float x, float y, const unsigned char* txt);
 #endif

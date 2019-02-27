@@ -28,6 +28,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   struct User_ptrs* user_ptrs;
   Ui_graphics* uig;
   Ui* ui;
+  Ui_resp* ui_resp;
   Keyboard_event* k_event;
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
@@ -39,14 +40,15 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
     /* Encode the key event to k_event struct */
     k_event = keyboard_enc_event(key, mods);
+    ui_resp = ui_get_resp(ui, k_event);
 
     /* Get keyboard response, and act upon it */
-    ui_get_resp(ui, k_event);
+    //ui_get_resp(ui, k_event);
     /* ^ should stay in normal mode, unless CMD_WAIT_SEL from cmd is set,
      * if so, go into select mode. if select sucessful with ENTER, return UI_RESP_SELECTION
      * if no selection, just keep drawing as usual
      * if ESC, send UI_RESP_EXIT_CMD */
-    ui_gfx_update(ui, uig);
+    ui_gfx_update(ui_resp, uig);
     /* ^ should be changed to take a ui_resp, instead of the whole ui struct */
 
     /* cmd_run(ui) // run cmd from ui
@@ -63,6 +65,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
      *   set it back to normal mode if CMD_SEL_CANCEL
      *   set it back to normal if CMD_RAN_OKAY */
     free(k_event);
+    free(ui_resp);
   }
 
 }

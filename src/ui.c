@@ -26,9 +26,10 @@ ui_setup(void)
   return tmp;
 }
 
-Ui*
+Ui_resp*
 ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 {
+  Ui_resp* resp = malloc(sizeof(Ui_resp));
 
   /* UI testing functions
    * Very messy, just for experimentation */
@@ -48,12 +49,21 @@ ui_get_resp(Ui* ui, Keyboard_event* key_ev)
 
     ui_msg_buff_any(ui->buff, &ui->buff_len, "Select size", &ui->last_out_msg);
     ui->resp = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
+    resp->code = UI_RESP_UPDATE_TEXT + UI_RESP_SEL_MODE;
+    resp->selection[0] = ui->sel_x1;
+    resp->selection[1] = ui->sel_y1;
+    resp->selection[2] = ui->sel_x2;
+    resp->selection[3] = ui->sel_y2;
+    resp->buff_txt = ui->buff;
   }
   else
   {
     ui_cat_to_buff_any(ch, ui->buff, &ui->buff_len, &ui->last_out_msg);
     ui->resp = UI_RESP_UPDATE_TEXT;
+    resp->code = UI_RESP_UPDATE_TEXT;
+    resp->buff_txt = ui->buff;
   }
+  return resp;
 }
 
 /* cat char to buffer */

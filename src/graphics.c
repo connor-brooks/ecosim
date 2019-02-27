@@ -8,6 +8,7 @@
 #include "graphics.h"
 #include "config.h"
 #include "utils.h"
+#include "ui_response.h"
 
 Agent_graphics* 
 agent_gfx_setup(int count, float* verts, const char* v_shader, const char* f_shader){
@@ -126,20 +127,20 @@ ui_draw(Ui_graphics* uig)
 }
 
 void
-ui_gfx_update(Ui* ui, Ui_graphics* uig)
+ui_gfx_update(Ui_resp* resp, Ui_graphics* uig)
 {
   /* Update text from UI */
-  if(ui->resp && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
-    strcpy(uig->cmd_txt, ui->buff);
+  if(resp->code && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
+    strcpy(uig->cmd_txt, resp->buff_txt);
 
   /* Update select drwaing */
-  if(ui->resp & UI_RESP_SEL_MODE )
+  if(resp->code & UI_RESP_SEL_MODE )
   {
     uig->show_sel = 1;
-    uig->sel_x1 = ui->sel_x1;
-    uig->sel_y1 = ui->sel_y1;
-    uig->sel_x2 = ui->sel_x2;
-    uig->sel_y2 = ui->sel_y2;
+    uig->sel_x1 = resp->selection[0];
+    uig->sel_y1 = resp->selection[1];
+    uig->sel_x2 = resp->selection[2];
+    uig->sel_y2 = resp->selection[3];
   }
   else uig->show_sel = 0;
 }
