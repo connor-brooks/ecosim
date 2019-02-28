@@ -37,10 +37,36 @@ agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
         vert_ret[p_offset++] = aa[i].x; // x
         vert_ret[p_offset++] = aa[i].y; // y
         vert_ret[p_offset++] = 0.0f; // z
-        vert_ret[p_offset++] = 1.0f;
+        vert_ret[p_offset++] = aa[i].size;
         break;
 
     };
   }
   return vert_ret;
+}
+
+void 
+agents_update(Agent_array* aa)
+{
+  for(int i = 0; i < aa->count; i++)
+  {
+    printf("got agent\n");
+  }
+}
+
+/* Create an agent array */
+Agent_array*
+agent_array_setup(int count)
+{
+  Agent_array* temp = malloc(sizeof(Agent_array));
+  int i;
+
+  temp->count = count;
+  for(i = 0; i < count; i++)
+  {
+    printf("got agent\n");
+  }
+
+
+
 }

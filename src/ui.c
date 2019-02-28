@@ -9,7 +9,7 @@ Ui*
 ui_setup(void)
 {
   Ui* tmp = malloc(sizeof(Ui));
-  float tmp_sel[] = {-0.1f, -0.5f, 0.0f, 0.0f};
+  float tmp_sel[] = {-0.1f, -0.1f, 0.0f, 0.0f};
 
   tmp->mode = UI_MODE_NORM;
   tmp->buff = malloc(sizeof(char) * MAX_BUFF_LEN);
@@ -51,7 +51,8 @@ ui_resp_norm_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
   int ch = key_ev->ch;
 
   /* Do action */
-  ui_cat_to_buff(ch, ui);
+  if(ch)
+    ui_cat_to_buff(ch, ui);
 
   /* Set response */
   resp->code = UI_RESP_UPDATE_TEXT;
@@ -64,13 +65,14 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
 {
   int ch = key_ev->ch;
   int axis = UI_SEL_AXIS_X;
+  int ax_offset = 2;
   float amt = 0;
   float small = 0.01f;
   float big = 0.05f;
 
 
   /* Do action */
-  ui_msg_buff(ui, "Select Size");
+  ui_msg_buff(ui, "Select point");
 
   /* Put into function
    * ui_sel_mode_mod(ui, offset)
@@ -125,7 +127,8 @@ ui_resp_sel_mode(Ui* ui, Keyboard_event* key_ev, Ui_resp* resp)
         amt =  +small;
         break;
     };
-    ui_resize_sel(&ui->selection[axis], amt);
+    if(amt)
+      ui_resize_sel(&ui->selection[axis + ax_offset], amt);
   }
 
   /* Set response */

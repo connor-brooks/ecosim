@@ -9,8 +9,8 @@ const char* agents_vs =
 "out vec4 color_out;"
 "void main() {"
 "color_out = color;"
-"  gl_Position = vec4(position);"
-"  gl_PointSize = 10.0;"
+"  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
+"  gl_PointSize = position.w;"
 "}";
 
 const char* agents_fs =

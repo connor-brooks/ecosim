@@ -79,6 +79,7 @@ main(int argc, char **argv)
   Agent agents[agent_count];
   float* agent_verts;
   Agent_graphics* agent_gfx;
+  Agent_array* agent_array;
 
   Ui_graphics* ui_gfx;
   //Keyboard* keyboard;
@@ -119,6 +120,7 @@ main(int argc, char **argv)
 
   agents[0].x = 0.2;
   agents[0].y = 0.2;
+  agents[0].size = 3.0;
   agents[0].rgb.r = 1.0;
   agents[0].rgb.g = 0.0;
   agents[0].rgb.b = 0.0;
@@ -126,18 +128,21 @@ main(int argc, char **argv)
 
   agents[1].x = 0.5;
   agents[1].y = 0.5;
+  agents[1].size = 4.0;
   agents[1].rgb.r = 0.0;
   agents[1].rgb.g = 1.0;
   agents[1].rgb.b = 0.0;
 
   agents[2].x = 0.7;
   agents[2].y = 0.7;
+  agents[2].size = 5.5;
   agents[2].rgb.r = 0.0;
   agents[2].rgb.g = 0.0;
   agents[2].rgb.b = 1.0;
 
   agents[3].x = 0.7;
   agents[3].y = 0.2;
+  agents[3].size = 6.0;
   agents[3].rgb.r = 1.0;
   agents[3].rgb.g = 0.0;
   agents[3].rgb.b = 1.0;

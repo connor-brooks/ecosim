@@ -7,6 +7,7 @@ enum ui_resp_code {
   UI_RESP_RUN_CMD     = 2 << 1,
   UI_RESP_SEL_MODE    = 4 << 2
     /*UI_RESP_SEL_RETURN = 8? */
+    /* add a quit response */
 };
 
 struct _Ui_resp{

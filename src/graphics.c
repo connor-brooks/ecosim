@@ -103,12 +103,22 @@ void
 ui_draw(Ui_graphics* uig)
 {
   float* tmp_ptr = uig->vertex_data;
+  int sel_wind_ord[] = {
+    0, 1,
+    2, 1,
+    2, 3,
+    0, 3};
+
+
+                          
 
   glColor3f(0.5, 0.5, 0.5);
   glBegin(GL_QUADS);
 
-  for(int i = 0; i < 4; i++, tmp_ptr += 2)
+  for(int i = 0; i < 4; i++, tmp_ptr += 2) {
     glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
+    printf("i is at %d\n", i);
+  }
   glEnd();
 
   draw_text(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
