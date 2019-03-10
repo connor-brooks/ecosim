@@ -18,14 +18,17 @@
 #define AGENT_MIN_VELOCITY (-1.0)
 
 #define AGENT_ENERGY_DEFAULT (1.0)
-#define AGENT_METAB_MAX (0.3)
+#define AGENT_METAB_MAX (0.6)
+#define AGENT_METAB_MIN (0.0)
 
 #define AGENT_METAB_ENERGY_SCALE(x) (0.005 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((18 * x) + 2)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((8 * x) + 2)
 
 #define AGENT_MAX_SPEED (0.01)
 
 #define AGENTS_ENERGY_DEAD (0.1)
+
+#define AGENTS_TIME_FACTOR (0.5)
 
 int
 agent_vert_elems(int n)
@@ -80,6 +83,11 @@ agents_update(Agent_array* aa)
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
     agents_update_location(a_ptr);
+    /* experiemtation code.. ignore 
+  float mv_amt = agents_update_mv_amt(a_ptr);
+    a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
+    a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
+    */
     agents_update_energy(a_ptr);
   }
 }
@@ -121,7 +129,7 @@ agents_update_mv_wrap(Agent* a_ptr)
 void
 agents_update_energy(Agent* a_ptr)
 {
-  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism);
+  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism) * AGENTS_TIME_FACTOR;
   if(a_ptr->energy < AGENTS_ENERGY_DEAD) a_ptr->state = AGENT_STATE_DEAD;
 }
 
@@ -150,7 +158,7 @@ agent_array_setup(int count)
     // default state
     temp->agents[i].state = AGENT_STATE_LIVING;
     temp->agents[i].energy = AGENT_ENERGY_DEFAULT;
-    temp->agents[i].metabolism = RANDF(AGENT_METAB_MAX);
+    temp->agents[i].metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
   }
   return temp;
 }

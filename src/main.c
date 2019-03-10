@@ -24,6 +24,9 @@ struct User_ptrs{
   Ui_graphics* uig;
 };
 
+/* TEMPORARY GLOBAL */
+int game_run = 1;
+
 /* Keyboard callback */
 void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -34,8 +37,10 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   Ui_resp* ui_resp;
   Keyboard_event* k_event;
 
+
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
+    game_run = !game_run;
     /* For pointer passing between callback and main */
     user_ptrs = glfwGetWindowUserPointer(window);
     uig = user_ptrs->uig;
@@ -121,7 +126,7 @@ main(int argc, char **argv)
   printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
- // /* new setup agents */
+  // /* new setup agents */
   agent_count = DEV_AGENT_COUNT;
   agent_array = agent_array_setup(agent_count);
 
@@ -176,9 +181,12 @@ main(int argc, char **argv)
 
 
     // Update the positional data and VBO
+    if(game_run)
+    {
       agents_update(agent_array);
       agent_vbo_update(agent_gfx, agent_array);
-    
+    }
+
     /* swap */
     glfwSwapBuffers(window);
     /* Poll for events */
