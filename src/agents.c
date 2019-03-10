@@ -45,12 +45,23 @@ agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
   return vert_ret;
 }
 
-void 
+void
 agents_update(Agent_array* aa)
 {
+  float* tmp_ptr;
   for(int i = 0; i < aa->count; i++)
   {
-    printf("got agent\n");
+    //   printf("got agent\n");
+    aa->agents[i].x += aa->agents[i].velocity.x;
+    aa->agents[i].y += aa->agents[i].velocity.y;
+
+    /* Go through each velocity, wrap around if needed */
+    for(tmp_ptr = &aa->agents[i].x; tmp_ptr <= &aa->agents[i].y; tmp_ptr++){
+      *tmp_ptr = ((*tmp_ptr> 1.0) || (*tmp_ptr < -1.0)) ?
+        -(*tmp_ptr) :
+        *tmp_ptr;
+
+    }
   }
 }
 
@@ -62,11 +73,21 @@ agent_array_setup(int count)
   int i;
 
   temp->count = count;
+  temp->agents = malloc(sizeof(Agent) * count);
   for(i = 0; i < count; i++)
   {
-    printf("got agent\n");
+    // pos n size
+    temp->agents[i].x = RANDF(1.0);
+    temp->agents[i].y = RANDF(1.0);
+    temp->agents[i].size = RANDF(3.0) + 0.5;
+    // color
+    temp->agents[i].rgb.r = RANDF(1.0);
+    temp->agents[i].rgb.g = RANDF(1.0);
+    temp->agents[i].rgb.b = RANDF(1.0);
+    // velocity
+    temp->agents[i].velocity.x = RANDF(0.005);
+    temp->agents[i].velocity.y = RANDF(0.005);
+
   }
-
-
-
+  return temp;
 }

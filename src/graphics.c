@@ -117,7 +117,7 @@ ui_draw(Ui_graphics* uig)
 
   for(int i = 0; i < 4; i++, tmp_ptr += 2) {
     glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
-    printf("i is at %d\n", i);
+    //printf("i is at %d\n", i);
   }
   glEnd();
 

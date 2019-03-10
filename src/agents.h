@@ -11,6 +11,10 @@ struct _Agent {
   float y;
   float size;
   RGB rgb;
+  struct {
+    float x;
+    float y;
+  } velocity;
 };
 
 struct _Agent_array {

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
 #include <string.h>
 #include <GL/glew.h>
 #include <GL/freeglut.h>
@@ -63,7 +64,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
      *   set it back to normal if CMD_RAN_OKAY */
 
     /* Bit of debug */
-  //  printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
+    //  printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
     free(k_event);
     free(ui_resp);
   }
@@ -75,8 +76,8 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 int
 main(int argc, char **argv)
 {
-  int agent_count = 4;
-  Agent agents[agent_count];
+  srand((unsigned int)time(NULL));
+  int agent_count = 3000;
   float* agent_verts;
   Agent_graphics* agent_gfx;
   Agent_array* agent_array;
@@ -118,41 +119,44 @@ main(int argc, char **argv)
   //  glfwSetWindowUserPointer(window, keyboard);
   /* Setup agents */
 
-  agents[0].x = 0.2;
-  agents[0].y = 0.2;
-  agents[0].size = 3.0;
-  agents[0].rgb.r = 1.0;
-  agents[0].rgb.g = 0.0;
-  agents[0].rgb.b = 0.0;
+ // agents[0].x = 0.2;
+ // agents[0].y = 0.2;
+ // agents[0].size = 3.0;
+ // agents[0].rgb.r = 1.0;
+ // agents[0].rgb.g = 0.0;
+ // agents[0].rgb.b = 0.0;
 
 
-  agents[1].x = 0.5;
-  agents[1].y = 0.5;
-  agents[1].size = 4.0;
-  agents[1].rgb.r = 0.0;
-  agents[1].rgb.g = 1.0;
-  agents[1].rgb.b = 0.0;
+ // agents[1].x = 0.5;
+ // agents[1].y = 0.5;
+ // agents[1].size = 4.0;
+ // agents[1].rgb.r = 0.0;
+ // agents[1].rgb.g = 1.0;
+ // agents[1].rgb.b = 0.0;
 
-  agents[2].x = 0.7;
-  agents[2].y = 0.7;
-  agents[2].size = 5.5;
-  agents[2].rgb.r = 0.0;
-  agents[2].rgb.g = 0.0;
-  agents[2].rgb.b = 1.0;
+ // agents[2].x = 0.7;
+ // agents[2].y = 0.7;
+ // agents[2].size = 5.5;
+ // agents[2].rgb.r = 0.0;
+ // agents[2].rgb.g = 0.0;
+ // agents[2].rgb.b = 1.0;
 
-  agents[3].x = 0.7;
-  agents[3].y = 0.2;
-  agents[3].size = 6.0;
-  agents[3].rgb.r = 1.0;
-  agents[3].rgb.g = 0.0;
-  agents[3].rgb.b = 1.0;
+ // agents[3].x = 0.7;
+ // agents[3].y = 0.2;
+ // agents[3].size = 6.0;
+ // agents[3].rgb.r = 1.0;
+ // agents[3].rgb.g = 0.0;
+ // agents[3].rgb.b = 1.0;
+
+ // /* new setup agents */
+  agent_array = agent_array_setup(agent_count);
 
   /* Create agent graphic vertex arrary */
-  agent_verts = agents_to_vert(agents, agent_count, NULL, VERTS_NEW);
+  agent_verts = agents_to_vert(agent_array->agents, agent_array->count, NULL, VERTS_NEW);
 
 
   /* Setup agent graphics */
-  agent_gfx = agent_gfx_setup(agent_count, agent_verts, agents_vs, agents_fs);
+  agent_gfx = agent_gfx_setup(agent_array->count, agent_verts, agents_vs, agents_fs);
 
   /* Maybe push this into setup soon too? */
   agent_vbo_setup(agent_gfx);
@@ -172,6 +176,10 @@ main(int argc, char **argv)
   glfwSetWindowUserPointer(window, &user_ptrs);
 
 
+  /* FOR DEBUG */
+  int testnum = 0;
+
+
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
@@ -183,26 +191,58 @@ main(int argc, char **argv)
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
     /* Text function test */
-
+    //printf("trying to draw\n");
     gfx_agents_draw(agent_gfx);
     ui_draw(ui_gfx);
+    //printf("trying to draw ui\n");
 
     glfwSwapBuffers(window);
 
-    /* Poll for events */
-    glfwPollEvents();
+
+
+    /*
+     *  cmd_run(agent_array); // if count change, toggle count_change
+     *  agent_update(agent_array); // if count change, toggle count_change
+     *  agent_gfx_regen_vbo(agent_gfx, agent_array) // if count change, regen the vbo
+     *  agents_to_verts(agent_array, verts) // if count change, regen completly
+     *  agents_null_count_change(agents_array); // all count change done, reset the flag
+     *  agents_gfx_draw_agents(array);
+     */
+
 
     // Hackily update the locations of the agents
-    agents[0].x = sin(glfwGetTime());
-    agents[0].y = 0.3 * sin( glfwGetTime());
+//      agent_array->agents[0].x = sin(glfwGetTime());
+//      agents[0].y = 0.3 * sin( glfwGetTime());
+//  
+//      agents[1].x = sin(3 + glfwGetTime());
+//      agents[1].y = 0.8 * cos(3 + glfwGetTime());
 
-    agents[1].x = sin(3 + glfwGetTime());
-    agents[1].y = 0.8 * cos(3 + glfwGetTime());
+    // Dummy atm, if new agents are added, vs normal
+       if(testnum % 100 == 0){
+       free(agent_verts);
+       agent_verts = agents_to_vert(agent_array->agents, agent_array->count, agent_verts, VERTS_NEW);
+       agent_vbo_setup(agent_gfx);
+     //  printf("boom!\n");
+       testnum++;
+       }
+       else {
+       agents_to_vert(agent_array->agents, agent_array->count, agent_verts, VERTS_UPDATE);
+     //  printf("pop!\n");
+       testnum++;
 
-    agents_to_vert(agents, agent_count, agent_verts, VERTS_UPDATE);
+       }
+    //  printf("finished verts conv\n");
+      agents_update(agent_array);
+   //   printf("finished update %f\n", RANDF(1));
+    
+   // agents_to_vert(agent_array->agents, agent_count_test, agent_verts, VERTS_UPDATE);
+   //
+    /* Poll for events */
+    glfwPollEvents();
 
   }
 
   glfwTerminate();
   return 0;
 }
+

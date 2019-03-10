@@ -1,5 +1,6 @@
 #ifndef UTILS_H
 #define UTILS_H
+#define RANDF(x) (((float)rand()/(float)(RAND_MAX)) * x)
 
 typedef struct {
   float x;
@@ -7,9 +8,9 @@ typedef struct {
 } Point;
 
 typedef struct RGB_ {
-  int r;
-  int g;
-  int b;
+  float r;
+  float g;
+  float b;
 } RGB;
 
 
