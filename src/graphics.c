@@ -12,7 +12,7 @@
 #include "ui_response.h"
 
 
-Agent_graphics* 
+Agent_graphics*
 agent_gfx_setup(int count, float* verts, const char* v_shader, const char* f_shader){
   Agent_graphics* tmp = malloc(sizeof(Agent_graphics));
   tmp->no_agents = count;
@@ -33,6 +33,21 @@ agent_vbo_setup(Agent_graphics* ag)
   glBufferData(GL_ARRAY_BUFFER, ag->vert_data_len, ag->vert_data, GL_DYNAMIC_DRAW);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
   ag->vbo = vbo;
+}
+
+void
+agent_vbo_update(Agent_graphics* ag, Agent_array* aa)
+{
+  /* If the count has change, regen the VBO */
+  if(aa->count_change){
+    free(ag->vert_data);
+    ag->vert_data = agents_to_vert(aa->agents, aa->count, ag->vert_data, VERTS_NEW);
+    agent_vbo_setup(ag);
+  }
+  /*Otherwise just update pos and size */
+  else {
+    agents_to_vert(aa->agents, aa->count, ag->vert_data, VERTS_UPDATE);
+  }
 }
 
 void
@@ -78,7 +93,7 @@ gfx_agents_draw(Agent_graphics* ag)
 }
 
 
-Ui_graphics* 
+Ui_graphics*
 ui_gfx_setup(void)
 {
   Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
@@ -110,9 +125,9 @@ ui_draw(Ui_graphics* uig)
     0, 3};
 
 
-                          
 
-  glColor3f(0.5, 0.5, 0.5);
+
+  glColor4f(0.7, 0.7, 0.7, 0.5);
   glBegin(GL_QUADS);
 
   for(int i = 0; i < 4; i++, tmp_ptr += 2) {

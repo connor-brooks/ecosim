@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 #include <GL/glew.h>
+#include "agents.h"
 #include "ui_response.h"
 
 typedef struct RGB_ RGB;
@@ -30,6 +31,7 @@ typedef struct _Ui_graphics Ui_graphics;
 Agent_graphics* agent_gfx_setup(int count, float* verts, 
     const char* v_shdaer, const char* f_shader);
 void agent_vbo_setup(Agent_graphics* ag);
+void agent_vbo_update(Agent_graphics* ag, Agent_array* aa);
 void agent_shader_setup(Agent_graphics* ag);
 void gfx_agents_draw(Agent_graphics* ag);
 
