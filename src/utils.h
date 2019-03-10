@@ -1,6 +1,10 @@
 #ifndef UTILS_H
 #define UTILS_H
 #define RANDF(x) (((float)rand()/(float)(RAND_MAX)) * x)
+#define RANDF_MIN(min, max) ((((float) rand() / (float) RAND_MAX) * (max - min)) + min)
+#define WORLD_MIN_COORD (-1.0)
+#define WORLD_MAX_COORD (1.0)
+
 
 typedef struct {
   float x;

@@ -32,7 +32,7 @@ struct _Agent {
 
 struct _Agent_array {
   Agent* agents;
-  int count;
+  size_t count;
   int count_change;
 };
 

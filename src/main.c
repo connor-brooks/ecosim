@@ -14,6 +14,8 @@
 #include "keyboard.h"
 #include "ui.h"
 
+#define DEV_AGENT_COUNT (300)
+
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
  * arguments to them */
@@ -120,7 +122,7 @@ main(int argc, char **argv)
   fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
  // /* new setup agents */
-  agent_count = 360;
+  agent_count = DEV_AGENT_COUNT;
   agent_array = agent_array_setup(agent_count);
 
   /* Create agent graphic vertex arrary */
@@ -176,7 +178,6 @@ main(int argc, char **argv)
     // Update the positional data and VBO
       agents_update(agent_array);
       agent_vbo_update(agent_gfx, agent_array);
-      printf("sizee %d\n", agent_array->count);
     
     /* swap */
     glfwSwapBuffers(window);

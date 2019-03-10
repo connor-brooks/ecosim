@@ -1,16 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <GLFW/glfw3.h>
+#include <time.h>
+#include <math.h>
 #include "utils.h"
 #include "agents.h"
+
 #define AGENT_DIMENTIONS (4)
 #define AGENT_DRAWABLE_FEATURES (2)
+
 #define AGENT_RGB_MAX (1.0)
 #define AGENT_RGB_MIN (1.0)
+#define AGENT_RGB_ALPHA (0.6)
+
+#define AGENT_MAX_VELOCITY (1.0)
+#define AGENT_MIN_VELOCITY (-1.0)
+
+#define AGENT_ENERGY_DEFAULT (1.0)
+#define AGENT_METAB_MAX (0.3)
 
 #define AGENT_METAB_ENERGY_SCALE(x) (0.005 * x)
 #define AGENT_ENERGY_SIZE_SCALE(x) ((18 * x) + 2)
+
 #define AGENT_MAX_SPEED (0.01)
+
+#define AGENTS_ENERGY_DEAD (0.1)
 
 int
 agent_vert_elems(int n)
@@ -33,27 +48,21 @@ agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
     p_offset = i * AGENT_DIMENTIONS;
     c_offset = p_offset + (n * AGENT_DIMENTIONS);
 
-    /* No need for switch anymore, since colors will need to be updated */
-    switch(mode){
-      case VERTS_NEW:
-      case VERTS_UPDATE:
-        vert_ret[c_offset++] = aa[i].rgb.r; // R
-        vert_ret[c_offset++] = aa[i].rgb.g; // G
-        vert_ret[c_offset++] = aa[i].rgb.b; // B
-        vert_ret[c_offset++] = (aa[i].state == AGENT_STATE_PRUNE)?
-          0.0f: //Pruning, hide
-          0.7f; // normal, show
-        //      case VERTS_UPDATE:
-        vert_ret[p_offset++] = aa[i].x; // x
-        vert_ret[p_offset++] = aa[i].y; // y
-        vert_ret[p_offset++] = 0.0f; // z
-        vert_ret[p_offset++] = AGENT_ENERGY_SIZE_SCALE(aa[i].energy);
-        /* No more size
-        vert_ret[p_offset++] = aa[i].size; */
-        break;
+    /* colors */
+    vert_ret[c_offset++] = aa[i].rgb.r; // R
+    vert_ret[c_offset++] = aa[i].rgb.g; // G
+    vert_ret[c_offset++] = aa[i].rgb.b; // B
+    vert_ret[c_offset++] = (aa[i].state == AGENT_STATE_PRUNE)?
+      0.0f: //Pruning, hide
+      AGENT_RGB_ALPHA; // normal, show
 
-    };
+    /* pos & size */
+    vert_ret[p_offset++] = aa[i].x; // x
+    vert_ret[p_offset++] = aa[i].y; // y
+    vert_ret[p_offset++] = 0.0f; // z
+    vert_ret[p_offset++] = AGENT_ENERGY_SIZE_SCALE(aa[i].energy); //size
   }
+
   return vert_ret;
 }
 
@@ -95,24 +104,25 @@ agents_update_mv_amt(Agent* a_ptr)
   return AGENT_MAX_SPEED * a_ptr->metabolism;
 }
 
-void 
+void
 agents_update_mv_wrap(Agent* a_ptr)
 {
   float* tmp_ptr;
+  /* loop through x and y and put the agents at the opposite side
+   * of the screen if they're past the ends */
   for(tmp_ptr = &a_ptr->x; tmp_ptr <= &a_ptr->y; tmp_ptr++){
-    *tmp_ptr = ((*tmp_ptr> 1.0) || (*tmp_ptr < -1.0)) ?
+    *tmp_ptr = ((*tmp_ptr> WORLD_MAX_COORD) || (*tmp_ptr < WORLD_MIN_COORD)) ?
       -(*tmp_ptr) :
       *tmp_ptr;
   }
-
 }
 
 
-void 
+void
 agents_update_energy(Agent* a_ptr)
 {
-    a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism);
-    if(a_ptr->energy < 0.0) a_ptr->state = AGENT_STATE_DEAD;
+  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism);
+  if(a_ptr->energy < AGENTS_ENERGY_DEAD) a_ptr->state = AGENT_STATE_DEAD;
 }
 
 /* Create an agent array */
@@ -125,29 +135,22 @@ agent_array_setup(int count)
   temp->count = count;
   temp->count_change = 0;
   temp->agents = malloc(sizeof(Agent) * count);
+
   for(i = 0; i < count; i++)
   {
-    temp->agents[i].x = RANDF(1.0);
-    temp->agents[i].y = RANDF(1.0);
+    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+    temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
     // color
     temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);
     temp->agents[i].rgb.g = RANDF(AGENT_RGB_MAX);
     temp->agents[i].rgb.b = RANDF(AGENT_RGB_MAX);
     // velocity
-    temp->agents[i].velocity.x = RANDF(1.0);
-    temp->agents[i].velocity.y = RANDF(1.0);
+    temp->agents[i].velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+    temp->agents[i].velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
     // default state
     temp->agents[i].state = AGENT_STATE_LIVING;
-    temp->agents[i].energy = 1.0;
-    temp->agents[i].metabolism = RANDF(1.0);
-
-    /* For testing */
-    //      if( i % 2)
-    //        temp->agents[i].state = AGENT_STATE_DEAD;
-    //
-    //      if( i % 3)
-    //        temp->agents[i].state = AGENT_STATE_PRUNE;
-    //
+    temp->agents[i].energy = AGENT_ENERGY_DEFAULT;
+    temp->agents[i].metabolism = RANDF(AGENT_METAB_MAX);
   }
   return temp;
 }
