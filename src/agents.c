@@ -51,6 +51,9 @@ agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
     p_offset = i * AGENT_DIMENTIONS;
     c_offset = p_offset + (n * AGENT_DIMENTIONS);
 
+    /* this is long, change rgb into an array
+     * change x and y into an array too. */
+
     /* colors */
     vert_ret[c_offset++] = aa[i].rgb.r; // R
     vert_ret[c_offset++] = aa[i].rgb.g; // G
@@ -98,6 +101,7 @@ agents_update_location(Agent* a_ptr)
   /* Calculate move magnitude */
   float mv_amt = agents_update_mv_amt(a_ptr);
 
+  /* also change velocity into an array */
   /* Move agents */
   a_ptr->x += a_ptr->velocity.x * mv_amt;
   a_ptr->y += a_ptr->velocity.y * mv_amt;
@@ -112,6 +116,9 @@ agents_update_mv_amt(Agent* a_ptr)
   return AGENT_MAX_SPEED * a_ptr->metabolism;
 }
 
+/* This function is stupid. 
+ * Put X and y for agents into an arrary so this type
+ * of thing doesn't exist. */
 void
 agents_update_mv_wrap(Agent* a_ptr)
 {
