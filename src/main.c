@@ -13,6 +13,7 @@
 #include "shaders.h"
 #include "keyboard.h"
 #include "ui.h"
+#include "quadtree.h"
 
 #define DEV_AGENT_COUNT (300)
 
@@ -88,6 +89,7 @@ main(int argc, char **argv)
   float* agent_verts;
   Agent_graphics* agent_gfx;
   Agent_array* agent_array;
+  Quadtree* quad;
 
   Ui_graphics* ui_gfx;
   //Keyboard* keyboard;
@@ -139,6 +141,17 @@ main(int argc, char **argv)
   /* Maybe push this into setup soon too? */
   agent_vbo_setup(agent_gfx);
   agent_shader_setup(agent_gfx);
+
+  /* Setup quadtree */
+  float quadRootPos[] = {-1.0, -1.0};
+  quad = quadtree_create(quadRootPos, 2.0);
+
+  for(int i = 0; i < agent_array->count; i++) {
+    Agent* tmp_ptr = &agent_array->agents[i];
+    float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
+    quadtree_insert(quad, tmp_ptr, tmp_pos);
+  }
+
 
   /* Setup UI graphics */
   ui_gfx = ui_gfx_setup();

@@ -4,8 +4,8 @@ LIBS=-lGL -lm -lglut -lglfw -lGLEW
 
 all: ecosim
 
-ecosim: ui.o keyboard.o graphics.o utils.o agents.o main.o
-	$(CC) $(CFLAGS) $(LIBS) ui.o keyboard.o graphics.o utils.o agents.o main.o -o ecosim
+ecosim: quadtree.o ui.o keyboard.o graphics.o utils.o agents.o main.o
+	$(CC) $(CFLAGS) $(LIBS) quadtree.o ui.o keyboard.o graphics.o utils.o agents.o main.o -o ecosim
 
 main.o: main.c
 	$(CC) -c main.c
@@ -24,6 +24,9 @@ ui.o: ui.c
 
 graphics.o: graphics.c
 	$(CC) -c graphics.c
+
+quadtree.o: quadtree.c
+	$(CC) -c quadtree.c
 
 clean:
 		rm *.o
