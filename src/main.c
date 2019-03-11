@@ -90,6 +90,7 @@ main(int argc, char **argv)
   Agent_graphics* agent_gfx;
   Agent_array* agent_array;
   Quadtree* quad;
+  Quadtree_verts* quad_verts;
 
   Ui_graphics* ui_gfx;
   //Keyboard* keyboard;
@@ -146,10 +147,22 @@ main(int argc, char **argv)
   float quadRootPos[] = {-1.0, -1.0};
   quad = quadtree_create(quadRootPos, 2.0);
 
+
   for(int i = 0; i < agent_array->count; i++) {
     Agent* tmp_ptr = &agent_array->agents[i];
     float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
     quadtree_insert(quad, tmp_ptr, tmp_pos);
+  }
+
+  quad_verts = quadtree_verts_create();
+
+  float* test = quadtree_to_verts(quad, quad_verts);
+  test = quadtree_to_verts(quad, quad_verts);
+  test = quadtree_to_verts(quad, quad_verts);
+
+  for(int i =0; i < 2; i++)
+  {
+    printf("at %d is %d \n", i, quad_verts->verts[i]);
   }
 
 

@@ -86,11 +86,11 @@ agents_update(Agent_array* aa)
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
     agents_update_location(a_ptr);
-    /* experiemtation code.. ignore 
+    /* experiemtation code.. ignore  */
   float mv_amt = agents_update_mv_amt(a_ptr);
     a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
     a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-    */
+/*    */
     agents_update_energy(a_ptr);
   }
 }

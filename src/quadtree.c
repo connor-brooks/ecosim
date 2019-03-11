@@ -82,3 +82,65 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
   }
 
 }
+
+
+/* Below is terrible code, rewrite tommorw */
+
+Quadtree_verts* 
+quadtree_verts_create()
+{
+  Quadtree_verts* tmp = malloc(sizeof(Quadtree_verts));
+  tmp->q_count = 0;
+  tmp->arr_size = sizeof(float) * 3;
+  tmp->verts = malloc(tmp->arr_size);
+  tmp->end = 0;
+  return tmp;
+}
+
+float* 
+quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
+{
+  int i;
+  float* tmp;
+  size_t new_size;
+
+  new_size = v->arr_size + (sizeof(float) * 3);
+  if(v->arr_size <= new_size)
+  {
+    printf("realloc at size %d\n", v->arr_size * 2);
+    v->verts = realloc(v->verts, v->arr_size * 2);
+    //realloc new_size * 2
+    //verts = new verts
+    v->arr_size = v->arr_size * 2;
+    //arr_size = new size
+  }
+
+  for(i = 0; i < QUADTREE_DIMS; i++)
+  {
+    v->verts[v->end] = 1;
+   v->end++; 
+  }
+  v->q_count++;
+  
+
+
+  //verts size is 0
+  //if verts size < verts size + dims (4)
+  //
+  //tmp.append(q->pos);
+  //verts_size += 4
+//  if(q->has_child){
+//  for(i = 0; i < QUAD_COUNT; i++){
+//    //tmp.append(quadtree_to_verts(quad[i]);
+//    
+//  }
+//  }
+//
+  return  tmp;
+
+  // add values to array
+  // if we have split
+  // loop through each split
+  // add values to array
+//
+}
