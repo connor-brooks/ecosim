@@ -153,12 +153,12 @@ agent_array_setup(int count)
 
   for(i = 0; i < count; i++)
   {
-    temp->agents[i].x = RANDF_MIN(0.0, WORLD_MAX_COORD);
+    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
     temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
     // color
     temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);
     temp->agents[i].rgb.g = RANDF(AGENT_RGB_MAX);
-    temp->agents[i].rgb.b = RANDF(AGENT_RGB_MAX);
+    temp->agents[i].rgb.b = temp->agents[i].rgb.g; //RANDF(AGENT_RGB_MAX);
     // velocity
     temp->agents[i].velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
     temp->agents[i].velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
@@ -168,4 +168,66 @@ agent_array_setup(int count)
     temp->agents[i].metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
   }
   return temp;
+}
+
+Agent_verts* 
+agent_verts_create()
+{
+  Agent_verts* tmp = malloc(sizeof(Agent_verts));
+  tmp->capacity = sizeof(float) * (4);
+  tmp->size = 0;
+  tmp->verts_pos = malloc(tmp->capacity);
+  tmp->verts_col = malloc(tmp->capacity);
+  tmp->a_count = 0;
+  tmp->end = 0;
+  return tmp;
+  //
+}
+
+void 
+agents_to_verts(Agent_array* aa, Agent_verts* av)
+{
+  int i;
+  size_t new_size = (sizeof(float) * 4 * aa->count); //4 floats
+  av->end = 0;
+  av->a_count= 0;
+
+//  if(aa->count_change) printf("rebuuld aarrary\n");
+
+  /* if verts array too big, grow */
+  if(new_size > av->capacity){
+    av->capacity = new_size;
+    av->verts_pos = realloc(av->verts_pos, av->capacity);
+    av->verts_col = realloc(av->verts_col, av->capacity);
+  }
+
+
+  for(i = 0; i < aa->count ; i++) {
+    Agent* agent = &aa->agents[i];
+    float* pos = av->verts_pos;
+    float* col = av->verts_col;
+    //printf("adding agent %f %f\n", agent->x, agent->y);
+
+    pos[av->end] = agent->x;
+    av->verts_col[av->end] = agent->rgb.r;
+    av->end++;
+
+    pos[av->end] = agent->y;
+    col[av->end] = agent->rgb.g;
+    av->end++;
+
+    pos[av->end] = 0.0f;
+    col[av->end] = agent->rgb.b;
+    av->end++;
+
+    pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy); 
+    col[av->end] = (agent->state == AGENT_STATE_PRUNE)?
+      0.0f : // pruning
+      AGENT_RGB_ALPHA;
+    av->end++;
+    //printf("At %d\n", i);
+    av->a_count++;
+
+  }
+
 }

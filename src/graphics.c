@@ -189,6 +189,23 @@ gfx_quad_draw(Quadtree_verts* qv)
     glDrawArrays(GL_QUADS, 0, qv->q_count * 4);
     glDisableClientState(GL_VERTEX_ARRAY);
     glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+}
 
+void 
+gfx_agents_draw_new(Agent_verts* av, GLuint shader)
+{
+    glColor3f(1.0, 1.0, 1.0);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
+    glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_col);
+    glUseProgram(shader);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glDrawArrays(GL_POINTS, 0, av->a_count);
+    glDrawElements(GL_POINTS, av->a_count, GL_UNSIGNED_SHORT, (void*)0);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glUseProgram(0);
+    glDisableClientState(GL_VERTEX_ARRAY);
 
 }

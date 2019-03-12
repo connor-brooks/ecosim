@@ -15,7 +15,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (1000)
+#define DEV_AGENT_COUNT (200)
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -93,6 +93,7 @@ main(int argc, char **argv)
   Agent_array* agent_array;
   Quadtree* quad;
   Quadtree_verts* quad_verts;
+  Agent_verts* agent_verts_new;
 
   Ui_graphics* ui_gfx;
   //Keyboard* keyboard;
@@ -137,6 +138,8 @@ main(int argc, char **argv)
 
   /* Create agent graphic vertex arrary */
   agent_verts = agents_to_vert(agent_array->agents, agent_array->count, NULL, VERTS_NEW);
+
+  agent_verts_new = agent_verts_create();
 
   /* Setup agent graphics */
   agent_gfx = agent_gfx_setup(agent_array->count, agent_verts, agents_vs, agents_fs);
@@ -194,9 +197,8 @@ main(int argc, char **argv)
 
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
-    /* Text function test */
-    //printf("trying to draw ui\n");
-    //
+
+    /* quad function test */
     float quadRootPos[] = {-1.0, -1.0};
     quad = quadtree_create(quadRootPos, 2.0);
     for(int i = 0; i < agent_array->count; i++) {
@@ -206,8 +208,6 @@ main(int argc, char **argv)
     }
 
 
-    quad_verts = quadtree_verts_create();
-    quadtree_to_verts(quad, quad_verts);
     /*
      *  cmd_run(agent_array); // if count change, toggle count_change
      *  agent_update(agent_array); // if count change, toggle count_change
@@ -218,15 +218,22 @@ main(int argc, char **argv)
      */
 
 
-
+    quad_verts = quadtree_verts_create();
+    quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
-    gfx_agents_draw(agent_gfx);
+    free(quad_verts); /* just free since we won't use again */
+
+    agents_to_verts(agent_array, agent_verts_new);
+    gfx_agents_draw_new(agent_verts_new, agent_gfx->shader);
+
+    // Old VBO drawing function
+//    gfx_agents_draw(agent_gfx);
     ui_draw(ui_gfx);
 
     if(game_run)
     {
       agents_update(agent_array);
-      agent_vbo_update(agent_gfx, agent_array);
+    //  agent_vbo_update(agent_gfx, agent_array);
     }
 
     /* swap */
@@ -234,7 +241,6 @@ main(int argc, char **argv)
     /* Poll for events */
     glfwPollEvents();
 
-    free(quad_verts);
 
   }
 

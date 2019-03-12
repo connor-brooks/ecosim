@@ -36,6 +36,8 @@ void agent_vbo_update(Agent_graphics* ag, Agent_array* aa);
 void agent_shader_setup(Agent_graphics* ag);
 void gfx_agents_draw(Agent_graphics* ag);
 
+void gfx_agents_draw_new(Agent_verts* av, GLuint shader);
+
 void gfx_quad_draw(Quadtree_verts* qv);
 
 Ui_graphics* ui_gfx_setup(void);

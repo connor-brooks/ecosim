@@ -1,10 +1,12 @@
 #ifndef AGENTS_H
 #define AGENTS_H
 #include <stdio.h>
+#include <stddef.h>
 #include "utils.h"
 
 typedef struct _Agent Agent;
 typedef struct _Agent_array Agent_array;
+typedef struct _Agent_verts Agent_verts;
 
 enum agent_states {
   AGENT_STATE_PRUNE  = -1,
@@ -42,6 +44,14 @@ enum agent_to_verts_mode {
   VERTS_UPDATE
 };
 
+struct _Agent_verts {
+  float* verts_pos, *verts_col;
+  size_t capacity;
+  size_t size;
+  int a_count;
+  ptrdiff_t end;
+};
+
 void agents_update(Agent_array* aa);
 
 void agents_update_location(Agent* a_ptr);
@@ -56,6 +66,9 @@ Agent_array* agent_array_setup(int count);
 
 int agent_vert_elems(int n);
 float* agents_to_vert(Agent* aa, int n, float* vert_arr, int mode);
+
+void agents_to_verts(Agent_array* aa, Agent_verts* av);
+Agent_verts* agent_verts_create();
 
 #endif
 

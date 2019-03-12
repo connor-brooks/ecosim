@@ -103,13 +103,6 @@ quadtree_verts_create()
 float*
 quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
 {
-  glColor3f(0.1, 0.1, 0.1);
-//  glBegin(GL_LINE_LOOP);
-//  glVertex3f(q->pos[0], q->pos[1], 0.0);
-//  glVertex3f(q->pos[0]+q->size, q->pos[1], 0.0);
-//  glVertex3f(q->pos[0]+q->size, q->pos[1]+q->size, 0.0);
-//  glVertex3f(q->pos[0], q->pos[1]+q->size, 0.0);
-//  glEnd();
   int i;
   size_t new_size = v->size + (sizeof(float) * QUADTREE_VERT_LEN);
 
