@@ -7,6 +7,7 @@
 
 #include "graphics.h"
 #include "agents.h"
+#include "quadtree.h"
 #include "config.h"
 #include "utils.h"
 #include "ui_response.h"
@@ -90,6 +91,7 @@ gfx_agents_draw(Agent_graphics* ag)
   glDisableVertexAttribArray(0);
   glDisableVertexAttribArray(1);
   glUseProgram(0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 
@@ -177,3 +179,16 @@ draw_text(float x, float y, const unsigned char* txt)
 }
 
 
+void 
+gfx_quad_draw(Quadtree_verts* qv)
+{
+    glColor4f(0.1, 0.1, 0.1, 0.5);
+    glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, qv->verts);
+    glDrawArrays(GL_QUADS, 0, qv->q_count * 4);
+    glDisableClientState(GL_VERTEX_ARRAY);
+    glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
+
+
+}

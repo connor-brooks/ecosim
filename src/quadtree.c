@@ -1,15 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <GL/gl.h>
 
 #include "quadtree.h"
 #include "agents.h"
+#define QUADTREE_VERT_LEN (3 * 4)
 
 
 Quadtree*
 quadtree_create(float pos[], float size)
 {
-  printf("Spanning %f %f to %f %f\n", pos[0], pos[1], pos[0]+size, pos[1]+size);
+  //printf("Spanning %f %f to %f %f\n", pos[0], pos[1], pos[0]+size, pos[1]+size);
 
   int i;
   Quadtree* tmp = malloc(sizeof(Quadtree));
@@ -27,7 +29,7 @@ quadtree_create(float pos[], float size)
   tmp->ptr_count = 0;
   tmp->has_child = 0;
 
-  printf("ok in here %f, %f size %f\n", tmp->pos[0], tmp->pos[1], tmp->size);
+//  printf("ok in here %f, %f size %f\n", tmp->pos[0], tmp->pos[1], tmp->size);
   return tmp;
 }
 
@@ -38,7 +40,7 @@ quadtree_split(Quadtree *q)
   int add_half;
   float child_size = q->size * 0.5f;
   float new_pos[QUAD_COUNT][QUADTREE_DIMS];
-  printf("SPLITTING WITH SIZE %f\n", child_size);
+ // printf("SPLITTING WITH SIZE %f\n", child_size);
 
   /* Loop through each new quad
    * Loop through each dimention
@@ -70,14 +72,14 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
   }
 
   if(q->ptr_count == QUADTREE_MAX_PER_CELL){
-    printf("I AM FULL\n");
+    //printf("I AM FULL\n");
     // if not split, split quad
     if(!q->has_child) quadtree_split(q);
     // then just insert
     for(i = 0; i < QUAD_COUNT; i++)
       quadtree_insert(q->sect[i], ptr, pos);
   } else {
-    printf("inserting 0x%x into %f, %f\n", ptr, pos[0], pos[1]);
+    //printf("inserting 0x%x into %f, %f\n", ptr, pos[0], pos[1]);
     q->ptr_count++;
   }
 
@@ -86,61 +88,62 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
 
 /* Below is terrible code, rewrite tommorw */
 
-Quadtree_verts* 
+Quadtree_verts*
 quadtree_verts_create()
 {
   Quadtree_verts* tmp = malloc(sizeof(Quadtree_verts));
+  tmp->capacity = sizeof(float) * (QUADTREE_VERT_LEN +1);;;
+  tmp->size = 0;
+  tmp->verts = malloc(tmp->capacity);
   tmp->q_count = 0;
-  tmp->arr_size = sizeof(float) * 3;
-  tmp->verts = malloc(tmp->arr_size);
   tmp->end = 0;
   return tmp;
 }
 
-float* 
+float*
 quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
 {
+  glColor3f(0.1, 0.1, 0.1);
+//  glBegin(GL_LINE_LOOP);
+//  glVertex3f(q->pos[0], q->pos[1], 0.0);
+//  glVertex3f(q->pos[0]+q->size, q->pos[1], 0.0);
+//  glVertex3f(q->pos[0]+q->size, q->pos[1]+q->size, 0.0);
+//  glVertex3f(q->pos[0], q->pos[1]+q->size, 0.0);
+//  glEnd();
   int i;
-  float* tmp;
-  size_t new_size;
+  size_t new_size = v->size + (sizeof(float) * QUADTREE_VERT_LEN);
 
-  new_size = v->arr_size + (sizeof(float) * 3);
-  if(v->arr_size <= new_size)
-  {
-    printf("realloc at size %d\n", v->arr_size * 2);
-    v->verts = realloc(v->verts, v->arr_size * 2);
-    //realloc new_size * 2
-    //verts = new verts
-    v->arr_size = v->arr_size * 2;
-    //arr_size = new size
+  /* if verts array too big, grow */
+  if(new_size > v->capacity){
+    v->capacity = v->capacity * 2;
+    v->verts = realloc(v->verts, v->capacity);
   }
 
-  for(i = 0; i < QUADTREE_DIMS; i++)
-  {
-    v->verts[v->end] = 1;
-   v->end++; 
-  }
+  // X & y 
+  v->verts[v->end++] = q->pos[0];
+  v->verts[v->end++] = q->pos[1];
+  v->verts[v->end++] = 0.0;
+
+  v->verts[v->end++] = q->pos[0] + q->size;
+  v->verts[v->end++] = q->pos[1];
+  v->verts[v->end++] = 0.0;
+
+  v->verts[v->end++] = q->pos[0] + q->size;
+  v->verts[v->end++] = q->pos[1] + q->size;
+  v->verts[v->end++] = 0.0;
+
+  v->verts[v->end++] = q->pos[0];
+  v->verts[v->end++] = q->pos[1] + q->size;
+  v->verts[v->end++] = 0.0;
+  // For Z
+
+  v->size = new_size;
   v->q_count++;
-  
+//  printf("q count = %d\n", v->q_count);
 
-
-  //verts size is 0
-  //if verts size < verts size + dims (4)
-  //
-  //tmp.append(q->pos);
-  //verts_size += 4
-//  if(q->has_child){
-//  for(i = 0; i < QUAD_COUNT; i++){
-//    //tmp.append(quadtree_to_verts(quad[i]);
-//    
-//  }
-//  }
-//
-  return  tmp;
-
-  // add values to array
-  // if we have split
-  // loop through each split
-  // add values to array
-//
+  if(q->has_child){
+    for(i = 0; i < QUAD_COUNT; i++){
+      quadtree_to_verts(q->sect[i], v);
+    }
+  }
 }

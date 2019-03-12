@@ -19,10 +19,11 @@ struct Quadtree_ {
 };
 
 struct Quadtree_verts_ {
-  float* verts;
-  int q_count;
-  size_t arr_size;
-  ptrdiff_t end;
+  float* verts; //vert data
+  size_t capacity; //byte length
+  size_t size; //byte length
+  int q_count; // count of quads
+  ptrdiff_t end; // end pointer
 };
 
 Quadtree* quadtree_create(float pos[], float size);

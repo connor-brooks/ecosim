@@ -2,6 +2,7 @@
 #define GRAPHICS_H
 #include <GL/glew.h>
 #include "agents.h"
+#include "quadtree.h"
 #include "ui_response.h"
 
 typedef struct RGB_ RGB;
@@ -34,6 +35,8 @@ void agent_vbo_setup(Agent_graphics* ag);
 void agent_vbo_update(Agent_graphics* ag, Agent_array* aa);
 void agent_shader_setup(Agent_graphics* ag);
 void gfx_agents_draw(Agent_graphics* ag);
+
+void gfx_quad_draw(Quadtree_verts* qv);
 
 Ui_graphics* ui_gfx_setup(void);
 void ui_draw(Ui_graphics* uig);

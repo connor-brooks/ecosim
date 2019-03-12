@@ -153,7 +153,7 @@ agent_array_setup(int count)
 
   for(i = 0; i < count; i++)
   {
-    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+    temp->agents[i].x = RANDF_MIN(0.0, WORLD_MAX_COORD);
     temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
     // color
     temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);

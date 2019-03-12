@@ -15,7 +15,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (300)
+#define DEV_AGENT_COUNT (1000)
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -47,6 +47,8 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     uig = user_ptrs->uig;
     ui = user_ptrs->ui;
 
+    /* change to
+     * ui_update = ui_get_key_resp(); */
     /* Encode the key event to k_event struct, get response from UI */
     k_event = keyboard_enc_event(key, mods);
     ui_resp = ui_get_resp(ui, k_event);
@@ -157,13 +159,15 @@ main(int argc, char **argv)
   quad_verts = quadtree_verts_create();
 
   float* test = quadtree_to_verts(quad, quad_verts);
-  test = quadtree_to_verts(quad, quad_verts);
-  test = quadtree_to_verts(quad, quad_verts);
 
-  for(int i =0; i < 2; i++)
+
+  int floatcount = quad_verts->size / sizeof(float);
+  for(int i =0; i < floatcount; i++)
   {
-    printf("at %d is %d \n", i, quad_verts->verts[i]);
+    printf("got %f\n", i, quad_verts->verts[i]);
   }
+  printf("total = %d\n", floatcount / 3);
+
 
 
   /* Setup UI graphics */
@@ -191,11 +195,19 @@ main(int argc, char **argv)
     /* Render */
     glClear(GL_COLOR_BUFFER_BIT);
     /* Text function test */
-    //printf("trying to draw\n");
-    gfx_agents_draw(agent_gfx);
-    ui_draw(ui_gfx);
     //printf("trying to draw ui\n");
+    //
+    float quadRootPos[] = {-1.0, -1.0};
+    quad = quadtree_create(quadRootPos, 2.0);
+    for(int i = 0; i < agent_array->count; i++) {
+      Agent* tmp_ptr = &agent_array->agents[i];
+      float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
+      quadtree_insert(quad, tmp_ptr, tmp_pos);
+    }
 
+
+    quad_verts = quadtree_verts_create();
+    quadtree_to_verts(quad, quad_verts);
     /*
      *  cmd_run(agent_array); // if count change, toggle count_change
      *  agent_update(agent_array); // if count change, toggle count_change
@@ -206,7 +218,11 @@ main(int argc, char **argv)
      */
 
 
-    // Update the positional data and VBO
+
+    gfx_quad_draw(quad_verts);
+    gfx_agents_draw(agent_gfx);
+    ui_draw(ui_gfx);
+
     if(game_run)
     {
       agents_update(agent_array);
@@ -217,6 +233,8 @@ main(int argc, char **argv)
     glfwSwapBuffers(window);
     /* Poll for events */
     glfwPollEvents();
+
+    free(quad_verts);
 
   }
 
