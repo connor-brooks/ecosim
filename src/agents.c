@@ -8,6 +8,42 @@
 #include "agents.h"
 
 
+/* Create an agent array */
+Agent_array*
+agent_array_setup(int count)
+{
+  Agent_array* temp = malloc(sizeof(Agent_array));
+  int i;
+
+  temp->count = count;
+  temp->count_change = 0;
+  temp->agents = malloc(sizeof(Agent) * count);
+
+  for(i = 0; i < count; i++)
+  {
+    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+    temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+    // color
+    temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);
+    temp->agents[i].rgb.g = RANDF(AGENT_RGB_MAX);
+    temp->agents[i].rgb.b = temp->agents[i].rgb.g; //RANDF(AGENT_RGB_MAX);
+    // velocity
+    temp->agents[i].velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+    temp->agents[i].velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+    // default state
+    temp->agents[i].state = AGENT_STATE_LIVING;
+    temp->agents[i].energy = AGENT_ENERGY_DEFAULT;
+    temp->agents[i].metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+  }
+  return temp;
+}
+void 
+agent_array_free(Agent_array* aa)
+{
+  free(aa->agents);
+  free(aa);
+}
+
 void
 agents_update(Agent_array* aa)
 {
@@ -74,36 +110,6 @@ agents_update_energy(Agent* a_ptr)
 {
   a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism) * AGENTS_TIME_FACTOR;
   if(a_ptr->energy < AGENTS_ENERGY_DEAD) a_ptr->state = AGENT_STATE_DEAD;
-}
-
-/* Create an agent array */
-Agent_array*
-agent_array_setup(int count)
-{
-  Agent_array* temp = malloc(sizeof(Agent_array));
-  int i;
-
-  temp->count = count;
-  temp->count_change = 0;
-  temp->agents = malloc(sizeof(Agent) * count);
-
-  for(i = 0; i < count; i++)
-  {
-    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
-    temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
-    // color
-    temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);
-    temp->agents[i].rgb.g = RANDF(AGENT_RGB_MAX);
-    temp->agents[i].rgb.b = temp->agents[i].rgb.g; //RANDF(AGENT_RGB_MAX);
-    // velocity
-    temp->agents[i].velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
-    temp->agents[i].velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
-    // default state
-    temp->agents[i].state = AGENT_STATE_LIVING;
-    temp->agents[i].energy = AGENT_ENERGY_DEFAULT;
-    temp->agents[i].metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
-  }
-  return temp;
 }
 
 Agent_verts*

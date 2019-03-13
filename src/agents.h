@@ -70,21 +70,19 @@ struct _Agent_verts {
   ptrdiff_t end;
 };
 
+Agent_array* agent_array_setup(int count);
+void agent_array_free(Agent_array* aa);
 void agents_update(Agent_array* aa);
 
 void agents_update_location(Agent* a_ptr);
-
 void agents_update_energy(Agent* a_ptr);
-
 float agents_update_mv_amt(Agent* a_ptr);
-
 void agents_update_mv_wrap(Agent* a_ptr);
 
-Agent_array* agent_array_setup(int count);
 
-void agents_to_verts(Agent_array* aa, Agent_verts* av);
 Agent_verts* agent_verts_create();
 void agent_verts_free(Agent_verts* av);
+void agents_to_verts(Agent_array* aa, Agent_verts* av);
 
 #endif
 

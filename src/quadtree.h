@@ -40,6 +40,7 @@ void quadtree_insert(Quadtree* q, void* ptr, float pos[]);
 void quadtree_split(Quadtree *q);
 
 Quadtree_verts* quadtree_verts_create();
+void quadtree_query_free(Quadtree_query* qq);
 void quadtree_verts_free(Quadtree_verts* qv);
 void quadtree_to_verts(Quadtree* q, Quadtree_verts* v);
 

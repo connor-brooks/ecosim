@@ -196,6 +196,14 @@ quadtree_query_setup()
   return tmp;
 }
 
+
+void 
+quadtree_query_free(Quadtree_query* qq)
+{
+  free(qq->ptrs);
+  free(qq);
+}
+
 void
 quadtree_query(Quadtree *q, Quadtree_query* query, float pos[], float size)
 {

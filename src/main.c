@@ -126,9 +126,6 @@ main(int argc, char **argv)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   srand((unsigned int)time(NULL));
 
-  /*  printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
-      fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION)); */
-
   /* Setup agent arrary
    * setup agent verts
    * setup agent shader */
@@ -136,12 +133,10 @@ main(int argc, char **argv)
   agent_verts_new = agent_verts_create();
   GLuint agent_shader = gfx_agent_shader();
 
-  /* Setup quadtree
-   * setup quadtree verts*/
+  /* Quadtree head pos info */
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
-//  quad = quadtree_create(quad_head_pos, quad_head_size);
- // quad_verts = quadtree_verts_create();
+
 
 
   /* Setup UI graphics */
@@ -190,6 +185,7 @@ main(int argc, char **argv)
      * This function should only rebuild the verts array IF the agent count has changed*/
     agents_to_verts(agent_array, agent_verts_new);
     gfx_agents_draw_new(agent_verts_new, agent_shader);
+    quadtree_verts_free(quad_verts);
 
     /* Draw UI */
     ui_draw(ui_gfx);
@@ -197,13 +193,14 @@ main(int argc, char **argv)
     if(game_run)
     {
       agents_update(agent_array);
-      /* test code for quert */
+
+      /* test code for query */
       Quadtree_query* query = quadtree_query_setup();
       quadtree_query(quad, query, quad_head_pos, quad_head_size);
       printf("q got %d agent\n", query->ptr_count);
+      quadtree_query_free(query);
     }
     quadtree_free(quad);
-    quadtree_verts_free(quad_verts);
 
     /* swap */
     glfwSwapBuffers(window);
@@ -213,6 +210,8 @@ main(int argc, char **argv)
 
   }
 
+  /* Agent verts can be persistant, so free at end, not each frame*/
+  agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
   glfwTerminate();
   return 0;
