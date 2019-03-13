@@ -140,8 +140,8 @@ main(int argc, char **argv)
    * setup quadtree verts*/
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
-  quad = quadtree_create(quad_head_pos, quad_head_size);
-  quad_verts = quadtree_verts_create();
+//  quad = quadtree_create(quad_head_pos, quad_head_size);
+ // quad_verts = quadtree_verts_create();
 
 
   /* Setup UI graphics */
@@ -172,7 +172,6 @@ main(int argc, char **argv)
 
     /* Recreate quadtree and insert agents */
 
-    quadtree_free(quad);
     quad = quadtree_create(quad_head_pos, quad_head_size);
     for(int i = 0; i < agent_array->count; i++) {
       Agent* tmp_ptr = &agent_array->agents[i];
@@ -182,10 +181,11 @@ main(int argc, char **argv)
 
     /* Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
-    free(quad_verts);
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
+    quadtree_verts_free(quad_verts);
+
 
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed*/
