@@ -84,6 +84,7 @@ Agent_array* agent_array_setup(int count);
 
 void agents_to_verts(Agent_array* aa, Agent_verts* av);
 Agent_verts* agent_verts_create();
+void agent_verts_free(Agent_verts* av);
 
 #endif
 

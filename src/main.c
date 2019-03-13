@@ -184,7 +184,6 @@ main(int argc, char **argv)
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
-    quadtree_verts_free(quad_verts);
 
 
     /* Convert agents to verts and draw them
@@ -203,6 +202,8 @@ main(int argc, char **argv)
       quadtree_query(quad, query, quad_head_pos, quad_head_size);
       printf("q got %d agent\n", query->ptr_count);
     }
+    quadtree_free(quad);
+    quadtree_verts_free(quad_verts);
 
     /* swap */
     glfwSwapBuffers(window);
@@ -212,6 +213,7 @@ main(int argc, char **argv)
 
   }
 
+  agent_verts_free(agent_verts_new);
   glfwTerminate();
   return 0;
 }

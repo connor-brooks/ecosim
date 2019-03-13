@@ -23,10 +23,10 @@ agents_update(Agent_array* aa)
 
     agents_update_location(a_ptr);
     /* experiemtation code.. ignore  */
-  float mv_amt = agents_update_mv_amt(a_ptr);
+    float mv_amt = agents_update_mv_amt(a_ptr);
     a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
     a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-/*    */
+    /*    */
     agents_update_energy(a_ptr);
   }
 }
@@ -52,7 +52,7 @@ agents_update_mv_amt(Agent* a_ptr)
   return AGENT_MAX_SPEED * a_ptr->metabolism;
 }
 
-/* This function is stupid. 
+/* This function is stupid.
  * Put X and y for agents into an arrary so this type
  * of thing doesn't exist. */
 void
@@ -106,7 +106,7 @@ agent_array_setup(int count)
   return temp;
 }
 
-Agent_verts* 
+Agent_verts*
 agent_verts_create()
 {
   Agent_verts* tmp = malloc(sizeof(Agent_verts));
@@ -119,8 +119,15 @@ agent_verts_create()
   return tmp;
   //
 }
-
 void 
+agent_verts_free(Agent_verts* av)
+{
+  free(av->verts_pos);
+  free(av->verts_col);
+  free(av);
+}
+
+void
 agents_to_verts(Agent_array* aa, Agent_verts* av)
 {
   int i;
@@ -128,7 +135,7 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
   av->end = 0;
   av->a_count= 0;
 
-//  if(aa->count_change) printf("rebuuld aarrary\n");
+  //  if(aa->count_change) printf("rebuuld aarrary\n");
 
   /* if verts array too big, grow */
   if(new_size > av->capacity){
@@ -156,7 +163,7 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
     col[av->end] = agent->rgb.b;
     av->end++;
 
-    pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy); 
+    pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy);
     col[av->end] = (agent->state == AGENT_STATE_PRUNE)?
       0.0f : // pruning
       AGENT_RGB_ALPHA;
