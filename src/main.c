@@ -179,13 +179,14 @@ main(int argc, char **argv)
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
+    quadtree_verts_free(quad_verts);
 
 
     /* Convert agents to verts and draw them
-     * This function should only rebuild the verts array IF the agent count has changed*/
+     * This function should only rebuild the verts array IF the agent count has changed,
+     * so we free at end, as the struct should presist all through running of program*/
     agents_to_verts(agent_array, agent_verts_new);
     gfx_agents_draw_new(agent_verts_new, agent_shader);
-    quadtree_verts_free(quad_verts);
 
     /* Draw UI */
     ui_draw(ui_gfx);
