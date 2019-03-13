@@ -62,11 +62,6 @@ struct _Agent_array {
 };
 
 
-enum agent_to_verts_mode {
-  VERTS_NEW,
-  VERTS_UPDATE
-};
-
 struct _Agent_verts {
   float* verts_pos, *verts_col;
   size_t capacity;

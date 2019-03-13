@@ -35,6 +35,19 @@ quadtree_create(float pos[], float size)
 }
 
 void
+quadtree_free(Quadtree* q)
+{
+  int i;
+  if(q->has_child){
+    for(i = 0; i < QUAD_COUNT; i++){
+      quadtree_free(q->sect[i]);
+    }
+  }
+  free(q);
+
+}
+
+void
 quadtree_split(Quadtree *q)
 {
   int i, j;
@@ -108,6 +121,13 @@ quadtree_verts_create()
   tmp->q_count = 0;
   tmp->end = 0;
   return tmp;
+}
+
+void
+quadtree_verts_free(Quadtree_verts* qv)
+{
+  free(qv->verts);
+  free(qv);
 }
 
 void

@@ -41,6 +41,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
+              glfwSetWindowShouldClose(window, GLFW_TRUE);
     game_run = !game_run;
     /* For pointer passing between callback and main */
     user_ptrs = glfwGetWindowUserPointer(window);
@@ -170,8 +171,9 @@ main(int argc, char **argv)
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Recreate quadtree and insert agents */
-    float quadRootPos[] = {-1.0, -1.0};
-    quad = quadtree_create(quadRootPos, 2.0);
+
+    quadtree_free(quad);
+    quad = quadtree_create(quad_head_pos, quad_head_size);
     for(int i = 0; i < agent_array->count; i++) {
       Agent* tmp_ptr = &agent_array->agents[i];
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
@@ -180,10 +182,10 @@ main(int argc, char **argv)
 
     /* Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
+    free(quad_verts);
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
-    free(quad_verts); /* just free since we won't use again */
 
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed*/

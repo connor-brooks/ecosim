@@ -35,17 +35,17 @@ struct Quadtree_query_ {
 };
 
 Quadtree* quadtree_create(float pos[], float size);
-
+void quadtree_free(Quadtree* q);
 void quadtree_insert(Quadtree* q, void* ptr, float pos[]);
-
 void quadtree_split(Quadtree *q);
 
-void quadtree_to_verts(Quadtree* q, Quadtree_verts* v);
 Quadtree_verts* quadtree_verts_create();
-int quadtree_intersect(Quadtree *q, float pos[], float size);
+void quadtree_verts_free(Quadtree_verts* qv);
+void quadtree_to_verts(Quadtree* q, Quadtree_verts* v);
 
-void quadtree_query(Quadtree *q, Quadtree_query* query, float pos[], float size);
 Quadtree_query* quadtree_query_setup();
+void quadtree_query(Quadtree *q, Quadtree_query* query, float pos[], float size);
+int quadtree_intersect(Quadtree *q, float pos[], float size);
 void quadtree_query_add_ptr(Quadtree *quad, Quadtree_query* query);
 
 #endif
