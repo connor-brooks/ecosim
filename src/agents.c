@@ -22,7 +22,7 @@
 #define AGENT_METAB_MIN (0.0)
 
 #define AGENT_METAB_ENERGY_SCALE(x) (0.005 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((8 * x) + 2)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((4 * x) + 2)
 
 #define AGENT_MAX_SPEED (0.01)
 

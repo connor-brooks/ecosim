@@ -15,7 +15,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (200)
+#define DEV_AGENT_COUNT (10)
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -153,12 +153,12 @@ main(int argc, char **argv)
   quad = quadtree_create(quadRootPos, 2.0);
 
 
-  for(int i = 0; i < agent_array->count; i++) {
-    Agent* tmp_ptr = &agent_array->agents[i];
-    float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
-    quadtree_insert(quad, tmp_ptr, tmp_pos);
-  }
-
+//  for(int i = 0; i < agent_array->count; i++) {
+//    Agent* tmp_ptr = &agent_array->agents[i];
+//    float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
+//    quadtree_insert(quad, tmp_ptr, tmp_pos);
+//  }
+//
   quad_verts = quadtree_verts_create();
 
   float* test = quadtree_to_verts(quad, quad_verts);
@@ -200,13 +200,21 @@ main(int argc, char **argv)
 
     /* quad function test */
     float quadRootPos[] = {-1.0, -1.0};
+
     quad = quadtree_create(quadRootPos, 2.0);
+
     for(int i = 0; i < agent_array->count; i++) {
       Agent* tmp_ptr = &agent_array->agents[i];
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
       quadtree_insert(quad, tmp_ptr, tmp_pos);
     }
-
+    printf("===\n");
+//
+    quadRootPos[0] = -1.0;
+    quadRootPos[1] = -1.0;
+    Quadtree_query* query = quadtree_query_setup();
+    quadtree_query(quad, query, quadRootPos, 0.5);
+    printf("from query %d\n", query->ptr_count);
 
     /*
      *  cmd_run(agent_array); // if count change, toggle count_change
