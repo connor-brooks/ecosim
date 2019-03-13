@@ -87,9 +87,6 @@ void agents_update_mv_wrap(Agent* a_ptr);
 
 Agent_array* agent_array_setup(int count);
 
-//int agent_vert_elems(int n);
-//float* agents_to_vert(Agent* aa, int n, float* vert_arr, int mode);
-
 void agents_to_verts(Agent_array* aa, Agent_verts* av);
 Agent_verts* agent_verts_create();
 

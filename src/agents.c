@@ -8,48 +8,6 @@
 #include "agents.h"
 
 
-int
-agent_vert_elems(int n)
-{
-  return AGENT_DRAWABLE_FEATURES *
-    AGENT_DIMENTIONS * n;
-}
-
-//float*
-//agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
-//{
-//  int i;
-//  ptrdiff_t p_offset, c_offset;
-//  size_t verts_len = agent_vert_elems(n) * sizeof(float);
-//  float* vert_ret;
-//
-//  vert_ret  = (mode) ? vert_arr : malloc(verts_len);
-//
-//  for(i = 0; i < n; i++) {
-//    p_offset = i * AGENT_DIMENTIONS;
-//    c_offset = p_offset + (n * AGENT_DIMENTIONS);
-//
-//    /* this is long, change rgb into an array
-//     * change x and y into an array too. */
-//
-//    /* colors */
-//    vert_ret[c_offset++] = aa[i].rgb.r; // R
-//    vert_ret[c_offset++] = aa[i].rgb.g; // G
-//    vert_ret[c_offset++] = aa[i].rgb.b; // B
-//    vert_ret[c_offset++] = (aa[i].state == AGENT_STATE_PRUNE)?
-//      0.0f: //Pruning, hide
-//      AGENT_RGB_ALPHA; // normal, show
-//
-//    /* pos & size */
-//    vert_ret[p_offset++] = aa[i].x; // x
-//    vert_ret[p_offset++] = aa[i].y; // y
-//    vert_ret[p_offset++] = 0.0f; // z
-//    vert_ret[p_offset++] = AGENT_ENERGY_SIZE_SCALE(aa[i].energy); //size
-//  }
-//
-//  return vert_ret;
-//}
-//
 void
 agents_update(Agent_array* aa)
 {
