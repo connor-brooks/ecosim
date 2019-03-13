@@ -10,12 +10,15 @@
 #include "agents.h"
 #include "utils.h"
 #include "graphics.h"
-#include "shaders.h"
 #include "keyboard.h"
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (10)
+#define DEV_AGENT_COUNT (360)
+
+
+/* TEMPORARY GLOBAL */
+int game_run = 1;
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -24,9 +27,6 @@ struct User_ptrs{
   Ui* ui;
   Ui_graphics* uig;
 };
-
-/* TEMPORARY GLOBAL */
-int game_run = 1;
 
 /* Keyboard callback */
 void
@@ -86,29 +86,25 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 int
 main(int argc, char **argv)
 {
-  srand((unsigned int)time(NULL));
-  int agent_count;
-  float* agent_verts;
-  Agent_graphics* agent_gfx;
+  GLFWwindow* window;
+
   Agent_array* agent_array;
-  Quadtree* quad;
-  Quadtree_verts* quad_verts;
   Agent_verts* agent_verts_new;
 
-  Ui_graphics* ui_gfx;
-  //Keyboard* keyboard;
-  Ui* ui;
+  Quadtree* quad;
+  Quadtree_verts* quad_verts;
 
-  GLFWwindow* window;
+  Ui* ui;
+  Ui_graphics* ui_gfx;
+
 
   // For passing structs between callbacks in glfw
   struct User_ptrs user_ptrs;
 
   /* Initalize glfw and glut*/
+  glutInit(&argc, argv);
   if (!glfwInit())
     return -1; //exit
-  glutInit(&argc, argv);
-
 
   /* Create window */
   window = glfwCreateWindow(300, 300, "ecosim", NULL, NULL);
@@ -127,50 +123,24 @@ main(int argc, char **argv)
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  srand((unsigned int)time(NULL));
 
+  /*  printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+      fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION)); */
 
-  printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
-  fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
-
-  // /* new setup agents */
-  agent_count = DEV_AGENT_COUNT;
-  agent_array = agent_array_setup(agent_count);
-
-  /* Create agent graphic vertex arrary */
-  agent_verts = agents_to_vert(agent_array->agents, agent_array->count, NULL, VERTS_NEW);
-
+  /* Setup agent arrary
+   * setup agent verts
+   * setup agent shader */
+  agent_array = agent_array_setup(DEV_AGENT_COUNT);
   agent_verts_new = agent_verts_create();
+  GLuint agent_shader = gfx_agent_shader();
 
-  /* Setup agent graphics */
-  agent_gfx = agent_gfx_setup(agent_array->count, agent_verts, agents_vs, agents_fs);
-
-  /* Maybe push this into setup soon too? */
-  agent_vbo_setup(agent_gfx);
-  agent_shader_setup(agent_gfx);
-
-  /* Setup quadtree */
-  float quadRootPos[] = {-1.0, -1.0};
-  quad = quadtree_create(quadRootPos, 2.0);
-
-
-//  for(int i = 0; i < agent_array->count; i++) {
-//    Agent* tmp_ptr = &agent_array->agents[i];
-//    float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
-//    quadtree_insert(quad, tmp_ptr, tmp_pos);
-//  }
-//
+  /* Setup quadtree
+   * setup quadtree verts*/
+  float quad_head_pos[] = {-1.0f, -1.0f};
+  float quad_head_size = 2.0f;
+  quad = quadtree_create(quad_head_pos, quad_head_size);
   quad_verts = quadtree_verts_create();
-
-  float* test = quadtree_to_verts(quad, quad_verts);
-
-
-  int floatcount = quad_verts->size / sizeof(float);
-  for(int i =0; i < floatcount; i++)
-  {
-    printf("got %f\n", i, quad_verts->verts[i]);
-  }
-  printf("total = %d\n", floatcount / 3);
-
 
 
   /* Setup UI graphics */
@@ -187,6 +157,7 @@ main(int argc, char **argv)
   glfwSetWindowUserPointer(window, &user_ptrs);
 
 
+
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
@@ -195,53 +166,40 @@ main(int argc, char **argv)
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
 
-    /* Render */
+    /* Clear*/
     glClear(GL_COLOR_BUFFER_BIT);
 
-    /* quad function test */
+    /* Recreate quadtree and insert agents */
     float quadRootPos[] = {-1.0, -1.0};
-
     quad = quadtree_create(quadRootPos, 2.0);
-
     for(int i = 0; i < agent_array->count; i++) {
       Agent* tmp_ptr = &agent_array->agents[i];
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
       quadtree_insert(quad, tmp_ptr, tmp_pos);
     }
-    printf("===\n");
-//
-    quadRootPos[0] = -1.0;
-    quadRootPos[1] = -1.0;
-    Quadtree_query* query = quadtree_query_setup();
-    quadtree_query(quad, query, quadRootPos, 0.5);
-    printf("from query %d\n", query->ptr_count);
 
-    /*
-     *  cmd_run(agent_array); // if count change, toggle count_change
-     *  agent_update(agent_array); // if count change, toggle count_change
-     *  agent_gfx_regen_vbo(agent_gfx, agent_array) // if count change, regen the vbo
-     *  agents_to_verts(agent_array, verts) // if count change, regen completly
-     *  agents_null_count_change(agents_array); // all count change done, reset the flag
-     *  agents_gfx_draw_agents(array);
-     */
-
-
+    /* Every frame rebuild the quadtree verts, draw them free them
+     * will sort out later */
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
     free(quad_verts); /* just free since we won't use again */
 
+    /* Convert agents to verts and draw them
+     * This function should only rebuild the verts array IF the agent count has changed*/
     agents_to_verts(agent_array, agent_verts_new);
-    gfx_agents_draw_new(agent_verts_new, agent_gfx->shader);
+    gfx_agents_draw_new(agent_verts_new, agent_shader);
 
-    // Old VBO drawing function
-//    gfx_agents_draw(agent_gfx);
+    /* Draw UI */
     ui_draw(ui_gfx);
 
     if(game_run)
     {
       agents_update(agent_array);
-    //  agent_vbo_update(agent_gfx, agent_array);
+      /* test code for quert */
+      Quadtree_query* query = quadtree_query_setup();
+      quadtree_query(quad, query, quad_head_pos, quad_head_size);
+      printf("q got %d agent\n", query->ptr_count);
     }
 
     /* swap */

@@ -110,7 +110,7 @@ quadtree_verts_create()
   return tmp;
 }
 
-float*
+void
 quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
 {
   int i;

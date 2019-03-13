@@ -7,28 +7,6 @@
 #include "utils.h"
 #include "agents.h"
 
-#define AGENT_DIMENTIONS (4)
-#define AGENT_DRAWABLE_FEATURES (2)
-
-#define AGENT_RGB_MAX (1.0)
-#define AGENT_RGB_MIN (1.0)
-#define AGENT_RGB_ALPHA (0.6)
-
-#define AGENT_MAX_VELOCITY (1.0)
-#define AGENT_MIN_VELOCITY (-1.0)
-
-#define AGENT_ENERGY_DEFAULT (1.0)
-#define AGENT_METAB_MAX (0.6)
-#define AGENT_METAB_MIN (0.0)
-
-#define AGENT_METAB_ENERGY_SCALE(x) (0.005 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((4 * x) + 2)
-
-#define AGENT_MAX_SPEED (0.01)
-
-#define AGENTS_ENERGY_DEAD (0.1)
-
-#define AGENTS_TIME_FACTOR (0.5)
 
 int
 agent_vert_elems(int n)
@@ -37,41 +15,41 @@ agent_vert_elems(int n)
     AGENT_DIMENTIONS * n;
 }
 
-float*
-agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
-{
-  int i;
-  ptrdiff_t p_offset, c_offset;
-  size_t verts_len = agent_vert_elems(n) * sizeof(float);
-  float* vert_ret;
-
-  vert_ret  = (mode) ? vert_arr : malloc(verts_len);
-
-  for(i = 0; i < n; i++) {
-    p_offset = i * AGENT_DIMENTIONS;
-    c_offset = p_offset + (n * AGENT_DIMENTIONS);
-
-    /* this is long, change rgb into an array
-     * change x and y into an array too. */
-
-    /* colors */
-    vert_ret[c_offset++] = aa[i].rgb.r; // R
-    vert_ret[c_offset++] = aa[i].rgb.g; // G
-    vert_ret[c_offset++] = aa[i].rgb.b; // B
-    vert_ret[c_offset++] = (aa[i].state == AGENT_STATE_PRUNE)?
-      0.0f: //Pruning, hide
-      AGENT_RGB_ALPHA; // normal, show
-
-    /* pos & size */
-    vert_ret[p_offset++] = aa[i].x; // x
-    vert_ret[p_offset++] = aa[i].y; // y
-    vert_ret[p_offset++] = 0.0f; // z
-    vert_ret[p_offset++] = AGENT_ENERGY_SIZE_SCALE(aa[i].energy); //size
-  }
-
-  return vert_ret;
-}
-
+//float*
+//agents_to_vert(Agent* aa, int n, float* vert_arr, int mode)
+//{
+//  int i;
+//  ptrdiff_t p_offset, c_offset;
+//  size_t verts_len = agent_vert_elems(n) * sizeof(float);
+//  float* vert_ret;
+//
+//  vert_ret  = (mode) ? vert_arr : malloc(verts_len);
+//
+//  for(i = 0; i < n; i++) {
+//    p_offset = i * AGENT_DIMENTIONS;
+//    c_offset = p_offset + (n * AGENT_DIMENTIONS);
+//
+//    /* this is long, change rgb into an array
+//     * change x and y into an array too. */
+//
+//    /* colors */
+//    vert_ret[c_offset++] = aa[i].rgb.r; // R
+//    vert_ret[c_offset++] = aa[i].rgb.g; // G
+//    vert_ret[c_offset++] = aa[i].rgb.b; // B
+//    vert_ret[c_offset++] = (aa[i].state == AGENT_STATE_PRUNE)?
+//      0.0f: //Pruning, hide
+//      AGENT_RGB_ALPHA; // normal, show
+//
+//    /* pos & size */
+//    vert_ret[p_offset++] = aa[i].x; // x
+//    vert_ret[p_offset++] = aa[i].y; // y
+//    vert_ret[p_offset++] = 0.0f; // z
+//    vert_ret[p_offset++] = AGENT_ENERGY_SIZE_SCALE(aa[i].energy); //size
+//  }
+//
+//  return vert_ret;
+//}
+//
 void
 agents_update(Agent_array* aa)
 {

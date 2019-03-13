@@ -40,7 +40,7 @@ void quadtree_insert(Quadtree* q, void* ptr, float pos[]);
 
 void quadtree_split(Quadtree *q);
 
-float* quadtree_to_verts(Quadtree* q, Quadtree_verts* v);
+void quadtree_to_verts(Quadtree* q, Quadtree_verts* v);
 Quadtree_verts* quadtree_verts_create();
 int quadtree_intersect(Quadtree *q, float pos[], float size);
 
