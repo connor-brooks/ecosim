@@ -24,6 +24,7 @@ void gfx_agents_draw_new(Agent_verts* av, GLuint shader);
 void gfx_quad_draw(Quadtree_verts* qv);
 
 Ui_graphics* ui_gfx_setup(void);
+void ui_gfx_free(Ui_graphics* uig);
 void ui_draw(Ui_graphics* uig);
 void ui_gfx_update(Ui_resp* resp, Ui_graphics* uig);
 

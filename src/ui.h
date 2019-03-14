@@ -25,6 +25,7 @@ struct _Ui {
 typedef struct _Ui Ui;
 
 Ui* ui_setup(void);
+void ui_free(Ui* ui);
 
 Ui_resp* ui_get_resp(Ui* ui, Keyboard_event* key_ev);
 

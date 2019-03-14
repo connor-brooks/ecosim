@@ -214,6 +214,8 @@ main(int argc, char **argv)
   /* Agent verts can be persistant, so free at end, not each frame*/
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
+  ui_gfx_free(ui_gfx);
+  ui_free(ui);
   glfwTerminate();
   return 0;
 }

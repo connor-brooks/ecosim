@@ -19,6 +19,12 @@ ui_setup(void)
 
   return tmp;
 }
+void
+ui_free(Ui* ui)
+{
+  free(ui->buff);
+  free(ui);
+}
 
 /* Return ui response */
 Ui_resp*

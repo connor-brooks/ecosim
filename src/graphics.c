@@ -77,6 +77,16 @@ ui_gfx_setup(void)
   return tmp;
 }
 
+
+void 
+ui_gfx_free(Ui_graphics* uig)
+{
+//
+free(uig->vertex_data);
+free(uig->cmd_txt);
+free(uig);
+}
+
 void
 ui_draw(Ui_graphics* uig)
 {
@@ -146,7 +156,6 @@ gfx_quad_draw(Quadtree_verts* qv)
 void
 gfx_agents_draw_new(Agent_verts* av, GLuint shader)
 {
-  glColor3f(1.0, 1.0, 1.0);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_col);
