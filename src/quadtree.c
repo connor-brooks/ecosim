@@ -4,9 +4,8 @@
 #include <GL/gl.h>
 
 #include "quadtree.h"
-#include "agents.h"
 #define QUADTREE_VERT_LEN (3 * 4)
-#define QUADTREE_QUERY_SIZE (4)
+#define QUADTREE_QUERY_SIZE (16)
 
 
 Quadtree*
@@ -20,6 +19,7 @@ quadtree_create(float pos[], float size)
   /* Copy over dimentional info  and size*/
   memcpy(&tmp->pos, pos, sizeof(float) * QUADTREE_DIMS);
   memcpy(&tmp->size, &size, sizeof(float));
+  /* create pointers array */
 
   /* NULL all sub-quad pointers */
   for(i = 0; i < QUAD_COUNT; i++) tmp->sect[i] = NULL;
@@ -56,6 +56,7 @@ quadtree_split(Quadtree *q)
   float new_pos[QUAD_COUNT][QUADTREE_DIMS];
   // printf("SPLITTING WITH SIZE %f\n", child_size);
 
+  // This is stupid do this in a standard way don't do this:
   /* Loop through each new quad
    * Loop through each dimention
    * use anding n bitshifting to see if we should offset this new quads dims
@@ -101,8 +102,11 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
     search_pos = 0;
     while(q->ptrs[search_pos] != NULL) search_pos++;
     q->ptrs[search_pos] = ptr;
-    //   printf("inserted into %d\n", search_pos);
-
+    /* debug */
+    //    Agent* tmp_agent = ptr;
+    //    printf("quadtree.c: inserted 0x%x into %d\n", ptr, search_pos);
+    //    printf("quadtree.c: agent pos %f %f\n", tmp_agent->x, tmp_agent->y);
+    //
     q->ptr_count++;
   }
 
@@ -197,7 +201,7 @@ quadtree_query_setup()
 }
 
 
-void 
+void
 quadtree_query_free(Quadtree_query* qq)
 {
   free(qq->ptrs);
@@ -207,12 +211,25 @@ quadtree_query_free(Quadtree_query* qq)
 void
 quadtree_query(Quadtree *q, Quadtree_query* query, float pos[], float size)
 {
+  /* debug */
+  // printf("Quadtree.c: IN QUERY\n");
+  Agent* tmp_agent = q->ptrs[0];
+
+  //  for(int i = 0; i < QUADTREE_MAX_PER_CELL; i++)
+  //  {
+  //    tmp_agent = q->ptrs[i];
+  //    if(tmp_agent != NULL)
+  //      printf("Quadtree.c: %d elem x %f y %f\n", i, tmp_agent->x, tmp_agent->y);
+  //
+  //  }
   /* if no intersection ,ignore */
   if(!quadtree_intersect(q, pos, size)) return;
 
   /* If quad has children, recusivly go through and add them to query*/
   if(q->has_child){
     for(int i = 0; i < QUAD_COUNT; i++) {
+      //    printf("Quadtree.c: SPLITTING QUERY\n");
+
       quadtree_query(q->sect[i], query, pos, size);
     }
 
@@ -226,27 +243,70 @@ quadtree_query_add_ptr(Quadtree *quad, Quadtree_query* query)
 {
   /* predict for the worst, the quad is full */
   size_t new_size = query->size + (sizeof(void*) * QUADTREE_MAX_PER_CELL);
+  /* debug */
+  //printf("======== \n");
+  //printf("Quadtree.c: IN QUERY ADD \n");
+  Agent* tmp_agent = quad->ptrs[0];
+
+  //  for(int i = 0; i < QUADTREE_MAX_PER_CELL; i++)
+  //  {
+  //    tmp_agent = quad->ptrs[i];
+  //    if(tmp_agent != NULL)
+  //      printf("Quadtree.c: %d elem x %f y %f\n", i, tmp_agent->x, tmp_agent->y);
+  //
+  //  }
+  //  /* if no intersection ,ignore */
 
   /* resize if needed */
   if(new_size > query->capacity){
     query->capacity *= 2;
     query->ptrs = realloc(query->ptrs, query->capacity);
+    ///   printf("Quadtree.c: RESIZING\n");
   }
 
-  for(int i = 0; i < quad->ptr_count; i++) {
+  //printf("--\n");
+  for(int i = 0; i < QUADTREE_MAX_PER_CELL; i++) {
     // if pointer isn't null, add it
+    //printf("Quadtree.c: at add %d\n", i);
+    //printf("Quadtree.c: Value 0x%x\n", quad->ptrs[i]);
     if(quad->ptrs[i] != NULL) {
+    //  tmp_agent = quad->ptrs[i];
+    //  //printf("Quadtree.c: ADD LOOP\n");
+    //  printf("Quadtree.c: %d elem x %f y %f\n", i, tmp_agent->x, tmp_agent->y);
+    //  if(tmp_agent->x > 10)
+    //  {
+    //    printf("TOO BIG\n");
+    //    exit(0);
+    //  }
+
       /* Add the pointer to end of query pointer array */
-      query->ptrs[quad->ptr_count] = quad->ptrs[i];
+      query->ptrs[query->ptr_count] = quad->ptrs[i];
+    //  printf("Quadtree.c: saved ptr 0x%x to array\n", tmp_agent);
+     // printf("Quadtree.c: array now has 0x%d at elm ptr_count\n", tmp_agent);
       /* increase the size and pointer counter */
       query->size += sizeof(void*);
       query->ptr_count += 1;
+
+      /* debug */
+      //printf("Quadtree.c: Added pointer\n");
+      // printf("Quadtree.c: got %d pointers\n", query->ptr_count);
+
     }
     else
     {
-      printf("ERR: got null\n");
+      //printf("ERR: got null\n");
     }
 
   }
 }
 
+/* For debug */
+void
+quadtree_query_dump(Quadtree_query* qq)
+{
+  printf("DUMP: Got %d pointers\n", qq->ptr_count);
+  for(int i =0; i < qq->ptr_count; i++)
+  {
+    printf("DUMP: Got pointer 0x%x at loc %d\n", (void*) qq->ptrs[i], i);
+  }
+}

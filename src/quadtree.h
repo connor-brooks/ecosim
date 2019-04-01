@@ -48,5 +48,6 @@ Quadtree_query* quadtree_query_setup();
 void quadtree_query(Quadtree *q, Quadtree_query* query, float pos[], float size);
 int quadtree_intersect(Quadtree *q, float pos[], float size);
 void quadtree_query_add_ptr(Quadtree *quad, Quadtree_query* query);
+void quadtree_query_dump(Quadtree_query* qq);
 
 #endif

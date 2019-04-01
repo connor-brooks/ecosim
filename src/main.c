@@ -41,7 +41,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
-              glfwSetWindowShouldClose(window, GLFW_TRUE);
+    glfwSetWindowShouldClose(window, GLFW_TRUE);
     game_run = !game_run;
     /* For pointer passing between callback and main */
     user_ptrs = glfwGetWindowUserPointer(window);
@@ -81,8 +81,6 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   }
 
 }
-
-/* Main function */
 
 int
 main(int argc, char **argv)
@@ -137,8 +135,6 @@ main(int argc, char **argv)
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
 
-
-
   /* Setup UI graphics */
   ui_gfx = ui_gfx_setup();
 
@@ -151,8 +147,6 @@ main(int argc, char **argv)
   user_ptrs.ui = ui;
   user_ptrs.uig = ui_gfx;
   glfwSetWindowUserPointer(window, &user_ptrs);
-
-
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -169,7 +163,7 @@ main(int argc, char **argv)
 
     quad = quadtree_create(quad_head_pos, quad_head_size);
     for(int i = 0; i < agent_array->count; i++) {
-      Agent* tmp_ptr = &agent_array->agents[i];
+      Agent* tmp_ptr = &(agent_array->agents[i]);
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
       quadtree_insert(quad, tmp_ptr, tmp_pos);
     }
@@ -180,7 +174,6 @@ main(int argc, char **argv)
     quadtree_to_verts(quad, quad_verts);
     gfx_quad_draw(quad_verts);
     quadtree_verts_free(quad_verts);
-
 
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed,
@@ -193,13 +186,15 @@ main(int argc, char **argv)
 
     if(game_run)
     {
-      agents_update(agent_array);
-
       /* test code for query */
       Quadtree_query* query = quadtree_query_setup();
+
       quadtree_query(quad, query, quad_head_pos, quad_head_size);
       printf("q got %d agent\n", query->ptr_count);
       quadtree_query_free(query);
+
+      /* Update agents */
+      agents_update(agent_array, quad);
     }
     quadtree_free(quad);
 
@@ -207,8 +202,6 @@ main(int argc, char **argv)
     glfwSwapBuffers(window);
     /* Poll for events */
     glfwPollEvents();
-
-
   }
 
   /* Agent verts can be persistant, so free at end, not each frame*/

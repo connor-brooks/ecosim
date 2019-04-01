@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stddef.h>
 #include "utils.h"
+#include "quadtree.h"
 
 #define AGENT_DIMENTIONS (4)
 #define AGENT_DRAWABLE_FEATURES (2)
@@ -72,8 +73,9 @@ struct _Agent_verts {
 
 Agent_array* agent_array_setup(int count);
 void agent_array_free(Agent_array* aa);
-void agents_update(Agent_array* aa);
+void agents_update(Agent_array* aa, Quadtree* quad);
 
+Agent_array* agents_get_local(Agent* a_ptr, Quadtree* quad, float radius);
 void agents_update_location(Agent* a_ptr);
 void agents_update_energy(Agent* a_ptr);
 float agents_update_mv_amt(Agent* a_ptr);

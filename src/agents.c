@@ -6,6 +6,7 @@
 #include <math.h>
 #include "utils.h"
 #include "agents.h"
+#include "quadtree.h"
 
 
 /* Create an agent array */
@@ -37,7 +38,7 @@ agent_array_setup(int count)
   }
   return temp;
 }
-void 
+void
 agent_array_free(Agent_array* aa)
 {
   free(aa->agents);
@@ -45,7 +46,7 @@ agent_array_free(Agent_array* aa)
 }
 
 void
-agents_update(Agent_array* aa)
+agents_update(Agent_array* aa, Quadtree* quad)
 {
   Agent* a_ptr;
 
@@ -64,7 +65,71 @@ agents_update(Agent_array* aa)
     a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
     /*    */
     agents_update_energy(a_ptr);
+
+    if(i == 0)
+      agents_get_local(a_ptr, quad, 0.1);
   }
+}
+
+Agent_array*
+agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
+{
+  int i;
+  Quadtree_query* query = quadtree_query_setup();
+  Agent_array* agent_array = NULL;
+  Agent* tmp_a;
+
+  float pos[] = {a_ptr->x, a_ptr->y};
+  float half_rad = radius * 0.5;
+
+  /* radius sized box around agent */
+  float bot_left[] = {
+    a_ptr->x - half_rad, a_ptr->y - half_rad
+  };
+  float top_right[] = {
+    a_ptr->x + half_rad, a_ptr->y + half_rad
+  };
+
+  /* Do query */
+  quadtree_query(quad, query, pos, radius);
+  //quadtree_query_dump(query);
+
+  /* debug */
+  //printf("agent 0 got %d agents from quad\n", query->ptr_count);
+  glColor3f(1.0, 0.0, 0.0);
+  glBegin(GL_LINE_LOOP);
+  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad,0.0);
+  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad,            0.0);
+  glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
+  glVertex3f(a_ptr->x - half_rad,            a_ptr->y + half_rad,      0.0);
+  glEnd();
+
+  printf("====\n");
+  printf("agent.c: Got %d agents\n", query->ptr_count);
+  for(i = 0; i < query->ptr_count; i++)
+  {
+    tmp_a =  query->ptrs[i];
+    // If tmp a outside of a_ptr
+    if(tmp_a == NULL)
+    continue;
+    
+    else {
+      printf("Pointer is 0x%x\n", query->ptrs[i]);
+      printf("got %f and %f\n", tmp_a->x, tmp_a->y);
+    }
+    // if(tmp_a->x > top_right[0] ||
+    //    tmp_a->x < bot_left[0]  ||
+    //    tmp_a->y > top_right[1] ||
+    //    tmp_a->y < bot_left[1]
+    //   )
+    //   printf("FUCK AT %d\n", i);
+    //
+    // or it is state purge
+    // null the pointer out
+  }
+  //copy the query pointers to an agent array
+  quadtree_query_free(query);
+  //return agent array
 }
 
 void
@@ -125,7 +190,7 @@ agent_verts_create()
   return tmp;
   //
 }
-void 
+void
 agent_verts_free(Agent_verts* av)
 {
   free(av->verts_pos);
