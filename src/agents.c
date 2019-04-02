@@ -9,7 +9,7 @@
 #include "quadtree.h"
 
 #define AGENT_ARRAY_DEFAULT_SIZE (16)
-#define AGENT_DEBUG_SHOW_VISION (0)
+#define AGENT_DEBUG_SHOW_VISION (1)
 
 /* Create empty agent array */
 Agent_array*
@@ -49,23 +49,32 @@ agent_create_random()
   /* random DNA */
   tmp_agent->dna.metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
   tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
-  // color
-  tmp_agent->rgb.r = 1 - tmp_agent->dna.fear + 0.5; //RANDF(AGENT_RGB_MAX);
-  tmp_agent->rgb.g = 0.0f; //RANDF(AGENT_RGB_MAX);
-  tmp_agent->rgb.b = tmp_agent->dna.metabolism * 2.0; //RANDF(AGENT_RGB_MAX);
+  tmp_agent->dna.vision = RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX);
 
+  /* random pos / directional info */
   tmp_agent->x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
   tmp_agent->y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
   tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
   tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
 
+  /* set colors based on DNA */
+  agent_setup_colors(tmp_agent);
+
   // default state
   tmp_agent->state = AGENT_STATE_LIVING;
   tmp_agent->energy = AGENT_ENERGY_DEFAULT;
-  //tmp_agent->metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
 
   return tmp_agent;
 
+}
+
+/* rules for colors */
+void
+agent_setup_colors(Agent* a_ptr)
+{
+  a_ptr->rgb.r = (a_ptr->dna.fear > 0)? 0.0f : 1.0f;
+  a_ptr->rgb.g = a_ptr->dna.metabolism * 2.0;
+  a_ptr->rgb.b = (a_ptr->dna.fear < 0)? 0.0f : 1.0f;
 }
 
 /* For testing: Create an agent array with randomised population*/
@@ -114,11 +123,10 @@ agents_update(Agent_array* aa, Quadtree* quad)
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
     /* get local agents */
-    local_agents = agents_get_local(a_ptr, quad, 0.1);
-    if(i % 2)
-      for(int j = 0; j < local_agents->count; j++){
-        agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
-      }
+    local_agents = agents_get_local(a_ptr, quad, a_ptr->dna.vision);
+    for(int j = 0; j < local_agents->count; j++){
+      agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
+    }
 
     /* updates */
     agents_update_location(a_ptr);
@@ -154,9 +162,9 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 
   /* debug */
   if(AGENT_DEBUG_SHOW_VISION){
-    quadtree_query_dump(query);
-    glColor3f(1.0, 0.0, 0.0);
-    glBegin(GL_LINE_LOOP);
+    //quadtree_query_dump(query);
+    glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.03);
+    glBegin(GL_QUADS);
     glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
     glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
     glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
@@ -232,13 +240,13 @@ agents_update_mv_wrap(Agent* a_ptr)
   }
 }
 
-void 
+void
 agent_normalize_velocity(Agent* a_ptr)
 {
-  float mag = sqrt((a_ptr->velocity.x * a_ptr->velocity.x) 
-           + (a_ptr->velocity.y * a_ptr->velocity.y));
+  float mag = sqrt((a_ptr->velocity.x * a_ptr->velocity.x)
+      + (a_ptr->velocity.y * a_ptr->velocity.y));
   a_ptr->velocity.x = a_ptr->velocity.x / mag;
-  a_ptr->velocity.y = a_ptr->velocity.y / mag; 
+  a_ptr->velocity.y = a_ptr->velocity.y / mag;
 
 }
 
@@ -246,15 +254,43 @@ void
 agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
 {
   float diff[] = {0.0f, 0.0f};
+  float new_vel[] = {0.0f, 0.0f};
   float mag = 0.0f;
+  float tmp_fear = a_ptr->dna.fear;
 
   diff[0] = a_ptr->x - t_ptr->x;
   diff[1] = a_ptr->y - t_ptr->y;
 
-  /* Noramlise and set vector */
+  /* Noramlise and set new vector */
   mag = sqrt((diff[0] * diff[0]) + (diff[1] * diff[1]));
-  a_ptr->velocity.x += (diff[0] / mag) * a_ptr->dna.metabolism * a_ptr->dna.fear;
-  a_ptr->velocity.y += (diff[1] / mag) * a_ptr->dna.metabolism * a_ptr->dna.fear;
+  new_vel[0] = (diff[0] / mag);
+  new_vel[1] = (diff[1] / mag);
+
+  /* Take into account metabolism for speed */
+  new_vel[0] *= a_ptr->dna.metabolism;
+  new_vel[1] *= a_ptr->dna.metabolism;
+
+  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD) 
+    tmp_fear = -tmp_fear;
+
+  /* lines */
+  if(a_ptr->dna.fear > 0.0){
+    glColor4f(1.0, 0.0, 0.0, 0.1);
+  }
+  else
+  {
+    glColor4f(0.0, 1.0, 0.0, 0.1);
+  }
+  glLineWidth((5.0 * tmp_fear * a_ptr->dna.metabolism) + 2.0);
+  glBegin(GL_LINES);
+  glVertex3f(a_ptr->x, a_ptr->y, 0.0);
+  glVertex3f(t_ptr->x, t_ptr->y, 0.0);
+  glEnd();
+  glLineWidth(1.0);
+
+
+  a_ptr->velocity.x += new_vel[0] * tmp_fear;
+  a_ptr->velocity.y += new_vel[1] * tmp_fear;
 
   agent_normalize_velocity(a_ptr);
 }

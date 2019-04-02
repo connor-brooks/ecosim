@@ -14,7 +14,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (300)
+#define DEV_AGENT_COUNT (100)
 
 
 /* TEMPORARY GLOBAL */

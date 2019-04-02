@@ -19,11 +19,14 @@
 #define AGENT_METAB_MAX (0.5)
 #define AGENT_METAB_MIN (0.0)
 
-#define AGENT_FEAR_MAX (0.5)
-#define AGENT_FEAR_MIN (-0.4)
+#define AGENT_FEAR_MAX (1.0)
+#define AGENT_FEAR_MIN (-1.0)
 
-#define AGENT_METAB_ENERGY_SCALE(x) (0.002 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((5 * x) + 3)
+#define AGENT_VISION_MAX (0.05)
+#define AGENT_VISION_MIN (0.25)
+
+#define AGENT_METAB_ENERGY_SCALE(x) (0.001 * x)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((6 * x) + 4)
 
 #define AGENT_MAX_SPEED (0.01)
 
@@ -46,6 +49,7 @@ enum agent_states {
 struct _DNA {
   float metabolism;
   float fear;
+  float vision;
 
 };
 
@@ -95,6 +99,7 @@ void agents_update(Agent_array* aa, Quadtree* quad);
 Agent_array* agents_get_local(Agent* a_ptr, Quadtree* quad, float radius);
 
 Agent* agent_create_random();
+void agent_setup_colors(Agent* a_ptr);
 void agents_update_location(Agent* a_ptr);
 void agents_update_energy(Agent* a_ptr);
 float agents_update_mv_amt(Agent* a_ptr);
