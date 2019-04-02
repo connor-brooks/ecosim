@@ -34,6 +34,7 @@ quadtree_create(float pos[], float size)
   return tmp;
 }
 
+/* free a quad and all it's children */
 void
 quadtree_free(Quadtree* q)
 {
@@ -54,7 +55,6 @@ quadtree_split(Quadtree *q)
   int add_half;
   float child_size = q->size * 0.5f;
   float new_pos[QUAD_COUNT][QUADTREE_DIMS];
-  // printf("SPLITTING WITH SIZE %f\n", child_size);
 
   // This is stupid do this in a standard way don't do this:
   /* Loop through each new quad
@@ -73,6 +73,7 @@ quadtree_split(Quadtree *q)
   q->has_child = 1;
 }
 
+/* insert a pointer to the quadtree a pos */
 void
 quadtree_insert(Quadtree* q, void* ptr, float pos[])
 {
@@ -102,18 +103,11 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
     search_pos = 0;
     while(q->ptrs[search_pos] != NULL) search_pos++;
     q->ptrs[search_pos] = ptr;
-    /* debug */
-    //    Agent* tmp_agent = ptr;
-    //    printf("quadtree.c: inserted 0x%x into %d\n", ptr, search_pos);
-    //    printf("quadtree.c: agent pos %f %f\n", tmp_agent->x, tmp_agent->y);
-    //
     q->ptr_count++;
   }
 
 }
 
-
-/* Below is terrible code, rewrite tommorw */
 
 Quadtree_verts*
 quadtree_verts_create()
@@ -166,7 +160,6 @@ quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
 
   v->size = new_size;
   v->q_count++;
-  //  printf("q count = %d\n", v->q_count);
 
   if(q->has_child){
     for(i = 0; i < QUAD_COUNT; i++){
@@ -176,12 +169,25 @@ quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
 }
 
 
+/* check if a point intersects with a quad */
 int quadtree_intersect(Quadtree *q, float pos[], float size)
 {
-  if ((pos[0] <= q->pos[0] + q->size) &&
-      (pos[1] <= q->pos[1] + q->size) &&
-      (q->pos[0] <= pos[0] + size) &&
-      (q->pos[1] <= pos[1] + size))
+
+  float half_size = size * 0.5;
+
+  //glColor3f(0.0, 0.0, 1.0);
+  //glBegin(GL_LINE_LOOP);
+  //glVertex3f(pos[0] - half_size, pos[1] - half_size, 0);
+  //glVertex3f(pos[0] + half_size, pos[1] - half_size, 0);
+  //glVertex3f(pos[0] + half_size, pos[1] - half_size, 0);
+  //glVertex3f(pos[0] + half_size, pos[1] + half_size, 0);
+  //glVertex3f(pos[0] - half_size, pos[1] + half_size, 0);
+  //glEnd();
+
+  if ((pos[0] - half_size <= q->pos[0] + q->size) &&
+      (pos[1] - half_size <= q->pos[1] + q->size) &&
+      (q->pos[0] <= pos[0] + half_size) &&
+      (q->pos[1] <= pos[1] + half_size))
     return 1;
 
   else return 0;

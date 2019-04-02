@@ -14,7 +14,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (360)
+#define DEV_AGENT_COUNT (100)
 
 
 /* TEMPORARY GLOBAL */
@@ -187,11 +187,11 @@ main(int argc, char **argv)
     if(game_run)
     {
       /* test code for query */
-      Quadtree_query* query = quadtree_query_setup();
+      //Quadtree_query* query = quadtree_query_setup();
 
-      quadtree_query(quad, query, quad_head_pos, quad_head_size);
-      printf("q got %d agent\n", query->ptr_count);
-      quadtree_query_free(query);
+      //quadtree_query(quad, query, quad_head_pos, quad_head_size);
+      //printf("q got %d agent\n", query->ptr_count);
+      //quadtree_query_free(query);
 
       /* Update agents */
       agents_update(agent_array, quad);

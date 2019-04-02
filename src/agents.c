@@ -75,6 +75,7 @@ Agent_array*
 agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 {
   int i;
+  int ignore;
   Quadtree_query* query = quadtree_query_setup();
   Agent_array* agent_array = NULL;
   Agent* tmp_a;
@@ -92,41 +93,46 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 
   /* Do query */
   quadtree_query(quad, query, pos, radius);
-  //quadtree_query_dump(query);
 
   /* debug */
-  //printf("agent 0 got %d agents from quad\n", query->ptr_count);
+  //quadtree_query_dump(query);
   glColor3f(1.0, 0.0, 0.0);
   glBegin(GL_LINE_LOOP);
-  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad,0.0);
-  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad,            0.0);
+  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
+  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
   glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
-  glVertex3f(a_ptr->x - half_rad,            a_ptr->y + half_rad,      0.0);
+  glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
   glEnd();
 
-  printf("====\n");
-  printf("agent.c: Got %d agents\n", query->ptr_count);
+  /* Loop through agents */
   for(i = 0; i < query->ptr_count; i++)
   {
-    tmp_a =  query->ptrs[i];
-    // If tmp a outside of a_ptr
+    tmp_a = query->ptrs[i];
+    ignore = 0;
+
+    /* Ignore null pointers and self */
     if(tmp_a == NULL)
-    continue;
-    
-    else {
-      printf("Pointer is 0x%x\n", query->ptrs[i]);
-      printf("got %f and %f\n", tmp_a->x, tmp_a->y);
-    }
-    // if(tmp_a->x > top_right[0] ||
-    //    tmp_a->x < bot_left[0]  ||
-    //    tmp_a->y > top_right[1] ||
-    //    tmp_a->y < bot_left[1]
-    //   )
-    //   printf("FUCK AT %d\n", i);
-    //
-    // or it is state purge
-    // null the pointer out
+      ignore = 1;
+    if(a_ptr == tmp_a)
+      ignore = 1;
+
+    /* Ignore not within Agents line of sight? */
+    if(tmp_a->x > top_right[0] ||
+        tmp_a->x < bot_left[0]  ||
+        tmp_a->y > top_right[1] ||
+        tmp_a->y < bot_left[1])
+      ignore = 1;
+
+    /* Ignore pruneable agents */
+    if(tmp_a->state == AGENT_STATE_PRUNE)
+      ignore = 1;
+
+    /* Nulll out pointer if needed */
+    if(ignore) query->ptrs[i] = NULL;
+    // Everything is ok at this point
+    if(!ignore) printf("*");
   }
+  printf("\n");
   //copy the query pointers to an agent array
   quadtree_query_free(query);
   //return agent array
