@@ -16,11 +16,14 @@
 #define AGENT_MIN_VELOCITY (-1.0)
 
 #define AGENT_ENERGY_DEFAULT (1.0)
-#define AGENT_METAB_MAX (0.6)
+#define AGENT_METAB_MAX (0.5)
 #define AGENT_METAB_MIN (0.0)
 
-#define AGENT_METAB_ENERGY_SCALE(x) (0.005 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((4 * x) + 2)
+#define AGENT_FEAR_MAX (0.5)
+#define AGENT_FEAR_MIN (-0.4)
+
+#define AGENT_METAB_ENERGY_SCALE(x) (0.002 * x)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((5 * x) + 3)
 
 #define AGENT_MAX_SPEED (0.01)
 
@@ -31,20 +34,27 @@
 typedef struct _Agent Agent;
 typedef struct _Agent_array Agent_array;
 typedef struct _Agent_verts Agent_verts;
+typedef struct _DNA DNA;
 
 enum agent_states {
   AGENT_STATE_PRUNE  = -1,
   AGENT_STATE_DEAD   =  0,
   AGENT_STATE_LIVING =  1
- 
+
+};
+
+struct _DNA {
+  float metabolism;
+  float fear;
+
 };
 
 struct _Agent {
   float x;
   float y;
- 
+
   RGB rgb;
-  
+
   struct {
     float x;
     float y;
@@ -52,7 +62,8 @@ struct _Agent {
 
   int state;
   float energy;
-  float metabolism;
+  //float metabolism;
+  DNA dna;
 
 };
 
@@ -73,7 +84,6 @@ struct _Agent_verts {
   ptrdiff_t end;
 };
 
-Agent* agent_create_random();
 
 Agent_array* agent_array_create();
 Agent_array* agent_array_setup_random(int count);
@@ -81,11 +91,17 @@ void agent_array_insert(Agent_array* aa, Agent* a);
 void agent_array_free(Agent_array* aa);
 void agents_update(Agent_array* aa, Quadtree* quad);
 
+
 Agent_array* agents_get_local(Agent* a_ptr, Quadtree* quad, float radius);
+
+Agent* agent_create_random();
 void agents_update_location(Agent* a_ptr);
 void agents_update_energy(Agent* a_ptr);
 float agents_update_mv_amt(Agent* a_ptr);
 void agents_update_mv_wrap(Agent* a_ptr);
+
+void agent_normalize_velocity(Agent* a_ptr);
+void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);
 
 
 Agent_verts* agent_verts_create();

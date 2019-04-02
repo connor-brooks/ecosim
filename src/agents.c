@@ -46,19 +46,24 @@ Agent*
 agent_create_random()
 {
   Agent* tmp_agent = malloc(sizeof(Agent));
+  /* random DNA */
+  tmp_agent->dna.metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+  tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
+  // color
+  tmp_agent->rgb.r = 1 - tmp_agent->dna.fear + 0.5; //RANDF(AGENT_RGB_MAX);
+  tmp_agent->rgb.g = 0.0f; //RANDF(AGENT_RGB_MAX);
+  tmp_agent->rgb.b = tmp_agent->dna.metabolism * 2.0; //RANDF(AGENT_RGB_MAX);
+
   tmp_agent->x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
   tmp_agent->y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
-  // color
-  tmp_agent->rgb.r = RANDF(AGENT_RGB_MAX);
-  tmp_agent->rgb.g = RANDF(AGENT_RGB_MAX);
-  tmp_agent->rgb.b = tmp_agent->rgb.g; //RANDF(AGENT_RGB_MAX);
-  // velocity
   tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
   tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+
   // default state
   tmp_agent->state = AGENT_STATE_LIVING;
   tmp_agent->energy = AGENT_ENERGY_DEFAULT;
-  tmp_agent->metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+  //tmp_agent->metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+
   return tmp_agent;
 
 }
@@ -110,6 +115,10 @@ agents_update(Agent_array* aa, Quadtree* quad)
 
     /* get local agents */
     local_agents = agents_get_local(a_ptr, quad, 0.1);
+    if(i % 2)
+      for(int j = 0; j < local_agents->count; j++){
+        agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
+      }
 
     /* updates */
     agents_update_location(a_ptr);
@@ -204,7 +213,7 @@ agents_update_location(Agent* a_ptr)
 float
 agents_update_mv_amt(Agent* a_ptr)
 {
-  return AGENT_MAX_SPEED * a_ptr->metabolism;
+  return AGENT_MAX_SPEED * a_ptr->dna.metabolism;
 }
 
 /* This function is stupid.
@@ -223,10 +232,37 @@ agents_update_mv_wrap(Agent* a_ptr)
   }
 }
 
+void 
+agent_normalize_velocity(Agent* a_ptr)
+{
+  float mag = sqrt((a_ptr->velocity.x * a_ptr->velocity.x) 
+           + (a_ptr->velocity.y * a_ptr->velocity.y));
+  a_ptr->velocity.x = a_ptr->velocity.x / mag;
+  a_ptr->velocity.y = a_ptr->velocity.y / mag; 
+
+}
+
+void
+agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
+{
+  float diff[] = {0.0f, 0.0f};
+  float mag = 0.0f;
+
+  diff[0] = a_ptr->x - t_ptr->x;
+  diff[1] = a_ptr->y - t_ptr->y;
+
+  /* Noramlise and set vector */
+  mag = sqrt((diff[0] * diff[0]) + (diff[1] * diff[1]));
+  a_ptr->velocity.x += (diff[0] / mag) * a_ptr->dna.metabolism * a_ptr->dna.fear;
+  a_ptr->velocity.y += (diff[1] / mag) * a_ptr->dna.metabolism * a_ptr->dna.fear;
+
+  agent_normalize_velocity(a_ptr);
+}
+
 void
 agents_update_energy(Agent* a_ptr)
 {
-  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->metabolism) * AGENTS_TIME_FACTOR;
+  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * AGENTS_TIME_FACTOR;
   if(a_ptr->energy < AGENTS_ENERGY_DEAD) a_ptr->state = AGENT_STATE_DEAD;
 }
 
