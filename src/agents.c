@@ -9,9 +9,9 @@
 #include "quadtree.h"
 
 #define AGENT_ARRAY_DEFAULT_SIZE (16)
+#define AGENT_DEBUG_SHOW_VISION (0)
 
-
-
+/* Create empty agent array */
 Agent_array*
 agent_array_create()
 {
@@ -63,7 +63,7 @@ agent_create_random()
 
 }
 
-/* For Create an agent array with randomised population*/
+/* For testing: Create an agent array with randomised population*/
 Agent_array*
 agent_array_setup_random(int count)
 {
@@ -71,7 +71,6 @@ agent_array_setup_random(int count)
   Agent_array* tmp_aa = agent_array_create();
   Agent* tmp_a = agent_create_random();
 
-  printf("inserting\n");
   for(i = 0; i < count; i++)
   {
     tmp_a = agent_create_random();
@@ -87,17 +86,21 @@ agent_array_free(Agent_array* aa)
   /* free each agent */
   for(i = 0; i < aa->count; i++)
     free(aa->agents[i]);
-  
+
+  /* free everything else */
   free(aa->agents);
   free(aa);
 }
 
+/* update agents from agent array */
 void
 agents_update(Agent_array* aa, Quadtree* quad)
 {
+  int i;
   Agent* a_ptr;
+  Agent_array* local_agents;
 
-  for(int i = 0; i < aa->count; i++)
+  for(i = 0; i < aa->count; i++)
   {
     /* temp pointer for agent */
     a_ptr = aa->agents[i];
@@ -105,16 +108,14 @@ agents_update(Agent_array* aa, Quadtree* quad)
     // If the agent isn't living, don't update anything
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
+    /* get local agents */
+    local_agents = agents_get_local(a_ptr, quad, 0.1);
+
+    /* updates */
     agents_update_location(a_ptr);
-    /* experiemtation code.. ignore  */
-    // float mv_amt = agents_update_mv_amt(a_ptr);
-    // a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-    // a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-    // /*    */
+
     agents_update_energy(a_ptr);
 
-    //if(i == 0)
-    agents_get_local(a_ptr, quad, 0.1);
   }
 }
 
@@ -125,7 +126,7 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   int ignore;
 
   Quadtree_query* query = quadtree_query_setup();
-  Agent_array* agent_array = NULL;
+  Agent_array* agent_array = agent_array_create();
   Agent* tmp_a;
 
   float pos[] = {a_ptr->x, a_ptr->y};
@@ -143,15 +144,17 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   quadtree_query(quad, query, pos, radius);
 
   /* debug */
-  //quadtree_query_dump(query);
-  //  glColor3f(1.0, 0.0, 0.0);
-  //  glBegin(GL_LINE_LOOP);
-  //  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
-  //  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
-  //  glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
-  //  glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
-  //  glEnd();
-  //
+  if(AGENT_DEBUG_SHOW_VISION){
+    quadtree_query_dump(query);
+    glColor3f(1.0, 0.0, 0.0);
+    glBegin(GL_LINE_LOOP);
+    glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
+    glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
+    glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
+    glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
+    glEnd();
+
+  }
   /* Loop through agents */
   for(i = 0; i < query->ptr_count; i++)
   {
@@ -175,15 +178,12 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
     if(tmp_a->state == AGENT_STATE_PRUNE)
       ignore = 1;
 
-    /* Nulll out pointer if needed */
-    if(ignore) query->ptrs[i] = NULL;
-    // Everything is ok at this point
-    //if(!ignore) printf("*");
+    /* Insert if valid agent */
+    if(!ignore) agent_array_insert(agent_array, tmp_a);
   }
-  //printf("\n");
-  //copy the query pointers to an agent array
+
   quadtree_query_free(query);
-  //return agent array
+  return agent_array;
 }
 
 void
@@ -223,7 +223,6 @@ agents_update_mv_wrap(Agent* a_ptr)
   }
 }
 
-
 void
 agents_update_energy(Agent* a_ptr)
 {
@@ -242,8 +241,8 @@ agent_verts_create()
   tmp->a_count = 0;
   tmp->end = 0;
   return tmp;
-  //
 }
+
 void
 agent_verts_free(Agent_verts* av)
 {
@@ -260,8 +259,6 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
   av->end = 0;
   av->a_count= 0;
 
-  //  if(aa->count_change) printf("rebuuld aarrary\n");
-
   /* if verts array too big, grow */
   if(new_size > av->capacity){
     av->capacity = new_size;
@@ -269,12 +266,10 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
     av->verts_col = realloc(av->verts_col, av->capacity);
   }
 
-
   for(i = 0; i < aa->count ; i++) {
     Agent* agent = aa->agents[i];
     float* pos = av->verts_pos;
     float* col = av->verts_col;
-    //printf("adding agent %f %f\n", agent->x, agent->y);
 
     pos[av->end] = agent->x;
     av->verts_col[av->end] = agent->rgb.r;
@@ -293,9 +288,6 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
       0.0f : // pruning
       AGENT_RGB_ALPHA;
     av->end++;
-    //printf("At %d\n", i);
     av->a_count++;
-
   }
-
 }
