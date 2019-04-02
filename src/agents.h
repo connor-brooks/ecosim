@@ -57,8 +57,10 @@ struct _Agent {
 };
 
 struct _Agent_array {
-  Agent* agents;
+  Agent** agents;
   size_t count;
+  size_t capacity;
+  size_t size;
   int count_change;
 };
 
@@ -71,7 +73,11 @@ struct _Agent_verts {
   ptrdiff_t end;
 };
 
-Agent_array* agent_array_setup(int count);
+Agent* agent_create_random();
+
+Agent_array* agent_array_create();
+Agent_array* agent_array_setup_random(int count);
+void agent_array_insert(Agent_array* aa, Agent* a);
 void agent_array_free(Agent_array* aa);
 void agents_update(Agent_array* aa, Quadtree* quad);
 

@@ -14,7 +14,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (100)
+#define DEV_AGENT_COUNT (300)
 
 
 /* TEMPORARY GLOBAL */
@@ -127,7 +127,7 @@ main(int argc, char **argv)
   /* Setup agent arrary
    * setup agent verts
    * setup agent shader */
-  agent_array = agent_array_setup(DEV_AGENT_COUNT);
+  agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
   agent_verts_new = agent_verts_create();
   GLuint agent_shader = gfx_agent_shader();
 
@@ -162,8 +162,9 @@ main(int argc, char **argv)
     /* Recreate quadtree and insert agents */
 
     quad = quadtree_create(quad_head_pos, quad_head_size);
+
     for(int i = 0; i < agent_array->count; i++) {
-      Agent* tmp_ptr = &(agent_array->agents[i]);
+      Agent* tmp_ptr = (agent_array->agents[i]);
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
       quadtree_insert(quad, tmp_ptr, tmp_pos);
     }

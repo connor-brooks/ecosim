@@ -8,39 +8,86 @@
 #include "agents.h"
 #include "quadtree.h"
 
+#define AGENT_ARRAY_DEFAULT_SIZE (16)
 
-/* Create an agent array */
+
+
 Agent_array*
-agent_array_setup(int count)
+agent_array_create()
 {
   Agent_array* temp = malloc(sizeof(Agent_array));
-  int i;
+  temp->count = 0;
+  temp->capacity = AGENT_ARRAY_DEFAULT_SIZE;
+  temp->size = sizeof(Agent*) * temp->capacity;
+  temp->agents = malloc(temp->size);
 
-  temp->count = count;
   temp->count_change = 0;
-  temp->agents = malloc(sizeof(Agent) * count);
 
-  for(i = 0; i < count; i++)
-  {
-    temp->agents[i].x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
-    temp->agents[i].y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
-    // color
-    temp->agents[i].rgb.r = RANDF(AGENT_RGB_MAX);
-    temp->agents[i].rgb.g = RANDF(AGENT_RGB_MAX);
-    temp->agents[i].rgb.b = temp->agents[i].rgb.g; //RANDF(AGENT_RGB_MAX);
-    // velocity
-    temp->agents[i].velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
-    temp->agents[i].velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
-    // default state
-    temp->agents[i].state = AGENT_STATE_LIVING;
-    temp->agents[i].energy = AGENT_ENERGY_DEFAULT;
-    temp->agents[i].metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
-  }
   return temp;
 }
+
+/* To insert agent to agent array */
+void
+agent_array_insert(Agent_array* aa, Agent* a)
+{
+  /* resize of needed */
+  if(aa->count + 1 >= aa->capacity){
+    aa->capacity *= 2;
+    aa->size = sizeof(Agent*) * aa->capacity;
+    aa->agents = realloc(aa->agents, aa->size);
+  }
+  /* save the agent to array */
+  aa->agents[aa->count] = a;
+  aa->count++;
+}
+
+/* Create random agent */
+Agent*
+agent_create_random()
+{
+  Agent* tmp_agent = malloc(sizeof(Agent));
+  tmp_agent->x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+  tmp_agent->y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+  // color
+  tmp_agent->rgb.r = RANDF(AGENT_RGB_MAX);
+  tmp_agent->rgb.g = RANDF(AGENT_RGB_MAX);
+  tmp_agent->rgb.b = tmp_agent->rgb.g; //RANDF(AGENT_RGB_MAX);
+  // velocity
+  tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+  tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+  // default state
+  tmp_agent->state = AGENT_STATE_LIVING;
+  tmp_agent->energy = AGENT_ENERGY_DEFAULT;
+  tmp_agent->metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+  return tmp_agent;
+
+}
+
+/* For Create an agent array with randomised population*/
+Agent_array*
+agent_array_setup_random(int count)
+{
+  int i;
+  Agent_array* tmp_aa = agent_array_create();
+  Agent* tmp_a = agent_create_random();
+
+  printf("inserting\n");
+  for(i = 0; i < count; i++)
+  {
+    tmp_a = agent_create_random();
+    agent_array_insert(tmp_aa, tmp_a);
+  }
+  return tmp_aa;
+}
+
 void
 agent_array_free(Agent_array* aa)
 {
+  int i;
+  /* free each agent */
+  for(i = 0; i < aa->count; i++)
+    free(aa->agents[i]);
+  
   free(aa->agents);
   free(aa);
 }
@@ -53,21 +100,21 @@ agents_update(Agent_array* aa, Quadtree* quad)
   for(int i = 0; i < aa->count; i++)
   {
     /* temp pointer for agent */
-    a_ptr = &aa->agents[i];
+    a_ptr = aa->agents[i];
 
     // If the agent isn't living, don't update anything
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
     agents_update_location(a_ptr);
     /* experiemtation code.. ignore  */
-    float mv_amt = agents_update_mv_amt(a_ptr);
-    a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-    a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
-    /*    */
+    // float mv_amt = agents_update_mv_amt(a_ptr);
+    // a_ptr->x += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
+    // a_ptr->y += mv_amt * 0.2 * a_ptr->energy * sin(a_ptr->metabolism + glfwGetTime() * (2 * a_ptr->energy));
+    // /*    */
     agents_update_energy(a_ptr);
 
-    if(i == 0)
-      agents_get_local(a_ptr, quad, 0.1);
+    //if(i == 0)
+    agents_get_local(a_ptr, quad, 0.1);
   }
 }
 
@@ -76,6 +123,7 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 {
   int i;
   int ignore;
+
   Quadtree_query* query = quadtree_query_setup();
   Agent_array* agent_array = NULL;
   Agent* tmp_a;
@@ -96,14 +144,14 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 
   /* debug */
   //quadtree_query_dump(query);
-  glColor3f(1.0, 0.0, 0.0);
-  glBegin(GL_LINE_LOOP);
-  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
-  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
-  glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
-  glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
-  glEnd();
-
+  //  glColor3f(1.0, 0.0, 0.0);
+  //  glBegin(GL_LINE_LOOP);
+  //  glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
+  //  glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
+  //  glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
+  //  glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
+  //  glEnd();
+  //
   /* Loop through agents */
   for(i = 0; i < query->ptr_count; i++)
   {
@@ -130,9 +178,9 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
     /* Nulll out pointer if needed */
     if(ignore) query->ptrs[i] = NULL;
     // Everything is ok at this point
-    if(!ignore) printf("*");
+    //if(!ignore) printf("*");
   }
-  printf("\n");
+  //printf("\n");
   //copy the query pointers to an agent array
   quadtree_query_free(query);
   //return agent array
@@ -223,7 +271,7 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
 
 
   for(i = 0; i < aa->count ; i++) {
-    Agent* agent = &aa->agents[i];
+    Agent* agent = aa->agents[i];
     float* pos = av->verts_pos;
     float* col = av->verts_col;
     //printf("adding agent %f %f\n", agent->x, agent->y);
