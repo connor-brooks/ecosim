@@ -41,7 +41,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
-    glfwSetWindowShouldClose(window, GLFW_TRUE);
+    //glfwSetWindowShouldClose(window, GLFW_TRUE);
     game_run = !game_run;
     /* For pointer passing between callback and main */
     user_ptrs = glfwGetWindowUserPointer(window);
@@ -89,6 +89,7 @@ main(int argc, char **argv)
 
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
+  Agent_vis_verts* agent_vis_verts;
 
   Quadtree* quad;
   Quadtree_verts* quad_verts;
@@ -129,7 +130,9 @@ main(int argc, char **argv)
    * setup agent shader */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
   agent_verts_new = agent_verts_create();
+  agent_vis_verts = agent_vis_verts_create();
   GLuint agent_shader = gfx_agent_shader();
+  GLuint agent_vis_shader = gfx_agent_vis_shader();
 
   /* Quadtree head pos info */
   float quad_head_pos[] = {-1.0f, -1.0f};
@@ -179,8 +182,20 @@ main(int argc, char **argv)
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed,
      * so we free at end, as the struct should presist all through running of program*/
+
+    //const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+
+    //int window_width = mode->width;
+    //int  window_height = mode->height;
+    //int scale_w, scale_h;
+    //float test;
+    //glfwGetWindowSize(window, &scale_w, &scale_h);
+    float scale = gfx_get_scale(window);
     agents_to_verts(agent_array, agent_verts_new);
-    gfx_agents_draw_new(agent_verts_new, agent_shader);
+    //test = (float)scale_w / ((float)window_width / 2.0);
+    printf("scale %f\n", scale);
+    gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
+    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
 
     /* Draw UI */
     ui_draw(ui_gfx);

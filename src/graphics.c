@@ -12,21 +12,41 @@
 #include "utils.h"
 #include "ui_response.h"
 
-GLuint gfx_agent_shader()
+GLuint 
+gfx_setup_shader(const char* vs_raw, const char* fs_raw)
 {
   GLuint vs = 0;
   GLuint fs = 0;
   GLuint shader = 0;
-  /* Agent shaders */
+  vs = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(vs, 1, &(vs_raw), NULL);
+  glCompileShader(vs);
+
+  fs = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(fs, 1, &(fs_raw), NULL);
+  glCompileShader(fs);
+
+  shader = glCreateProgram();
+  glAttachShader(shader, fs);
+  glAttachShader(shader, vs);
+  glLinkProgram(shader);
+  return shader;
+
+}
+
+GLuint 
+gfx_agent_shader()
+{
   const char* agents_vs =
     "#version 130\n"
     "attribute vec4 position;"
     "attribute vec4 color;"
+    "uniform vec2 window;"
     "out vec4 color_out;"
     "void main() {"
     "color_out = color;"
     "  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
-    "  gl_PointSize = position.w;"
+    "  gl_PointSize = position.w * window.x;"
     "}";
 
   const char* agents_fs =
@@ -42,23 +62,47 @@ GLuint gfx_agent_shader()
     " vec2 test2 = gl_PointCoord - vec2(0.5);"
  //   " float rand = random(color_out) * 0.2;"
     " if(length(test2) > 0.5) discard;"
-    //"  gl_FragColor = color_out * (length(test2) + 0.3);"
-    "  gl_FragColor = color_out ;"
+    "  gl_FragColor = color_out * (1 - (length(test2) ));"
+    //"  gl_FragColor = color_out ;"
     "}";
 
-  vs = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vs, 1, &(agents_vs), NULL);
-  glCompileShader(vs);
+  return gfx_setup_shader(agents_vs, agents_fs);
 
-  fs = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fs, 1, &(agents_fs), NULL);
-  glCompileShader(fs);
+}
 
-  shader = glCreateProgram();
-  glAttachShader(shader, fs);
-  glAttachShader(shader, vs);
-  glLinkProgram(shader);
-  return shader;
+GLuint 
+gfx_agent_vis_shader()
+{
+  const char* vis_vs =
+    "#version 130\n"
+    "attribute vec4 position;"
+    "attribute vec4 color;"
+    "uniform vec2 window;"
+    "out vec4 color_out;"
+    "void main() {"
+    "color_out = color;"
+    "  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
+    "  gl_PointSize = position.w * window.x;"
+    "}";
+
+  const char* vis_fs =
+    "#version 130\n"
+    "out vec4 frag_colour;"
+    "in vec4 color_out;"
+//    "float random(vec4 col)"
+//    "{"
+//    "return fract(sin(dot(col,"
+//    "vec4(12.123213, 32.2312, 213.2312, 87.8343))));"
+//    "}"
+    "void main() {"
+    " vec2 test2 = gl_PointCoord - vec2(0.5);"
+ //   " float rand = random(color_out) * 0.2;"
+    " if(length(test2) > 0.5) discard;"
+    "  gl_FragColor = color_out * (length(test2) * 1.0) + 0.05;"
+//    "  gl_FragColor = color_out ;"
+    "}";
+
+  return gfx_setup_shader(vis_vs, vis_fs);
 
 }
 
@@ -160,12 +204,16 @@ gfx_quad_draw(Quadtree_verts* qv)
 }
 
 void
-gfx_agents_draw_new(Agent_verts* av, GLuint shader)
+gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale)
 {
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_col);
   glUseProgram(shader);
+
+  GLuint loc = glGetUniformLocation(shader, "window");
+  glUniform2f(loc, scale, scale);
+
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
   glDrawArrays(GL_POINTS, 0, av->a_count);
@@ -175,4 +223,46 @@ gfx_agents_draw_new(Agent_verts* av, GLuint shader)
   glUseProgram(0);
   glDisableClientState(GL_VERTEX_ARRAY);
 
+}
+
+
+void
+gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale)
+{
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_vis_pos);
+  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_vis_col);
+
+
+  glUseProgram(shader);
+
+  GLuint loc = glGetUniformLocation(shader, "window");
+  glUniform2f(loc, scale, scale);
+
+  glEnableVertexAttribArray(0);
+  glEnableVertexAttribArray(1);
+  glDrawArrays(GL_POINTS, 0, av->a_count);
+  glDrawElements(GL_POINTS, av->a_count, GL_UNSIGNED_SHORT, (void*)0);
+  glDisableVertexAttribArray(0);
+  glDisableVertexAttribArray(1);
+  glUseProgram(0);
+  glDisableClientState(GL_VERTEX_ARRAY);
+
+}
+
+/* get the scale. Since the development was done in half-screen
+ * a 1.0 width is considered 1/2 of the screen. Fullscreen scaling would
+ * be done by a factor of 2. Hacky, but just the way things were done*/
+float
+gfx_get_scale(GLFWwindow* window)
+{
+    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    int w_screen = mode->width;
+    int w_window, h_window;
+    float scale;
+
+    glfwGetWindowSize(window, &w_window, &h_window);
+    scale = (float)w_window / ((float)w_screen / 2.0);
+    return scale;
 }

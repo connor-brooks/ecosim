@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 #include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include "agents.h"
 #include "quadtree.h"
 #include "ui_response.h"
@@ -18,8 +19,12 @@ struct _Ui_graphics {
 
 typedef struct _Ui_graphics Ui_graphics;
 
+GLuint gfx_setup_shader(const char* vs_raw, const char* fs_raw);
 GLuint gfx_agent_shader();
-void gfx_agents_draw_new(Agent_verts* av, GLuint shader);
+GLuint gfx_agent_vis_shader();
+
+void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale);
+void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale);
 
 void gfx_quad_draw(Quadtree_verts* qv);
 
@@ -29,6 +34,8 @@ void ui_draw(Ui_graphics* uig);
 void ui_gfx_update(Ui_resp* resp, Ui_graphics* uig);
 
 void gfx_text_draw(float x, float y, const unsigned char* txt);
+
+float gfx_get_scale(GLFWwindow* window);
 
 
 

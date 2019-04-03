@@ -8,8 +8,6 @@
 #include "agents.h"
 #include "quadtree.h"
 
-#define AGENT_ARRAY_DEFAULT_SIZE (16)
-#define AGENT_DEBUG_SHOW_VISION (1)
 
 /* Create empty agent array */
 Agent_array*
@@ -57,8 +55,11 @@ agent_create_random()
   tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
   tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
 
+
+
   /* set colors based on DNA */
   agent_setup_colors(tmp_agent);
+  agent_setup_vision_quad(tmp_agent);
 
   // default state
   tmp_agent->state = AGENT_STATE_LIVING;
@@ -75,6 +76,19 @@ agent_setup_colors(Agent* a_ptr)
   a_ptr->rgb.r = (a_ptr->dna.fear > 0)? 0.0f : 1.0f;
   a_ptr->rgb.g = a_ptr->dna.metabolism * 2.0;
   a_ptr->rgb.b = (a_ptr->dna.fear < 0)? 0.0f : 1.0f;
+}
+
+void
+agent_setup_vision_quad(Agent* a_ptr)
+{
+  float half_rad = a_ptr->dna.vision * 0.5;
+
+  /* radius sized box around agent */
+  a_ptr->vis_quad.bot_left[0] = a_ptr->x - half_rad;
+  a_ptr->vis_quad.bot_left[1] = a_ptr->y - half_rad;
+
+  a_ptr->vis_quad.top_right[0] = a_ptr->x + half_rad;
+  a_ptr->vis_quad.top_right[1] = a_ptr->y + half_rad;
 }
 
 /* For testing: Create an agent array with randomised population*/
@@ -133,6 +147,25 @@ agents_update(Agent_array* aa, Quadtree* quad)
 
     agents_update_energy(a_ptr);
 
+
+    /* radius sized box around agent */
+    agent_setup_vision_quad(a_ptr);
+    float *bot_left  = (a_ptr->vis_quad.bot_left);
+    float *top_right = (a_ptr->vis_quad.top_right);
+    /* debug */
+    if(AGENT_DEBUG_SHOW_VISION){
+      //quadtree_query_dump(query);
+      glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.03);
+      glBegin(GL_QUADS);
+      glVertex3f(bot_left[0], bot_left[1], 0.0);
+      glVertex3f(top_right[0], bot_left[1], 0.0);
+      glVertex3f(top_right[0], top_right[1], 0.0);
+      glVertex3f(bot_left[0], top_right[1], 0.0);
+
+      glEnd();
+
+    }
+
   }
 }
 
@@ -147,31 +180,13 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   Agent* tmp_a;
 
   float pos[] = {a_ptr->x, a_ptr->y};
-  float half_rad = radius * 0.5;
+  float *bot_left  = (a_ptr->vis_quad.bot_left);
+  float *top_right = (a_ptr->vis_quad.top_right);
 
-  /* radius sized box around agent */
-  float bot_left[] = {
-    a_ptr->x - half_rad, a_ptr->y - half_rad
-  };
-  float top_right[] = {
-    a_ptr->x + half_rad, a_ptr->y + half_rad
-  };
 
   /* Do query */
   quadtree_query(quad, query, pos, radius);
 
-  /* debug */
-  if(AGENT_DEBUG_SHOW_VISION){
-    //quadtree_query_dump(query);
-    glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.03);
-    glBegin(GL_QUADS);
-    glVertex3f(a_ptr->x - half_rad, a_ptr->y - half_rad, 0.0);
-    glVertex3f(a_ptr->x + half_rad, a_ptr->y - half_rad, 0.0);
-    glVertex3f(a_ptr->x + half_rad, a_ptr->y + half_rad, 0.0);
-    glVertex3f(a_ptr->x - half_rad, a_ptr->y + half_rad, 0.0);
-    glEnd();
-
-  }
   /* Loop through agents */
   for(i = 0; i < query->ptr_count; i++)
   {
@@ -240,6 +255,15 @@ agents_update_mv_wrap(Agent* a_ptr)
   }
 }
 
+float
+agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
+{
+  float attraction = a_ptr->dna.fear;
+  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD)
+    attraction = -attraction;
+  return attraction;
+}
+
 void
 agent_normalize_velocity(Agent* a_ptr)
 {
@@ -270,7 +294,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   new_vel[0] *= a_ptr->dna.metabolism;
   new_vel[1] *= a_ptr->dna.metabolism;
 
-  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD) 
+  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD)
     tmp_fear = -tmp_fear;
 
   /* lines */
@@ -281,7 +305,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   {
     glColor4f(0.0, 1.0, 0.0, 0.1);
   }
-  glLineWidth((5.0 * tmp_fear * a_ptr->dna.metabolism) + 2.0);
+  glLineWidth((10.0 * tmp_fear * 0.5 - a_ptr->dna.metabolism) + 2.0);
   glBegin(GL_LINES);
   glVertex3f(a_ptr->x, a_ptr->y, 0.0);
   glVertex3f(t_ptr->x, t_ptr->y, 0.0);
@@ -306,10 +330,12 @@ Agent_verts*
 agent_verts_create()
 {
   Agent_verts* tmp = malloc(sizeof(Agent_verts));
-  tmp->capacity = sizeof(float) * (4);
-  tmp->size = 0;
-  tmp->verts_pos = malloc(tmp->capacity);
-  tmp->verts_col = malloc(tmp->capacity);
+  tmp->capacity = 16;
+  tmp->size = sizeof(float) * 4 * tmp->capacity;;
+  tmp->verts_pos = malloc(tmp->size);
+  tmp->verts_col = malloc(tmp->size);
+  tmp->verts_vis_pos = malloc(tmp->size);
+  tmp->verts_vis_col = malloc(tmp->size);
   tmp->a_count = 0;
   tmp->end = 0;
   return tmp;
@@ -327,39 +353,70 @@ void
 agents_to_verts(Agent_array* aa, Agent_verts* av)
 {
   int i;
-  size_t new_size = (sizeof(float) * 4 * aa->count); //4 floats
+
+  av->capacity = aa->count;
+  av->size = sizeof(float) * 4 * av->capacity;
+  av->verts_pos = realloc(av->verts_pos, av->size);
+  av->verts_col = realloc(av->verts_col, av->size);
+  av->verts_vis_pos = realloc(av->verts_vis_pos, av->size);
+  av->verts_vis_col = realloc(av->verts_vis_col, av->size);
+
   av->end = 0;
   av->a_count= 0;
 
-  /* if verts array too big, grow */
-  if(new_size > av->capacity){
-    av->capacity = new_size;
-    av->verts_pos = realloc(av->verts_pos, av->capacity);
-    av->verts_col = realloc(av->verts_col, av->capacity);
-  }
-
+// Don't need dynamic array yet
+//  /* if verts array too big, grow */
+//  if(new_size > av->capacity){
+//    av->capacity = new_size;
+//    av->verts_pos = realloc(av->verts_pos, av->capacity);
+//    av->verts_col = realloc(av->verts_col, av->capacity);
+//  }
+//
   for(i = 0; i < aa->count ; i++) {
     Agent* agent = aa->agents[i];
+    /* agent drawing */
     float* pos = av->verts_pos;
     float* col = av->verts_col;
+    /* vision drawing */
+    float* v_pos = av->verts_vis_pos;
+    float* v_col = av->verts_vis_col;
 
-    pos[av->end] = agent->x;
-    av->verts_col[av->end] = agent->rgb.r;
+    /* rgb, x y and z*/
+    v_pos[av->end] = pos[av->end] = agent->x;
+    v_col[av->end] = col[av->end] = agent->rgb.r;
     av->end++;
 
-    pos[av->end] = agent->y;
-    col[av->end] = agent->rgb.g;
+    v_pos[av->end] = pos[av->end] = agent->y;
+    v_col[av->end] = col[av->end] = agent->rgb.g;
     av->end++;
 
-    pos[av->end] = 0.0f;
-    col[av->end] = agent->rgb.b;
+    v_pos[av->end] = pos[av->end] = 0.0f;
+    v_col[av->end] = col[av->end] = agent->rgb.b;
     av->end++;
 
+    /* special vert data */
     pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy);
     col[av->end] = (agent->state == AGENT_STATE_PRUNE)?
       0.0f : // pruning
       AGENT_RGB_ALPHA;
+
+    v_pos[av->end] = agent->dna.vision * 400;
+    v_col[av->end] = (agent->state != AGENT_STATE_LIVING)?
+      0.0f : // pruning
+      AGENT_VIS_ALPHA;
+
     av->end++;
     av->a_count++;
   }
+}
+
+Agent_vis_verts*
+agent_vis_verts_create()
+{
+  Agent_vis_verts* tmp = malloc(sizeof(Agent_vis_verts));
+  tmp->count = 0;
+  tmp->capacity = AGENT_VIS_VERTS_DEFAULT;
+  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
+  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
+//
 }
