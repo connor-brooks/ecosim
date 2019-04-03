@@ -141,6 +141,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     for(int j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
     }
+    agent_update_mv_flock(a_ptr, local_agents);
 
     /* updates */
     agents_update_location(a_ptr);
@@ -305,18 +306,50 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   {
     glColor4f(0.0, 1.0, 0.0, 0.1);
   }
-  glLineWidth((10.0 * tmp_fear * 0.5 - a_ptr->dna.metabolism) + 2.0);
+  glLineWidth((10.0 * tmp_fear * 0.5 - a_ptr->dna.metabolism) + 4.0);
   glBegin(GL_LINES);
-  glVertex3f(a_ptr->x, a_ptr->y, 0.0);
   glVertex3f(t_ptr->x, t_ptr->y, 0.0);
+  glVertex3f(a_ptr->x, a_ptr->y, 0.0);
   glEnd();
   glLineWidth(1.0);
 
 
-  a_ptr->velocity.x += new_vel[0] * tmp_fear;
-  a_ptr->velocity.y += new_vel[1] * tmp_fear;
+  if(mag > 0.15){
+    a_ptr->velocity.x += new_vel[0] * tmp_fear;
+    a_ptr->velocity.y += new_vel[1] * tmp_fear;
+  }
 
   agent_normalize_velocity(a_ptr);
+}
+
+void
+agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
+{
+  int i;
+  float total[] = {0.0f, 0.0f};
+  float avg[] = {0.0f, 0.0f};
+  float new[] = {0.0f, 0.0f};
+
+  if(aa->count == 0) return;
+  for(i = 0; i < aa->count; i++) {
+    total[0] += aa->agents[i]->velocity.x;
+    total[1] += aa->agents[i]->velocity.y;
+  }
+  printf("total %f, %f\n", total[0], total[1]);
+  avg[0] = total[0] / (float) i;
+  avg[1] = total[1] / (float) i;
+
+  float mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
+  new[0] =  avg[0] / mag;
+  new[1] =  avg[1] / mag;
+
+  a_ptr->velocity.x += new[0];
+  a_ptr->velocity.y += new[1];
+  printf("mag %f, %f\n", new[0], new[1]);
+
+  agent_normalize_velocity(a_ptr);
+
+
 }
 
 void
@@ -364,14 +397,14 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
   av->end = 0;
   av->a_count= 0;
 
-// Don't need dynamic array yet
-//  /* if verts array too big, grow */
-//  if(new_size > av->capacity){
-//    av->capacity = new_size;
-//    av->verts_pos = realloc(av->verts_pos, av->capacity);
-//    av->verts_col = realloc(av->verts_col, av->capacity);
-//  }
-//
+  // Don't need dynamic array yet
+  //  /* if verts array too big, grow */
+  //  if(new_size > av->capacity){
+  //    av->capacity = new_size;
+  //    av->verts_pos = realloc(av->verts_pos, av->capacity);
+  //    av->verts_col = realloc(av->verts_col, av->capacity);
+  //  }
+  //
   for(i = 0; i < aa->count ; i++) {
     Agent* agent = aa->agents[i];
     /* agent drawing */
@@ -418,5 +451,5 @@ agent_vis_verts_create()
   tmp->capacity = AGENT_VIS_VERTS_DEFAULT;
   tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
   tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
-//
+  //
 }

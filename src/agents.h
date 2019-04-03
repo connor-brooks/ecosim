@@ -12,7 +12,7 @@
 #define AGENT_RGB_MIN (1.0)
 #define AGENT_RGB_ALPHA (0.8)
 
-#define AGENT_VIS_ALPHA (0.03)
+#define AGENT_VIS_ALPHA (0.08)
 
 #define AGENT_MAX_VELOCITY (1.0)
 #define AGENT_MIN_VELOCITY (-1.0)
@@ -28,9 +28,9 @@
 #define AGENT_VISION_MIN (0.25)
 
 #define AGENT_METAB_ENERGY_SCALE(x) (0.001 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 4)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((20 * x) + 2)
 
-#define AGENT_MAX_SPEED (0.01)
+#define AGENT_MAX_SPEED (0.005)
 
 #define AGENTS_ENERGY_DEAD (0.1)
 
@@ -130,6 +130,8 @@ void agents_update_mv_wrap(Agent* a_ptr);
 void agent_normalize_velocity(Agent* a_ptr);
 void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);
 float agent_item_attraction(Agent* a_ptr, Agent* t_ptr);
+
+void agent_update_mv_flock(Agent* a_ptr, Agent_array* aa);
 
 /* verts */
 Agent_verts* agent_verts_create();
