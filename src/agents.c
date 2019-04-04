@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stddef.h>
+#include <string.h>
 #include <GLFW/glfw3.h>
 #include <time.h>
 #include <math.h>
@@ -29,6 +30,7 @@ void
 agent_array_insert(Agent_array* aa, Agent* a)
 {
   /* resize of needed */
+ // printf("start: inseted, count is %d\n", aa->count);
   if(aa->count + 1 >= aa->capacity){
     aa->capacity *= 2;
     aa->size = sizeof(Agent*) * aa->capacity;
@@ -37,6 +39,7 @@ agent_array_insert(Agent_array* aa, Agent* a)
   /* save the agent to array */
   aa->agents[aa->count] = a;
   aa->count++;
+  //printf("inseted, count is %d\n", aa->count);
 }
 
 /* Create random agent */
@@ -132,6 +135,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
   {
     /* temp pointer for agent */
     a_ptr = aa->agents[i];
+    //printf("count aa: %d\n", aa->count);
 
     // If the agent isn't living, don't update anything
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
@@ -140,6 +144,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     local_agents = agents_get_local(a_ptr, quad, a_ptr->dna.vision);
     for(int j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
+      agent_item_collision(a_ptr, local_agents->agents[j]);
     }
     agent_update_mv_flock(a_ptr, local_agents);
 
@@ -148,6 +153,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
 
     agents_update_energy(a_ptr);
 
+    agent_split(a_ptr, aa);
 
     /* radius sized box around agent */
     agent_setup_vision_quad(a_ptr);
@@ -257,11 +263,13 @@ agents_update_mv_wrap(Agent* a_ptr)
 }
 
 float
-agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
+agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
 {
   float attraction = a_ptr->dna.fear;
   if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD)
     attraction = -attraction;
+
+  if(*mag < 0.15) return 0.0;
   return attraction;
 }
 
@@ -281,7 +289,8 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   float diff[] = {0.0f, 0.0f};
   float new_vel[] = {0.0f, 0.0f};
   float mag = 0.0f;
-  float tmp_fear = a_ptr->dna.fear;
+  //  float tmp_fear = a_ptr->dna.fear;
+  float attraction;
 
   diff[0] = a_ptr->x - t_ptr->x;
   diff[1] = a_ptr->y - t_ptr->y;
@@ -295,8 +304,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   new_vel[0] *= a_ptr->dna.metabolism;
   new_vel[1] *= a_ptr->dna.metabolism;
 
-  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD)
-    tmp_fear = -tmp_fear;
+  attraction = agent_item_attraction(a_ptr, t_ptr, &mag);
 
   /* lines */
   if(a_ptr->dna.fear > 0.0){
@@ -306,18 +314,12 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   {
     glColor4f(0.0, 1.0, 0.0, 0.1);
   }
-  glLineWidth((10.0 * tmp_fear * 0.5 - a_ptr->dna.metabolism) + 4.0);
+  glLineWidth((10.0 * attraction * 0.5 ) + 4.0);
   glBegin(GL_LINES);
   glVertex3f(t_ptr->x, t_ptr->y, 0.0);
   glVertex3f(a_ptr->x, a_ptr->y, 0.0);
   glEnd();
   glLineWidth(1.0);
-
-
-  if(mag > 0.15){
-    a_ptr->velocity.x += new_vel[0] * tmp_fear;
-    a_ptr->velocity.y += new_vel[1] * tmp_fear;
-  }
 
   agent_normalize_velocity(a_ptr);
 }
@@ -349,6 +351,52 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
 
   agent_normalize_velocity(a_ptr);
 
+
+}
+void
+agent_item_collision(Agent* a_ptr, Agent* t_ptr)
+{
+  float close = 0.02;
+  if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
+      (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
+    //printf("col\n");
+    switch(t_ptr->state){
+      case AGENT_STATE_LIVING:
+        t_ptr->state = AGENT_STATE_DEAD;
+        break;
+      case AGENT_STATE_DEAD:
+        t_ptr->state = AGENT_STATE_PRUNE;
+        a_ptr->energy += t_ptr->energy;
+        break;
+    }
+
+  }
+}
+
+void 
+agent_split(Agent* a_ptr, Agent_array* aa)
+{
+  Agent* tmp_agent;
+  //printf("count so far, %d\n", aa->count);
+  if(a_ptr->energy > 2.0)
+  {
+    a_ptr->energy *= 0.5;
+    tmp_agent = agent_create_random();
+    tmp_agent->dna = a_ptr->dna;
+    agent_setup_colors(tmp_agent);
+    tmp_agent->x = a_ptr->x + 0.03;
+    tmp_agent->y = a_ptr->y;
+    //tmp_agent->x = a_ptr->y + 0.03;
+
+    //tmp_agent = malloc(sizeof(Agent));
+    //memcpy(tmp_agent, a_ptr, sizeof(Agent));
+    //tmp_agent->velocity.x = -tmp_agent->velocity.x;
+    //tmp_agent->velocity.y = -tmp_agent->velocity.y;
+    //tmp_agent->x += 0.02;
+    //tmp_agent->y += 0.02;
+    agent_array_insert(aa, tmp_agent);
+    //printf("inserting new agent\n");
+  }
 
 }
 

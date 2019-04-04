@@ -25,10 +25,10 @@
 #define AGENT_FEAR_MIN (-1.0)
 
 #define AGENT_VISION_MAX (0.05)
-#define AGENT_VISION_MIN (0.25)
+#define AGENT_VISION_MIN (0.15)
 
 #define AGENT_METAB_ENERGY_SCALE(x) (0.001 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((20 * x) + 2)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 2)
 
 #define AGENT_MAX_SPEED (0.005)
 
@@ -37,7 +37,7 @@
 #define AGENTS_TIME_FACTOR (0.5)
 
 #define AGENT_ARRAY_DEFAULT_SIZE (16)
-#define AGENT_DEBUG_SHOW_VISION (1)
+#define AGENT_DEBUG_SHOW_VISION (0)
 
 #define AGENT_VIS_VERTS_DEFAULT (16)
 
@@ -129,7 +129,11 @@ void agents_update_mv_wrap(Agent* a_ptr);
 
 void agent_normalize_velocity(Agent* a_ptr);
 void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);
-float agent_item_attraction(Agent* a_ptr, Agent* t_ptr);
+float agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag);
+
+void agent_item_collision(Agent* a_ptr, Agent* t_ptr);
+
+void agent_split(Agent* a_ptr, Agent_array* aa);
 
 void agent_update_mv_flock(Agent* a_ptr, Agent_array* aa);
 

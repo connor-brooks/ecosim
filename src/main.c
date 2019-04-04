@@ -14,7 +14,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (100)
+#define DEV_AGENT_COUNT (200)
 
 
 /* TEMPORARY GLOBAL */
@@ -169,7 +169,8 @@ main(int argc, char **argv)
     for(int i = 0; i < agent_array->count; i++) {
       Agent* tmp_ptr = (agent_array->agents[i]);
       float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
-      quadtree_insert(quad, tmp_ptr, tmp_pos);
+      if(tmp_ptr->state != AGENT_STATE_PRUNE)
+        quadtree_insert(quad, tmp_ptr, tmp_pos);
     }
 
     /* Every frame rebuild the quadtree verts, draw them free them
@@ -193,7 +194,7 @@ main(int argc, char **argv)
     float scale = gfx_get_scale(window);
     agents_to_verts(agent_array, agent_verts_new);
     //test = (float)scale_w / ((float)window_width / 2.0);
-    printf("scale %f\n", scale);
+    //printf("scale %f\n", scale);
 
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
