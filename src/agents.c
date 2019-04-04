@@ -335,7 +335,7 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
     total[0] += aa->agents[i]->velocity.x;
     total[1] += aa->agents[i]->velocity.y;
   }
-  printf("total %f, %f\n", total[0], total[1]);
+  //printf("total %f, %f\n", total[0], total[1]);
   avg[0] = total[0] / (float) i;
   avg[1] = total[1] / (float) i;
 
@@ -345,7 +345,7 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
 
   a_ptr->velocity.x += new[0];
   a_ptr->velocity.y += new[1];
-  printf("mag %f, %f\n", new[0], new[1]);
+  //printf("mag %f, %f\n", new[0], new[1]);
 
   agent_normalize_velocity(a_ptr);
 
@@ -433,7 +433,7 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
       0.0f : // pruning
       AGENT_RGB_ALPHA;
 
-    v_pos[av->end] = agent->dna.vision * 400;
+    v_pos[av->end] = agent->dna.vision; // * 400;
     v_col[av->end] = (agent->state != AGENT_STATE_LIVING)?
       0.0f : // pruning
       AGENT_VIS_ALPHA;

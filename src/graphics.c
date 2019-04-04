@@ -82,7 +82,7 @@ gfx_agent_vis_shader()
     "void main() {"
     "color_out = color;"
     "  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
-    "  gl_PointSize = position.w * window.x;"
+    "  gl_PointSize = position.w * window.x * 400;"
     "}";
 
   const char* vis_fs =
@@ -260,10 +260,15 @@ gfx_get_scale(GLFWwindow* window)
 {
     const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     int w_screen = mode->width;
+    int h_screen = mode->height;
     int w_window, h_window;
-    float scale;
+    float h_scale, w_scale, scale;
+
 
     glfwGetWindowSize(window, &w_window, &h_window);
-    scale = (float)w_window / ((float)w_screen / 2.0);
+
+    w_scale = (float)w_window / ((float)w_screen / 2.0);
+    h_scale = (float)h_window / ((float)h_screen / 2.0);
+    scale = (h_scale + w_scale) / 2.0f;
     return scale;
 }

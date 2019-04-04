@@ -194,6 +194,7 @@ main(int argc, char **argv)
     agents_to_verts(agent_array, agent_verts_new);
     //test = (float)scale_w / ((float)window_width / 2.0);
     printf("scale %f\n", scale);
+
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
 
