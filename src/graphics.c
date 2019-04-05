@@ -98,7 +98,7 @@ gfx_agent_vis_shader()
     " vec2 test2 = gl_PointCoord - vec2(0.5);"
  //   " float rand = random(color_out) * 0.2;"
     " if(length(test2) > 0.5) discard;"
-    "  gl_FragColor = color_out * (length(test2) * 1.0) + 0.05;"
+    "  gl_FragColor = color_out * fract((length(test2) - 0.4) * 4.0) + 0.02;"
     " if(color_out.w == 0) gl_FragColor.w = 0;"
 //    "  gl_FragColor = color_out ;"
     "}";

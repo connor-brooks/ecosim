@@ -14,7 +14,7 @@
 #include "ui.h"
 #include "quadtree.h"
 
-#define DEV_AGENT_COUNT (200)
+#define DEV_AGENT_COUNT (100)
 
 
 /* TEMPORARY GLOBAL */
@@ -90,6 +90,7 @@ main(int argc, char **argv)
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
   Agent_vis_verts* agent_vis_verts;
+  int cyclecount = 0;
 
   Quadtree* quad;
   Quadtree_verts* quad_verts;
@@ -129,6 +130,9 @@ main(int argc, char **argv)
    * setup agent verts
    * setup agent shader */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
+
+  agents_insert_dead(agent_array, 10);
+
   agent_verts_new = agent_verts_create();
   agent_vis_verts = agent_vis_verts_create();
   GLuint agent_shader = gfx_agent_shader();
@@ -211,6 +215,11 @@ main(int argc, char **argv)
       //printf("q got %d agent\n", query->ptr_count);
       //quadtree_query_free(query);
 
+      if(cyclecount % 100 == 0) {
+        agents_insert_dead(agent_array, 5);
+        printf("ok\n");
+      }
+      cyclecount++;
       /* Update agents */
       agents_update(agent_array, quad);
     }

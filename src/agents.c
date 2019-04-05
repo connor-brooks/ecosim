@@ -30,7 +30,7 @@ void
 agent_array_insert(Agent_array* aa, Agent* a)
 {
   /* resize of needed */
- // printf("start: inseted, count is %d\n", aa->count);
+  // printf("start: inseted, count is %d\n", aa->count);
   if(aa->count + 1 >= aa->capacity){
     aa->capacity *= 2;
     aa->size = sizeof(Agent*) * aa->capacity;
@@ -51,6 +51,11 @@ agent_create_random()
   tmp_agent->dna.metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
   tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
   tmp_agent->dna.vision = RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX);
+  tmp_agent->dna.rebirth = RANDF_MIN(AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX);
+  tmp_agent->dna.aggresion = RANDF_MIN(AGENT_AGGRESION_MIN, AGENT_AGGRESION_MAX);
+  tmp_agent->dna.diet = RANDF_MIN(AGENT_DIET_MIN, AGENT_DIET_MAX);
+  tmp_agent->dna.flock = RANDF_MIN(AGENT_FLOCK_MIN, AGENT_FLOCK_MAX);
+  tmp_agent->dna.wobble= RANDF_MIN(AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX);
 
   /* random pos / directional info */
   tmp_agent->x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
@@ -76,9 +81,43 @@ agent_create_random()
 void
 agent_setup_colors(Agent* a_ptr)
 {
-  a_ptr->rgb.r = (a_ptr->dna.fear > 0)? 0.0f : 1.0f;
-  a_ptr->rgb.g = a_ptr->dna.metabolism * 2.0;
-  a_ptr->rgb.b = (a_ptr->dna.fear < 0)? 0.0f : 1.0f;
+
+  float *diet = &a_ptr->dna.diet;
+  float *aggresion = &a_ptr->dna.aggresion;
+  float *metabolism = &a_ptr->dna.metabolism;
+  a_ptr->rgb.r = (*diet >= 0)? *diet : 0.0f;
+  a_ptr->rgb.g = *metabolism; //(a_ptr->dna.diet > 0.0) ? a_ptr->dna.diet : 0.0;
+  a_ptr->rgb.b = (*diet < 0.0f)? -(*diet): 0.0f;
+
+  float mag = sqrt(
+      (a_ptr->rgb.r * a_ptr->rgb.r) +
+      (a_ptr->rgb.g * a_ptr->rgb.g) +
+      (a_ptr->rgb.b * a_ptr->rgb.b)
+      );
+
+  a_ptr->rgb.r /= mag;
+  a_ptr->rgb.g /= mag;
+  a_ptr->rgb.b /= mag;
+
+
+}
+void
+agents_insert_dead(Agent_array* aa, int count)
+{
+  int i;
+  Agent* tmp_agent;
+  for(i = 0; i < count; i++) {
+    tmp_agent = agent_create_random();
+    tmp_agent->state = AGENT_STATE_DEAD;
+    tmp_agent->velocity.x = 0.00f;
+    tmp_agent->velocity.y = 0.00f;
+    tmp_agent->dna.diet = -1.0f;
+
+    tmp_agent->rgb.r = 0.7;
+    tmp_agent->rgb.g = 0.7;
+    tmp_agent->rgb.b = 0.7;
+    agent_array_insert(aa, tmp_agent);
+  }
 }
 
 void
@@ -142,11 +181,15 @@ agents_update(Agent_array* aa, Quadtree* quad)
 
     /* get local agents */
     local_agents = agents_get_local(a_ptr, quad, a_ptr->dna.vision);
+
+    /* flock */
+    agent_update_mv_flock(a_ptr, local_agents);
+
+    /* avoid or attrack */
     for(int j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
       agent_item_collision(a_ptr, local_agents->agents[j]);
     }
-    agent_update_mv_flock(a_ptr, local_agents);
 
     /* updates */
     agents_update_location(a_ptr);
@@ -162,8 +205,8 @@ agents_update(Agent_array* aa, Quadtree* quad)
     /* debug */
     if(AGENT_DEBUG_SHOW_VISION){
       //quadtree_query_dump(query);
-      glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.03);
-      glBegin(GL_QUADS);
+      glColor4f(1.0, 1.0,1.0, 0.5);
+      glBegin(GL_LINE_LOOP);
       glVertex3f(bot_left[0], bot_left[1], 0.0);
       glVertex3f(top_right[0], bot_left[1], 0.0);
       glVertex3f(top_right[0], top_right[1], 0.0);
@@ -233,8 +276,13 @@ agents_update_location(Agent* a_ptr)
 
   /* also change velocity into an array */
   /* Move agents */
-  a_ptr->x += a_ptr->velocity.x * mv_amt;
-  a_ptr->y += a_ptr->velocity.y * mv_amt;
+  float wobble[] = {0.0, 0.0};
+  float p_random[] = {0.0, 0.0};
+
+  wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
+  wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
+  a_ptr->x += a_ptr->velocity.x * mv_amt * fabs(wobble[0]);
+  a_ptr->y += a_ptr->velocity.y * mv_amt * fabs(wobble[1]);
 
   /* Wrap if needed */
   agents_update_mv_wrap(a_ptr);
@@ -256,8 +304,8 @@ agents_update_mv_wrap(Agent* a_ptr)
   /* loop through x and y and put the agents at the opposite side
    * of the screen if they're past the ends */
   for(tmp_ptr = &a_ptr->x; tmp_ptr <= &a_ptr->y; tmp_ptr++){
-    *tmp_ptr = ((*tmp_ptr> WORLD_MAX_COORD) || (*tmp_ptr < WORLD_MIN_COORD)) ?
-      -(*tmp_ptr) :
+    *tmp_ptr = ((*tmp_ptr > WORLD_MAX_COORD) || (*tmp_ptr <= WORLD_MIN_COORD)) ?
+      -(*tmp_ptr)* 0.99:
       *tmp_ptr;
   }
 }
@@ -265,11 +313,56 @@ agents_update_mv_wrap(Agent* a_ptr)
 float
 agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
 {
-  float attraction = a_ptr->dna.fear;
-  if(a_ptr->dna.fear >= 0.0 && t_ptr->state == AGENT_STATE_DEAD)
-    attraction = -attraction;
+  float attraction = 0.0f; //(a_ptr->dna.aggresion);
 
-  if(*mag < 0.15) return 0.0;
+  int a_diet = (a_ptr->dna.diet > 0.0f) ?
+    AGENT_DIET_LIVING :
+    AGENT_DIET_DEAD;
+
+  int t_diet = (t_ptr->dna.diet > 0.0f) ?
+    AGENT_DIET_LIVING :
+    AGENT_DIET_DEAD;
+
+  int t_state = t_ptr->state;
+
+  /* meat eater vs any living */
+  if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_LIVING)
+    attraction = 1.0;
+
+  /* meat eater vs other meat eater */
+  if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
+    //if(*mag < 0.03) attraction = -1.0;
+    attraction = 0.0;
+  }
+
+  /* meat eater vs dead */
+  if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_DEAD)
+    attraction = 0.0;
+
+  /* plant eater vs dead */
+  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_DEAD)
+    attraction = 1.0;
+
+  /* plant eater vs living */
+  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
+    attraction = 0.0;
+
+  /* plant eater vs meat eater*/
+  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
+    attraction = -1.0;
+
+
+  //  if(a_ptr->dna.diet < 0.0f && t_ptr->state == AGENT_STATE_DEAD)
+  //    attraction = 1.0 * abs(a_ptr->dna.diet);
+  //
+  //  if(a_ptr->dna.diet > 0.0f && t_ptr->state == AGENT_STATE_DEAD)
+  //    attraction = 0.0;
+  //
+  //  if(a_ptr->dna.diet > 0.0f && t_ptr->state == AGENT_STATE_LIVING)
+  //    attraction = 1.0 * abs(a_ptr->dna.diet);
+  //
+  //
+  //  if(*mag < 0.2) return 0.1;
   return attraction;
 }
 
@@ -289,22 +382,27 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   float diff[] = {0.0f, 0.0f};
   float new_vel[] = {0.0f, 0.0f};
   float mag = 0.0f;
-  //  float tmp_fear = a_ptr->dna.fear;
   float attraction;
 
+  /* calc difference */
   diff[0] = a_ptr->x - t_ptr->x;
   diff[1] = a_ptr->y - t_ptr->y;
 
-  /* Noramlise and set new vector */
+  /* Noramlise and create new vector */
   mag = sqrt((diff[0] * diff[0]) + (diff[1] * diff[1]));
   new_vel[0] = (diff[0] / mag);
   new_vel[1] = (diff[1] / mag);
 
   /* Take into account metabolism for speed */
-  new_vel[0] *= a_ptr->dna.metabolism;
-  new_vel[1] *= a_ptr->dna.metabolism;
+  new_vel[0] *= a_ptr->dna.metabolism / 2.0;
+  new_vel[1] *= a_ptr->dna.metabolism / 2.0;
 
+  /* Is agent attracted or repeled? */
   attraction = agent_item_attraction(a_ptr, t_ptr, &mag);
+
+  /* sub from existing vector */
+  a_ptr->velocity.x -= new_vel[0] * attraction;
+  a_ptr->velocity.y -= new_vel[1] * attraction;
 
   /* lines */
   if(a_ptr->dna.fear > 0.0){
@@ -328,26 +426,38 @@ void
 agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
 {
   int i;
+  int count;
   float total[] = {0.0f, 0.0f};
   float avg[] = {0.0f, 0.0f};
   float new[] = {0.0f, 0.0f};
+  Agent* tmp_agent;
+
+  float attraction;
+  float dummy_f = 1.0f;
 
   if(aa->count == 0) return;
   for(i = 0; i < aa->count; i++) {
-    total[0] += aa->agents[i]->velocity.x;
-    total[1] += aa->agents[i]->velocity.y;
+    tmp_agent = aa->agents[i];
+    attraction = agent_item_attraction(a_ptr, tmp_agent, &dummy_f);
+    //if(aa->agents[i]->state != AGENT_STATE_LIVING) continue;
+    if(attraction >= 0){
+      total[0] += aa->agents[i]->velocity.x;
+      total[1] += aa->agents[i]->velocity.y;
+      count++;
+    }
   }
   //printf("total %f, %f\n", total[0], total[1]);
-  avg[0] = total[0] / (float) i;
-  avg[1] = total[1] / (float) i;
+  avg[0] = (total[0] == 0) ? 0 : total[0] / (float) count;
+  avg[1] = (total[1] == 0) ? 0 : total[1] / (float) count;
 
   float mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
-  new[0] =  avg[0] / mag;
-  new[1] =  avg[1] / mag;
+  mag += 0.00001;
+  new[0] =  (avg[0] == 0) ? 0 : avg[0] / mag;
+  new[1] =  (avg[0] == 0) ? 0 : avg[1] / mag;
 
-  a_ptr->velocity.x += new[0];
-  a_ptr->velocity.y += new[1];
-  //printf("mag %f, %f\n", new[0], new[1]);
+  if(mag < 0.35) return;
+  a_ptr->velocity.x += new[0] * a_ptr->dna.flock;
+  a_ptr->velocity.y += new[1] * a_ptr->dna.flock;
 
   agent_normalize_velocity(a_ptr);
 
@@ -357,46 +467,137 @@ void
 agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
   float close = 0.02;
+  float a_diet = a_ptr->dna.diet;
+  float t_diet = t_ptr->dna.diet;
+
   if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
       (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
     //printf("col\n");
     switch(t_ptr->state){
       case AGENT_STATE_LIVING:
-        t_ptr->state = AGENT_STATE_DEAD;
+        if(round(a_diet) > round(t_diet)){
+          t_ptr->state = AGENT_STATE_PRUNE;
+          a_ptr->energy += t_ptr->energy;
+        }
         break;
       case AGENT_STATE_DEAD:
-        t_ptr->state = AGENT_STATE_PRUNE;
-        a_ptr->energy += t_ptr->energy;
+        if(a_ptr->dna.diet < 0) {
+          t_ptr->state = AGENT_STATE_PRUNE;
+          a_ptr->energy += t_ptr->energy;
+        }
         break;
     }
 
   }
 }
 
-void 
+void
 agent_split(Agent* a_ptr, Agent_array* aa)
 {
   Agent* tmp_agent;
-  //printf("count so far, %d\n", aa->count);
-  if(a_ptr->energy > 2.0)
+  /* if energy is higher than rebirth threshold */
+  if(a_ptr->energy > a_ptr->dna.rebirth)
   {
     a_ptr->energy *= 0.5;
     tmp_agent = agent_create_random();
-    tmp_agent->dna = a_ptr->dna;
-    agent_setup_colors(tmp_agent);
-    tmp_agent->x = a_ptr->x + 0.03;
-    tmp_agent->y = a_ptr->y;
-    //tmp_agent->x = a_ptr->y + 0.03;
 
-    //tmp_agent = malloc(sizeof(Agent));
-    //memcpy(tmp_agent, a_ptr, sizeof(Agent));
-    //tmp_agent->velocity.x = -tmp_agent->velocity.x;
-    //tmp_agent->velocity.y = -tmp_agent->velocity.y;
-    //tmp_agent->x += 0.02;
-    //tmp_agent->y += 0.02;
+    tmp_agent->dna = a_ptr->dna;
+    agent_dna_mutate(tmp_agent);
+
+    tmp_agent->x = a_ptr->x + 0.04;
+    tmp_agent->y = a_ptr->y + 0.04;
+
+    tmp_agent->velocity.x = a_ptr->velocity.x; 
+    tmp_agent->velocity.y = a_ptr->velocity.y;
+
     agent_array_insert(aa, tmp_agent);
     //printf("inserting new agent\n");
   }
+}
+void
+agent_dna_mutate(Agent* a_ptr)
+{
+  float rate = AGENTS_DNA_MUTATE_RATE;
+  float metabolism_change = RANDF_MIN(-1.0, 1.0) * rate;
+  float fear_change       = RANDF_MIN(-1.0, 1.0) * rate;
+  float vision_change     = RANDF_MIN(-1.0, 1.0) * rate;
+  float rebirth_change     = RANDF_MIN(-1.0, 1.0) * rate;
+  float aggresion_change     = RANDF_MIN(-1.0, 1.0) * rate;
+  float diet_change     = RANDF_MIN(-1.0, 1.0) * rate;
+  float flock_change     = RANDF_MIN(-1.0, 1.0) * rate;
+  float wobble_change     = RANDF_MIN(-1.0, 1.0) * rate * 10;
+
+  a_ptr->dna.metabolism +=
+    (RANDF(1) > 0.3)?
+    metabolism_change :
+    0;
+  a_ptr->dna.fear +=
+    (RANDF(1) > 0.3)?
+    fear_change:
+    0;
+
+  a_ptr->dna.vision +=
+    (RANDF(1) > 0.3)?
+    vision_change:
+    0;
+
+  a_ptr->dna.rebirth +=
+    (RANDF(1) > 0.3)?
+    rebirth_change :
+    0;
+
+  a_ptr->dna.aggresion +=
+    (RANDF(1) > 0.3)?
+    aggresion_change :
+    0;
+
+  a_ptr->dna.diet +=
+    (RANDF(1) > 0.3)?
+    diet_change :
+    0;
+
+  a_ptr->dna.flock +=
+    (RANDF(1) > 0.3)?
+    flock_change :
+    0;
+
+  a_ptr->dna.wobble +=
+    (RANDF(1) > 0.3)?
+    wobble_change :
+    0;
+
+  agent_setup_colors(a_ptr);
+
+  /* use minmax etc with new val for this */
+  if(a_ptr->dna.vision < AGENT_VISION_MIN)
+    a_ptr->dna.vision = AGENT_VISION_MIN;
+
+  if(a_ptr->dna.vision > AGENT_VISION_MAX)
+    a_ptr->dna.vision = AGENT_VISION_MAX;
+
+  if(a_ptr->dna.metabolism < AGENT_METAB_MIN)
+    a_ptr->dna.metabolism = AGENT_METAB_MIN;
+
+  if(a_ptr->dna.metabolism > AGENT_METAB_MAX)
+    a_ptr->dna.metabolism = AGENT_METAB_MAX;
+
+  if(a_ptr->dna.rebirth < AGENT_REBIRTH_MIN)
+    a_ptr->dna.rebirth = AGENT_REBIRTH_MIN;
+
+  if(a_ptr->dna.rebirth > AGENT_REBIRTH_MAX)
+    a_ptr->dna.rebirth = AGENT_REBIRTH_MAX;
+
+  if(a_ptr->dna.diet > AGENT_DIET_MAX)
+    a_ptr->dna.diet = AGENT_DIET_MAX;
+
+  if(a_ptr->dna.diet < AGENT_DIET_MIN)
+    a_ptr->dna.diet = AGENT_DIET_MIN;
+
+  if(a_ptr->dna.flock > AGENT_FLOCK_MAX)
+    a_ptr->dna.flock = AGENT_FLOCK_MAX;
+
+  if(a_ptr->dna.flock < AGENT_FLOCK_MIN)
+    a_ptr->dna.flock = AGENT_FLOCK_MIN;
 
 }
 
@@ -404,7 +605,11 @@ void
 agents_update_energy(Agent* a_ptr)
 {
   a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * AGENTS_TIME_FACTOR;
-  if(a_ptr->energy < AGENTS_ENERGY_DEAD) a_ptr->state = AGENT_STATE_DEAD;
+  if(a_ptr->energy < AGENTS_ENERGY_DEAD) {
+    a_ptr->state = AGENT_STATE_DEAD;
+    a_ptr->velocity.x = 0.0f;
+    a_ptr->velocity.y = 0.0f;
+  }
 }
 
 Agent_verts*
