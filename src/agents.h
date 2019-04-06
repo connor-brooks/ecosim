@@ -42,10 +42,10 @@
 #define AGENT_WOBBLE_MAX (15.00)
 #define AGENT_WOBBLE_MIN (3.00)
 
-#define AGENT_METAB_ENERGY_SCALE(x) (0.0015 * x)
+#define AGENT_METAB_ENERGY_SCALE(x) (0.001 * x)
 #define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 2)
 
-#define AGENT_MAX_SPEED (0.0025)
+#define AGENT_MAX_SPEED (0.0015)
 
 #define AGENTS_ENERGY_DEAD (0.3)
 

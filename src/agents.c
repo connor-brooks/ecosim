@@ -113,9 +113,9 @@ agents_insert_dead(Agent_array* aa, int count)
     tmp_agent->velocity.y = 0.00f;
     tmp_agent->dna.diet = -1.0f;
 
-    tmp_agent->rgb.r = 0.7;
-    tmp_agent->rgb.g = 0.7;
-    tmp_agent->rgb.b = 0.7;
+    tmp_agent->rgb.r = 0.5;
+    tmp_agent->rgb.g = 0.5;
+    tmp_agent->rgb.b = 0.5;
     agent_array_insert(aa, tmp_agent);
   }
 }
@@ -609,6 +609,7 @@ agents_update_energy(Agent* a_ptr)
     a_ptr->state = AGENT_STATE_DEAD;
     a_ptr->velocity.x = 0.0f;
     a_ptr->velocity.y = 0.0f;
+    a_ptr->dna.diet = -1.0f;
   }
 }
 
