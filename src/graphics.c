@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "ui_response.h"
 
-GLuint 
+GLuint
 gfx_setup_shader(const char* vs_raw, const char* fs_raw)
 {
   GLuint vs = 0;
@@ -34,7 +34,38 @@ gfx_setup_shader(const char* vs_raw, const char* fs_raw)
 
 }
 
-GLuint 
+GLuint
+gfx_world_shader()
+{
+  const char* world_vs =
+    "#version 130\n"
+    "in vec4 position;"
+    "in vec4 color_in;"
+    "out vec4 color_out;"
+    "out vec4 pos_out;"
+    "void main() {"
+    "pos_out = position;"
+    "color_out = color_in;"
+    "  gl_Position = position;"
+    "}";
+
+  const char* world_fs =
+    "#version 130\n"
+    "in vec4 color_out;"
+    "in vec4 pos_out;"
+    "float rand(float n){return fract(sin(n) * 43758.5453123);}"
+    "void main() {"
+    " vec2 pos = pos_out.xy;"
+    "vec4 new = vec4(1.0, 1.0, 1.0, 1.0);"
+    "float noise = rand(pos.x * pos.y) * 0.017;"
+    "new.w = noise;"
+    "  gl_FragColor = new;"
+    "}";
+
+  return gfx_setup_shader(world_vs, world_fs);
+}
+
+GLuint
 gfx_agent_shader()
 {
   const char* agents_vs =
@@ -53,24 +84,31 @@ gfx_agent_shader()
     "#version 130\n"
     "out vec4 frag_colour;"
     "in vec4 color_out;"
-//    "float random(vec4 col)"
-//    "{"
-//    "return fract(sin(dot(col,"
-//    "vec4(12.123213, 32.2312, 213.2312, 87.8343))));"
-//    "}"
+    //    "float random(vec4 col)"
+    //    "{"
+    //    "return fract(sin(dot(col,"
+    //    "vec4(12.123213, 32.2312, 213.2312, 87.8343))));"
+    //    "}"
+    "float rand(float n){return fract(sin(n) * 43758.5453123);}"
     "void main() {"
-    " vec2 test2 = gl_PointCoord - vec2(0.5);"
- //   " float rand = random(color_out) * 0.2;"
-    " if(length(test2) > 0.5) discard;"
-    "  gl_FragColor = color_out * (1 - (length(test2) ));"
-    //"  gl_FragColor = color_out ;"
+    "vec4 color = color_out;"
+    " vec2 pos = gl_PointCoord - vec2(0.5);"
+    "    float r = length(pos)*1.0;"
+    "    float a = atan(pos.y,pos.x);"
+    "    float f = cos(a * 60);"
+    "    float alpha =  smoothstep(f,f+0.02,r) * 0.4;"
+    " if(length(pos) > 0.5) discard;"
+    " color.w = (alpha + color.w) ;"
+    //    "float alpha = 1.0-smoothstep(0.0, 0.5, length(gl_PointCoord-0.5));"
+    "if(color_out.w == 0) color.w = 0;"
+    "  gl_FragColor =  color * (1 - (length(pos) ));"
     "}";
 
   return gfx_setup_shader(agents_vs, agents_fs);
 
 }
 
-GLuint 
+GLuint
 gfx_agent_vis_shader()
 {
   const char* vis_vs =
@@ -89,18 +127,16 @@ gfx_agent_vis_shader()
     "#version 130\n"
     "out vec4 frag_colour;"
     "in vec4 color_out;"
-//    "float random(vec4 col)"
-//    "{"
-//    "return fract(sin(dot(col,"
-//    "vec4(12.123213, 32.2312, 213.2312, 87.8343))));"
-//    "}"
+    "float rand(float n){return fract(sin(n) * 43758.5453123);}"
     "void main() {"
-    " vec2 test2 = gl_PointCoord - vec2(0.5);"
- //   " float rand = random(color_out) * 0.2;"
-    " if(length(test2) > 0.5) discard;"
-    "  gl_FragColor = color_out * fract((length(test2) - 0.4) * 4.0) + 0.02;"
+    "vec4 color = color_out;"
+    " vec2 pos = gl_PointCoord - vec2(0.5);"
+    "float noise = rand(pos.x * pos.y) * 0.07;"
+    "color.w = color.w + noise;"
+    " if(length(pos) > 0.5) discard;"
+    "  gl_FragColor = color * fract((length(pos) - 0.4) * 4.0) + 0.02;"
     " if(color_out.w == 0) gl_FragColor.w = 0;"
-//    "  gl_FragColor = color_out ;"
+    //    "  gl_FragColor = color_out ;"
     "}";
 
   return gfx_setup_shader(vis_vs, vis_fs);
@@ -129,13 +165,13 @@ ui_gfx_setup(void)
 }
 
 
-void 
+void
 ui_gfx_free(Ui_graphics* uig)
 {
-//
-free(uig->vertex_data);
-free(uig->cmd_txt);
-free(uig);
+  //
+  free(uig->vertex_data);
+  free(uig->cmd_txt);
+  free(uig);
 }
 
 void
@@ -195,7 +231,7 @@ gfx_text_draw(float x, float y, const unsigned char* txt)
 void
 gfx_quad_draw(Quadtree_verts* qv)
 {
-  glColor4f(0.1, 0.1, 0.1, 0.5);
+  glColor4f(0.1, 0.1, 0.1, 0.2);
   glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_FLOAT, 0, qv->verts);
@@ -258,17 +294,30 @@ gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale)
 float
 gfx_get_scale(GLFWwindow* window)
 {
-    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    int w_screen = mode->width;
-    int h_screen = mode->height;
-    int w_window, h_window;
-    float h_scale, w_scale, scale;
+  const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+  int w_screen = mode->width;
+  int h_screen = mode->height;
+  int w_window, h_window;
+  float h_scale, w_scale, scale;
 
 
-    glfwGetWindowSize(window, &w_window, &h_window);
+  glfwGetWindowSize(window, &w_window, &h_window);
 
-    w_scale = (float)w_window / ((float)w_screen / 2.0);
-    h_scale = (float)h_window / ((float)h_screen / 2.0);
-    scale = (h_scale + w_scale) / 2.0f;
-    return scale;
+  w_scale = (float)w_window / ((float)w_screen / 2.0);
+  h_scale = (float)h_window / ((float)h_screen / 2.0);
+  scale = (h_scale + w_scale) / 2.0f;
+  return scale;
+}
+
+void gfx_world_texture(GLuint shader)
+{
+  glColor3f(0.0, 1.0, 0.0);
+  glUseProgram(shader);
+  glBegin(GL_QUADS);
+  glVertex3f(-1.0f, -1.0f, 0.0f);
+  glVertex3f(1.0f, -1.0f, 0.0f);
+  glVertex3f(1.0f, 1.0f, 0.0f);
+  glVertex3f(-1.0f, 1.0f, 0.0f);
+  glEnd();
+  glUseProgram(0);
 }

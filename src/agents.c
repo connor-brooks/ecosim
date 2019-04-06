@@ -205,7 +205,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     /* debug */
     if(AGENT_DEBUG_SHOW_VISION){
       //quadtree_query_dump(query);
-      glColor4f(1.0, 1.0,1.0, 0.5);
+      glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.5);
       glBegin(GL_LINE_LOOP);
       glVertex3f(bot_left[0], bot_left[1], 0.0);
       glVertex3f(top_right[0], bot_left[1], 0.0);
@@ -405,14 +405,8 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   a_ptr->velocity.y -= new_vel[1] * attraction;
 
   /* lines */
-  if(a_ptr->dna.fear > 0.0){
-    glColor4f(1.0, 0.0, 0.0, 0.1);
-  }
-  else
-  {
-    glColor4f(0.0, 1.0, 0.0, 0.1);
-  }
-  glLineWidth((10.0 * attraction * 0.5 ) + 4.0);
+  glColor4f(a_ptr->rgb.r, a_ptr->rgb.g, a_ptr->rgb.b, 0.25);
+  glLineWidth(2.0f);
   glBegin(GL_LINES);
   glVertex3f(t_ptr->x, t_ptr->y, 0.0);
   glVertex3f(a_ptr->x, a_ptr->y, 0.0);
@@ -507,7 +501,7 @@ agent_split(Agent* a_ptr, Agent_array* aa)
     tmp_agent->x = a_ptr->x + 0.04;
     tmp_agent->y = a_ptr->y + 0.04;
 
-    tmp_agent->velocity.x = a_ptr->velocity.x; 
+    tmp_agent->velocity.x = a_ptr->velocity.x;
     tmp_agent->velocity.y = a_ptr->velocity.y;
 
     agent_array_insert(aa, tmp_agent);

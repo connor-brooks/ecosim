@@ -91,6 +91,9 @@ main(int argc, char **argv)
   Agent_verts* agent_verts_new;
   Agent_vis_verts* agent_vis_verts;
   int cyclecount = 0;
+  /* Quadtree head pos info */
+  float quad_head_pos[] = {-1.0f, -1.0f};
+  float quad_head_size = 2.0f;
 
   Quadtree* quad;
   Quadtree_verts* quad_verts;
@@ -135,12 +138,12 @@ main(int argc, char **argv)
 
   agent_verts_new = agent_verts_create();
   agent_vis_verts = agent_vis_verts_create();
+
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
 
-  /* Quadtree head pos info */
-  float quad_head_pos[] = {-1.0f, -1.0f};
-  float quad_head_size = 2.0f;
+  GLuint world_shader = gfx_world_shader();
+
 
   /* Setup UI graphics */
   ui_gfx = ui_gfx_setup();
@@ -162,12 +165,12 @@ main(int argc, char **argv)
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
+    float scale = gfx_get_scale(window);
 
     /* Clear*/
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Recreate quadtree and insert agents */
-
     quad = quadtree_create(quad_head_pos, quad_head_size);
 
     for(int i = 0; i < agent_array->count; i++) {
@@ -187,42 +190,29 @@ main(int argc, char **argv)
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed,
      * so we free at end, as the struct should presist all through running of program*/
-
-    //const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-    //int window_width = mode->width;
-    //int  window_height = mode->height;
-    //int scale_w, scale_h;
-    //float test;
-    //glfwGetWindowSize(window, &scale_w, &scale_h);
-    float scale = gfx_get_scale(window);
     agents_to_verts(agent_array, agent_verts_new);
-    //test = (float)scale_w / ((float)window_width / 2.0);
-    //printf("scale %f\n", scale);
 
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
+    gfx_world_texture(world_shader);
+
 
     /* Draw UI */
     ui_draw(ui_gfx);
 
     if(game_run)
     {
-      /* test code for query */
-      //Quadtree_query* query = quadtree_query_setup();
+      agents_update(agent_array, quad);
 
-      //quadtree_query(quad, query, quad_head_pos, quad_head_size);
-      //printf("q got %d agent\n", query->ptr_count);
-      //quadtree_query_free(query);
-
+      /* insert food agents every 100 cycles */
       if(cyclecount % 100 == 0) {
         agents_insert_dead(agent_array, 5);
         printf("ok\n");
       }
       cyclecount++;
-      /* Update agents */
-      agents_update(agent_array, quad);
+
     }
+
     quadtree_free(quad);
 
     /* swap */

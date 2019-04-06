@@ -23,6 +23,8 @@ GLuint gfx_setup_shader(const char* vs_raw, const char* fs_raw);
 GLuint gfx_agent_shader();
 GLuint gfx_agent_vis_shader();
 
+GLuint gfx_world_shader();
+
 void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale);
 void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale);
 
@@ -37,7 +39,7 @@ void gfx_text_draw(float x, float y, const unsigned char* txt);
 
 float gfx_get_scale(GLFWwindow* window);
 
-
+void gfx_world_texture(GLuint shader);
 
 
 #endif

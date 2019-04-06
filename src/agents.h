@@ -10,7 +10,7 @@
 
 #define AGENT_RGB_MAX (1.0)
 #define AGENT_RGB_MIN (1.0)
-#define AGENT_RGB_ALPHA (0.8)
+#define AGENT_RGB_ALPHA (0.9)
 
 #define AGENT_VIS_ALPHA (0.1)
 
