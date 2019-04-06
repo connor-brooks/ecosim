@@ -192,9 +192,9 @@ main(int argc, char **argv)
      * so we free at end, as the struct should presist all through running of program*/
     agents_to_verts(agent_array, agent_verts_new);
 
+    gfx_world_texture(world_shader, glfwGetTime());
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
-    gfx_world_texture(world_shader, glfwGetTime());
 
 
     /* Draw UI */

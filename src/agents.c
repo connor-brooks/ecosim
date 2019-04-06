@@ -174,8 +174,17 @@ agents_update(Agent_array* aa, Quadtree* quad)
   {
     /* temp pointer for agent */
     a_ptr = aa->agents[i];
-    //printf("count aa: %d\n", aa->count);
 
+//    glColor3f(1.0, 0.0, 0.0);
+//    float vis = AGENT_ENERGY_SIZE_SCALE(a_ptr->energy);
+//    printf("vis %f\n", vis);
+//    glBegin(GL_QUADS);
+//    glVertex3f(a_ptr->x, a_ptr->y, 0.0f);
+//    glVertex3f(a_ptr->x + vis, a_ptr->y, 0.0f);
+//    glVertex3f(a_ptr->x + vis, a_ptr->y + vis, 0.0f);
+//    glVertex3f(a_ptr->x , a_ptr->y + vis, 0.0f);
+//    glEnd();
+//
     // If the agent isn't living, don't update anything
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
@@ -342,6 +351,15 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
   /* plant eater vs dead */
   if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_DEAD)
     attraction = 1.0;
+
+  /* plant eater vs platn eater */
+  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
+  {
+    //printf("with mag of %f\n", *mag);
+    //if(*mag < 0.03 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+    attraction = 0.0f;
+
+  }
 
   /* plant eater vs living */
   if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
