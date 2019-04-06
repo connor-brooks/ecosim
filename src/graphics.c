@@ -41,6 +41,7 @@ gfx_world_shader()
     "#version 130\n"
     "in vec4 position;"
     "in vec4 color_in;"
+    "uniform float time;"
     "out vec4 color_out;"
     "out vec4 pos_out;"
     "void main() {"
@@ -53,11 +54,12 @@ gfx_world_shader()
     "#version 130\n"
     "in vec4 color_out;"
     "in vec4 pos_out;"
-    "float rand(float n){return fract(sin(n) * 43758.5453123);}"
+    "uniform float time;"
+    "float rand(float n){return fract(sin(n + fract(time)) * 43758.5453123);}"
     "void main() {"
     " vec2 pos = pos_out.xy;"
     "vec4 new = vec4(1.0, 1.0, 1.0, 1.0);"
-    "float noise = rand(pos.x * pos.y) * 0.017;"
+    "float noise = rand(pos.x * pos.y) * 0.02;"
     "new.w = noise;"
     "  gl_FragColor = new;"
     "}";
@@ -231,7 +233,7 @@ gfx_text_draw(float x, float y, const unsigned char* txt)
 void
 gfx_quad_draw(Quadtree_verts* qv)
 {
-  glColor4f(0.1, 0.1, 0.1, 0.2);
+  glColor4f(1.0, 1.0, 1.0, 0.02);
   glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_FLOAT, 0, qv->verts);
@@ -309,10 +311,14 @@ gfx_get_scale(GLFWwindow* window)
   return scale;
 }
 
-void gfx_world_texture(GLuint shader)
+void gfx_world_texture(GLuint shader, float time)
 {
   glColor3f(0.0, 1.0, 0.0);
   glUseProgram(shader);
+
+  GLuint loc = glGetUniformLocation(shader, "time");
+  glUniform1f(loc, time);
+
   glBegin(GL_QUADS);
   glVertex3f(-1.0f, -1.0f, 0.0f);
   glVertex3f(1.0f, -1.0f, 0.0f);

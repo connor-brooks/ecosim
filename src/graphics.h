@@ -39,7 +39,7 @@ void gfx_text_draw(float x, float y, const unsigned char* txt);
 
 float gfx_get_scale(GLFWwindow* window);
 
-void gfx_world_texture(GLuint shader);
+void gfx_world_texture(GLuint shader, float time);
 
 
 #endif
