@@ -2,6 +2,8 @@
 *An ecosystem simulator*
 
 Ecosim is an ecosystem simulator, which is a work in progress. 
+
+![Screenshot of ecosim](screenshot.png)
 ## Requirements
 * gcc
 * make
