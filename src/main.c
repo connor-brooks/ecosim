@@ -20,6 +20,8 @@
 /* TEMPORARY GLOBAL */
 int game_run = 1;
 float zoom = 1.0;
+float xOffset = 0.0f;
+float yOffset = 0.0f;
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -109,7 +111,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     user_ptrs = glfwGetWindowUserPointer(window);
     Agent_array* aa = user_ptrs->aa;
-    
+
     tmp_agent = agent_create_random();
     tmp_agent->x = xRel;
     tmp_agent->y = -yRel;
@@ -123,12 +125,21 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
   xoffset *= 0.025;
   yoffset *= 0.025;
+  int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
   printf("offset x: %f, y %f\n", xoffset, yoffset);
-  zoom += yoffset;
+  if(key){
+    zoom += yoffset;
+    printf("key %d\n", key);
 
-  zoom = MAX(1.0, zoom);
-  zoom = MIN(2.0, zoom);
-  printf("zoom %f\n", zoom);
+    zoom = MAX(1.0, zoom);
+    zoom = MIN(2.0, zoom);
+    printf("zoom %f\n", zoom);
+  }
+  else {
+    xOffset += xoffset;
+    yOffset += -yoffset;
+
+  }
 }
 
 int
@@ -233,6 +244,7 @@ main(int argc, char **argv)
     }
     glPushMatrix();
     glScalef(zoom, zoom, 1.);
+    glTranslatef(xOffset, yOffset, 1.0);
 
     /* Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
