@@ -46,23 +46,24 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
     //glfwSetWindowShouldClose(window, GLFW_TRUE);
+    if(key == GLFW_KEY_SPACE)
     game_run = !game_run;
     /* For pointer passing between callback and main */
-    user_ptrs = glfwGetWindowUserPointer(window);
-    uig = user_ptrs->uig;
-    ui = user_ptrs->ui;
+   // user_ptrs = glfwGetWindowUserPointer(window);
+   // uig = user_ptrs->uig;
+   // ui = user_ptrs->ui;
 
-    /* change to
-     * ui_update = ui_get_key_resp(); */
-    /* Encode the key event to k_event struct, get response from UI */
-    k_event = keyboard_enc_event(key, mods);
-    ui_resp = ui_get_resp(ui, k_event);
-    /* ^ should stay in normal mode, unless CMD_WAIT_SEL from cmd is set,
-     * if so, go into select mode. if select sucessful with ENTER, return UI_RESP_SELECTION
-     * if no selection, just keep drawing as usual
-     * if ESC, send UI_RESP_EXIT_CMD */
-    ui_gfx_update(ui_resp, uig);
-    /* ^ should be changed to take a ui_resp, instead of the whole ui struct */
+   // /* change to
+   //  * ui_update = ui_get_key_resp(); */
+   // /* Encode the key event to k_event struct, get response from UI */
+   // k_event = keyboard_enc_event(key, mods);
+   // ui_resp = ui_get_resp(ui, k_event);
+   // /* ^ should stay in normal mode, unless CMD_WAIT_SEL from cmd is set,
+   //  * if so, go into select mode. if select sucessful with ENTER, return UI_RESP_SELECTION
+   //  * if no selection, just keep drawing as usual
+   //  * if ESC, send UI_RESP_EXIT_CMD */
+   // ui_gfx_update(ui_resp, uig);
+   // /* ^ should be changed to take a ui_resp, instead of the whole ui struct */
 
     /* cmd_run(ui) // run cmd from ui
      * ^ can respond in two ways:
@@ -80,8 +81,8 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
     /* Bit of debug */
     //  printf("key %d or %c, special %d\n", k_event->ch, k_event->ch, k_event->special);
-    free(k_event);
-    free(ui_resp);
+    //free(k_event);
+    //free(ui_resp);
   }
 
 }
@@ -126,18 +127,39 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
   xoffset *= 0.025;
   yoffset *= 0.025;
   int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
-  printf("offset x: %f, y %f\n", xoffset, yoffset);
+//  printf("offset x: %f, y %f\n", xoffset, yoffset);
   if(key){
     zoom += yoffset;
-    printf("key %d\n", key);
+ //   printf("key %d\n", key);
 
     zoom = MAX(1.0, zoom);
     zoom = MIN(2.0, zoom);
     printf("zoom %f\n", zoom);
+
+    /* keep in window */
+    float max = (1 / zoom) - 1;
+
+    xOffset = MAX(max, xOffset);
+    xOffset = MIN(-max, xOffset);
+
+    yOffset = MAX(max, yOffset);
+    yOffset = MIN(-max, yOffset);
+
   }
   else {
     xOffset += xoffset;
     yOffset += -yoffset;
+    
+    /* keep in window */
+    float max = (1 / zoom) - 1;
+
+    xOffset = MAX(max, xOffset);
+    xOffset = MIN(-max, xOffset);
+
+    yOffset = MAX(max, yOffset);
+    yOffset = MIN(-max, yOffset);
+
+    printf("set is x %f, y %f\n", xOffset, yOffset);
 
   }
 }
@@ -276,6 +298,7 @@ main(int argc, char **argv)
       if(cyclecount % 100 == 0) {
         agents_insert_dead(agent_array, 5);
         printf("ok\n");
+        agent_array = agent_array_prune(agent_array);
       }
       cyclecount++;
 

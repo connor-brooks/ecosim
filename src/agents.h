@@ -141,6 +141,7 @@ Agent_array* agent_array_create();
 Agent_array* agent_array_setup_random(int count);
 void agent_array_insert(Agent_array* aa, Agent* a);
 void agent_array_free(Agent_array* aa);
+Agent_array* agent_array_prune(Agent_array* aa);
 void agents_update(Agent_array* aa, Quadtree* quad);
 
 

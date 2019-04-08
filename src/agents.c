@@ -42,6 +42,21 @@ agent_array_insert(Agent_array* aa, Agent* a)
   //printf("inseted, count is %d\n", aa->count);
 }
 
+Agent_array*
+agent_array_prune(Agent_array* aa)
+{
+  int i;
+  Agent_array* tmp_aa;
+  tmp_aa = agent_array_create();
+  for(int i = 0; i < aa->count; i++) {
+    if(aa->agents[i]->state != AGENT_STATE_PRUNE) {
+      agent_array_insert(tmp_aa, aa->agents[i]);
+    }
+  }
+  //free(aa);
+return tmp_aa;
+}
+
 /* Create random agent */
 Agent*
 agent_create_random()
