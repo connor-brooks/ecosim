@@ -25,8 +25,8 @@ GLuint gfx_agent_vis_shader();
 
 GLuint gfx_world_shader();
 
-void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale);
-void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale);
+void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom);
+void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom);
 
 void gfx_quad_draw(Quadtree_verts* qv);
 

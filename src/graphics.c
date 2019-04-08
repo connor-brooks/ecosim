@@ -75,11 +75,12 @@ gfx_agent_shader()
     "attribute vec4 position;"
     "attribute vec4 color;"
     "uniform vec2 window;"
+    "uniform float zoom;"
     "out vec4 color_out;"
     "void main() {"
     "color_out = color;"
-    "  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
-    "  gl_PointSize = position.w * window.x;"
+    "  gl_Position = gl_ModelViewProjectionMatrix  * vec4(position.x, position.y, position.z, 1.0);"
+    "  gl_PointSize = position.w * window.x * zoom;"
     "}";
 
   const char* agents_fs =
@@ -92,12 +93,12 @@ gfx_agent_shader()
     " vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
     " vec2 diff_pos = pos;" 
-    //" diff_pos.x *= 0.5;"
-    //" diff_pos.y *= 2.0;"
+    " diff_pos.x *= 1.0;"
+    " diff_pos.y *= 1.0;"
     " float r = length(diff_pos)*1.0;"
     " float a = atan(pos.y,pos.x);"
     " float f = cos(a * 60);"
-    " float alpha =  smoothstep(f,f+0.02,r) * 0.6;"
+    " float alpha =  smoothstep(f,f+0.02,r) * 1.0;"
     " float radius = 1.0;" //0.25;;"
     " float cutoff = 1.0 - smoothstep(radius - (radius * 0.01),"
     " radius+(radius * 0.01),"
@@ -105,7 +106,7 @@ gfx_agent_shader()
     //" if(length(pos) > 0.5) discard;"
     " color.w = (alpha + color.w) ;"
     " if(color_out.w == 0) color.w = 0;"
-    " gl_FragColor =  cutoff * color * (1 - (length(pos) ));"
+    " gl_FragColor =  cutoff * color * (0.75 - (length(pos) ));"
     "}";
 
   return gfx_setup_shader(agents_vs, agents_fs);
@@ -121,23 +122,28 @@ gfx_agent_vis_shader()
     "attribute vec4 color;"
     "uniform vec2 window;"
     "out vec4 color_out;"
+    "uniform float zoom;"
     "void main() {"
     "color_out = color;"
-    "  gl_Position = vec4(position.x, position.y, position.z, 1.0);"
-    "  gl_PointSize = position.w * window.x * 400;"
+    "  gl_Position = gl_ModelViewProjectionMatrix * vec4(position.x, position.y, position.z, 1.0);"
+    "  gl_PointSize = position.w * window.x * zoom;"
     "}";
 
   const char* vis_fs =
     "#version 130\n"
     "out vec4 frag_colour;"
     "in vec4 color_out;"
+    "uniform float zoom;"
     "float rand(float n){return fract(sin(n) * 43758.5453123);}"
+    "float mini_rand(float n){return fract(sin(n) * 100);}"
     "void main() {"
     "vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
     "float noise = rand(pos.x * pos.y) * 0.07;"
     "color.w = color.w + noise;"
     " if(length(pos) > 0.5) discard;"
+    " float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"
+    "color += vec4(noise_pat * 0.1);"
     "  gl_FragColor = color * fract((length(pos) - 0.4) * 4.0) + 0.02;"
     " if(color_out.w == 0) gl_FragColor.w = 0;"
     //    "  gl_FragColor = color_out ;"
@@ -245,7 +251,7 @@ gfx_quad_draw(Quadtree_verts* qv)
 }
 
 void
-gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale)
+gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
@@ -254,6 +260,9 @@ gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale)
 
   GLuint loc = glGetUniformLocation(shader, "window");
   glUniform2f(loc, scale, scale);
+
+  GLuint loc2 = glGetUniformLocation(shader, "zoom");
+  glUniform1f(loc2, zoom);
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);
@@ -268,7 +277,7 @@ gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale)
 
 
 void
-gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale)
+gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
 
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -280,6 +289,9 @@ gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale)
 
   GLuint loc = glGetUniformLocation(shader, "window");
   glUniform2f(loc, scale, scale);
+
+  GLuint loc2 = glGetUniformLocation(shader, "zoom");
+  glUniform1f(loc2, zoom);
 
   glEnableVertexAttribArray(0);
   glEnableVertexAttribArray(1);

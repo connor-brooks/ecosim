@@ -19,6 +19,7 @@
 
 /* TEMPORARY GLOBAL */
 int game_run = 1;
+float zoom = 1.0;
 
 /* For passing structs between main and callbacks, using glfw's
  * glfwGetWindowUserPointer(); function, as there is no way to pass
@@ -26,6 +27,7 @@ int game_run = 1;
 struct User_ptrs{
   Ui* ui;
   Ui_graphics* uig;
+  Agent_array* aa;
 };
 
 /* Keyboard callback */
@@ -82,6 +84,53 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 
 }
 
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    struct User_ptrs* user_ptrs;
+    double xPos, yPos;
+    int width, height;
+    float xRel, yRel;
+    Agent* tmp_agent;
+    glfwGetCursorPos(window, &xPos, &yPos);
+    glfwGetWindowSize(window, &width, &height);
+
+    xRel = xPos / (float) width;
+    yRel = yPos / (float) height;
+
+    xRel *= 2;
+    yRel *= 2;
+
+    xRel -= 1;
+    yRel -= 1;
+
+
+    printf("x %f, y %f\n", xRel, yRel);
+
+    user_ptrs = glfwGetWindowUserPointer(window);
+    Agent_array* aa = user_ptrs->aa;
+    
+    tmp_agent = agent_create_random();
+    tmp_agent->x = xRel;
+    tmp_agent->y = -yRel;
+    agent_array_insert(aa, tmp_agent);
+    printf("S\n");
+  }
+
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+  xoffset *= 0.025;
+  yoffset *= 0.025;
+  printf("offset x: %f, y %f\n", xoffset, yoffset);
+  zoom += yoffset;
+
+  zoom = MAX(1.0, zoom);
+  zoom = MIN(2.0, zoom);
+  printf("zoom %f\n", zoom);
+}
+
 int
 main(int argc, char **argv)
 {
@@ -121,6 +170,8 @@ main(int argc, char **argv)
   /* Set the windows context */
   glfwMakeContextCurrent(window);
   glfwSetKeyCallback(window, key_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, scroll_callback);
 
   /* initalize glew and do various gl setup */
   glewInit();
@@ -156,6 +207,7 @@ main(int argc, char **argv)
    * It's pretty hacky but an okay workaround*/
   user_ptrs.ui = ui;
   user_ptrs.uig = ui_gfx;
+  user_ptrs.aa = agent_array;
   glfwSetWindowUserPointer(window, &user_ptrs);
 
   /* Main loop */
@@ -179,6 +231,8 @@ main(int argc, char **argv)
       if(tmp_ptr->state != AGENT_STATE_PRUNE)
         quadtree_insert(quad, tmp_ptr, tmp_pos);
     }
+    glPushMatrix();
+    glScalef(zoom, zoom, 1.);
 
     /* Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
@@ -193,12 +247,14 @@ main(int argc, char **argv)
     agents_to_verts(agent_array, agent_verts_new);
 
     gfx_world_texture(world_shader, glfwGetTime());
-    gfx_agents_draw_new(agent_verts_new, agent_shader, scale);
-    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale);
+    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, zoom);
+    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, zoom);
+    glPopMatrix();
+
 
 
     /* Draw UI */
-    ui_draw(ui_gfx);
+    //ui_draw(ui_gfx);
 
     if(game_run)
     {

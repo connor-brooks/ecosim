@@ -340,8 +340,8 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
 
   /* meat eater vs other meat eater */
   if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
-    //if(*mag < 0.03) attraction = -1.0;
-    attraction = 0.0;
+    if(*mag < 0.02 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+    else attraction = 0.0f;
   }
 
   /* meat eater vs dead */
@@ -356,8 +356,8 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
   if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
   {
     //printf("with mag of %f\n", *mag);
-    //if(*mag < 0.03 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
-    attraction = 0.0f;
+    if(*mag < 0.02 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+    else attraction = 0.0f;
 
   }
 
@@ -446,9 +446,11 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
 
   float attraction;
   float dummy_f = 1.0f;
+  int loop_amt = MIN(8, aa->count);
 
   if(aa->count == 0) return;
-  for(i = 0; i < aa->count; i++) {
+
+  for(i = 0; i < loop_amt; i++) {
     tmp_agent = aa->agents[i];
     attraction = agent_item_attraction(a_ptr, tmp_agent, &dummy_f);
     //if(aa->agents[i]->state != AGENT_STATE_LIVING) continue;
@@ -611,6 +613,12 @@ agent_dna_mutate(Agent* a_ptr)
   if(a_ptr->dna.flock < AGENT_FLOCK_MIN)
     a_ptr->dna.flock = AGENT_FLOCK_MIN;
 
+  if(a_ptr->dna.wobble > AGENT_WOBBLE_MAX)
+    a_ptr->dna.wobble = AGENT_WOBBLE_MAX;
+
+  if(a_ptr->dna.wobble < AGENT_WOBBLE_MIN)
+    a_ptr->dna.wobble = AGENT_WOBBLE_MIN;
+
 }
 
 void
@@ -699,7 +707,7 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
       0.0f : // pruning
       AGENT_RGB_ALPHA;
 
-    v_pos[av->end] = agent->dna.vision; // * 400;
+    v_pos[av->end] = agent->dna.vision * 400;
     v_col[av->end] = (agent->state != AGENT_STATE_LIVING)?
       0.0f : // pruning
       AGENT_VIS_ALPHA;
