@@ -1,5 +1,4 @@
 #include <stddef.h>
-#include "agents.h"
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #define QUAD_COUNT (4)
