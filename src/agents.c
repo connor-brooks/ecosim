@@ -53,7 +53,7 @@ agent_array_prune(Agent_array* aa)
       agent_array_insert(tmp_aa, aa->agents[i]);
     }
   }
-  //free(aa);
+  free(aa);
 return tmp_aa;
 }
 
@@ -128,9 +128,9 @@ agents_insert_dead(Agent_array* aa, int count)
     tmp_agent->velocity.y = 0.00f;
     tmp_agent->dna.diet = -1.0f;
 
-    tmp_agent->rgb.r = 0.5;
-    tmp_agent->rgb.g = 0.5;
-    tmp_agent->rgb.b = 0.5;
+    tmp_agent->rgb.r = 0.2;
+    tmp_agent->rgb.g = 0.2;
+    tmp_agent->rgb.b = 0.2;
     agent_array_insert(aa, tmp_agent);
   }
 }

@@ -107,6 +107,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     xRel -= 1;
     yRel -= 1;
 
+    yRel = -yRel;
+    xRel = (xRel - xOffset * zoom) / zoom;
+    yRel = (yRel - yOffset * zoom) / zoom;
 
     printf("x %f, y %f\n", xRel, yRel);
 
@@ -115,7 +118,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     tmp_agent = agent_create_random();
     tmp_agent->x = xRel;
-    tmp_agent->y = -yRel;
+    tmp_agent->y = yRel;
     agent_array_insert(aa, tmp_agent);
     printf("S\n");
   }
@@ -299,6 +302,7 @@ main(int argc, char **argv)
         agents_insert_dead(agent_array, 5);
         printf("ok\n");
         agent_array = agent_array_prune(agent_array);
+        user_ptrs.aa = agent_array;
       }
       cyclecount++;
 

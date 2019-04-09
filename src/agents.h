@@ -12,7 +12,7 @@
 #define AGENT_RGB_MIN (1.0)
 #define AGENT_RGB_ALPHA (0.9)
 
-#define AGENT_VIS_ALPHA (0.1)
+#define AGENT_VIS_ALPHA (0.2)
 
 #define AGENT_MAX_VELOCITY (1.0)
 #define AGENT_MIN_VELOCITY (-1.0)
