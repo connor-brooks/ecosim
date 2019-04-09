@@ -6,7 +6,6 @@
 #include "graphics.h"
 #include "agents.h"
 #include "quadtree.h"
-#include "config.h"
 #include "utils.h"
 
 GLuint
