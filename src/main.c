@@ -162,6 +162,29 @@ main(int argc, char **argv)
   glfwSetScrollCallback(window, scroll_callback);
 
 
+  unsigned int framebuffer;
+  glGenFramebuffers(1, &framebuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+
+  // generate texture
+  unsigned int texColorBuffer;
+  glGenTextures(1, &texColorBuffer);
+  glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1600, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  // attach it to currently bound framebuffer object
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
+
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  GLuint test_shader = gfx_test_shader();
+
+
+
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
@@ -189,6 +212,13 @@ main(int argc, char **argv)
         quadtree_insert(quad, tmp_agent, tmp_pos);
     }
 
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT); // we're not using the stencil buffer now
+//    glViewport(0, 0, width, height);
+
     /* Main drawing */
     glPushMatrix();
     glScalef(zoom, zoom, 1.);
@@ -198,7 +228,7 @@ main(int argc, char **argv)
      * will sort out later */
     quad_verts = quadtree_verts_create();
     quadtree_to_verts(quad, quad_verts);
-    gfx_quad_draw(quad_verts);
+    //gfx_quad_draw(quad_verts);
     quadtree_verts_free(quad_verts);
 
     /* Convert agents to verts and draw them
@@ -210,6 +240,26 @@ main(int argc, char **argv)
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale, zoom);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, zoom);
     glPopMatrix();
+
+    // second pass
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+    glViewport(0, 0, width, height);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    //    glDisable(GL_DEPTH_TEST);
+    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glColor3f(1, 0, 0);
+
+    glUseProgram(test_shader);
+    glBegin(GL_QUADS);
+    glVertex2f(-1, -1);
+    glVertex2f(1, -1);
+    glVertex2f(1, 1);
+    glVertex2f(-1, 1);
+    glEnd();
+
+    glUseProgram(0);
 
     /* Update */
     if(game_run)
