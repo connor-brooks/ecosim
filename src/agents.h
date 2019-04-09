@@ -62,7 +62,6 @@
 typedef struct _Agent Agent;
 typedef struct _Agent_array Agent_array;
 typedef struct _Agent_verts Agent_verts;
-typedef struct _Agent_vis_verts Agent_vis_verts;
 typedef struct _DNA DNA;
 
 enum agent_states {
@@ -172,7 +171,7 @@ Agent_verts* agent_verts_create();
 void agent_verts_free(Agent_verts* av);
 void agents_to_verts(Agent_array* aa, Agent_verts* av);
 
-Agent_vis_verts* agent_vis_verts_create();
+//Agent_vis_verts* agent_vis_verts_create();
 
 #endif
 

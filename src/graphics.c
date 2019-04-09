@@ -10,7 +10,7 @@
 #include "quadtree.h"
 #include "config.h"
 #include "utils.h"
-#include "ui_response.h"
+//#include "ui_response.h"
 
 GLuint
 gfx_setup_shader(const char* vs_raw, const char* fs_raw)
@@ -159,81 +159,81 @@ gfx_agent_vis_shader()
 
 }
 
-Ui_graphics*
-ui_gfx_setup(void)
-{
-  Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
-
-  tmp->height = 0.05;
-  tmp->show_sel = 0;
-  float tmp_v[] = {
-    -1.0f, -1.0f,
-    1.0f, -1.0f,
-    1.0f, -1.0f + tmp->height,
-    -1.0f, -1.0f+ tmp->height};
-  size_t tmp_v_size = sizeof(tmp_v);
-  tmp->cmd_txt = malloc(sizeof(char) * 64);
-  strcpy(tmp->cmd_txt, " ");
-
-  tmp->vertex_data = malloc(tmp_v_size);
-  memcpy(tmp->vertex_data, tmp_v, tmp_v_size);
-  return tmp;
-}
-
-
-void
-ui_gfx_free(Ui_graphics* uig)
-{
-  //
-  free(uig->vertex_data);
-  free(uig->cmd_txt);
-  free(uig);
-}
-
-void
-ui_draw(Ui_graphics* uig)
-{
-  float* tmp_ptr = uig->vertex_data;
-  glColor4f(0.7, 0.7, 0.7, 0.5);
-  glBegin(GL_QUADS);
-
-  for(int i = 0; i < 4; i++, tmp_ptr += 2) {
-    glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
-    //printf("i is at %d\n", i);
-  }
-  glEnd();
-
-  gfx_text_draw(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
-
-  /* Draw the selector (temp bit of code) */
-  if(uig->show_sel)
-  {
-    glColor3f(0.5, 0.5, 0.9);
-    glBegin(GL_LINE_LOOP);
-    glVertex3f(uig->selection[0], uig->selection[1], 0.0);
-    glVertex3f(uig->selection[2], uig->selection[1], 0.0);
-    glVertex3f(uig->selection[2], uig->selection[3], 0.0);
-    glVertex3f(uig->selection[0], uig->selection[3], 0.0);
-    glEnd();
-  }
-}
-
-void
-ui_gfx_update(Ui_resp* resp, Ui_graphics* uig)
-{
-  /* Update text from UI */
-  if(resp->code && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
-    strcpy(uig->cmd_txt, resp->buff_txt);
-
-  /* Update select drwaing */
-  if(resp->code & UI_RESP_SEL_MODE )
-  {
-    uig->show_sel = 1;
-    memcpy(uig->selection, resp->selection, sizeof(float) * 4);
-  }
-  else uig->show_sel = 0;
-}
-
+//Ui_graphics*
+//ui_gfx_setup(void)
+//{
+//  Ui_graphics* tmp = malloc(sizeof(Ui_graphics));
+//
+//  tmp->height = 0.05;
+//  tmp->show_sel = 0;
+//  float tmp_v[] = {
+//    -1.0f, -1.0f,
+//    1.0f, -1.0f,
+//    1.0f, -1.0f + tmp->height,
+//    -1.0f, -1.0f+ tmp->height};
+//  size_t tmp_v_size = sizeof(tmp_v);
+//  tmp->cmd_txt = malloc(sizeof(char) * 64);
+//  strcpy(tmp->cmd_txt, " ");
+//
+//  tmp->vertex_data = malloc(tmp_v_size);
+//  memcpy(tmp->vertex_data, tmp_v, tmp_v_size);
+//  return tmp;
+//}
+//
+//
+//void
+//ui_gfx_free(Ui_graphics* uig)
+//{
+//  //
+//  free(uig->vertex_data);
+//  free(uig->cmd_txt);
+//  free(uig);
+//}
+//
+//void
+//ui_draw(Ui_graphics* uig)
+//{
+//  float* tmp_ptr = uig->vertex_data;
+//  glColor4f(0.7, 0.7, 0.7, 0.5);
+//  glBegin(GL_QUADS);
+//
+//  for(int i = 0; i < 4; i++, tmp_ptr += 2) {
+//    glVertex3f(*tmp_ptr, *(tmp_ptr + 1), 0.0f);
+//    //printf("i is at %d\n", i);
+//  }
+//  glEnd();
+//
+//  gfx_text_draw(-0.98, -0.98,(const unsigned char *) uig->cmd_txt);
+//
+//  /* Draw the selector (temp bit of code) */
+//  if(uig->show_sel)
+//  {
+//    glColor3f(0.5, 0.5, 0.9);
+//    glBegin(GL_LINE_LOOP);
+//    glVertex3f(uig->selection[0], uig->selection[1], 0.0);
+//    glVertex3f(uig->selection[2], uig->selection[1], 0.0);
+//    glVertex3f(uig->selection[2], uig->selection[3], 0.0);
+//    glVertex3f(uig->selection[0], uig->selection[3], 0.0);
+//    glEnd();
+//  }
+//}
+//
+//void
+//ui_gfx_update(Ui_resp* resp, Ui_graphics* uig)
+//{
+//  /* Update text from UI */
+//  if(resp->code && (UI_RESP_UPDATE_TEXT || UI_RESP_RUN_CMD))
+//    strcpy(uig->cmd_txt, resp->buff_txt);
+//
+//  /* Update select drwaing */
+//  if(resp->code & UI_RESP_SEL_MODE )
+//  {
+//    uig->show_sel = 1;
+//    memcpy(uig->selection, resp->selection, sizeof(float) * 4);
+//  }
+//  else uig->show_sel = 0;
+//}
+//
 
 void
 gfx_text_draw(float x, float y, const unsigned char* txt)

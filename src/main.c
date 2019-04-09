@@ -10,8 +10,8 @@
 #include "agents.h"
 #include "utils.h"
 #include "graphics.h"
-#include "keyboard.h"
-#include "ui.h"
+//#include "keyboard.h"
+//#include "ui.h"
 #include "quadtree.h"
 
 #define DEV_AGENT_COUNT (80)
@@ -27,8 +27,6 @@ float yOffset = 0.0f;
  * glfwGetWindowUserPointer(); function, as there is no way to pass
  * arguments to them */
 struct User_ptrs{
-  Ui* ui;
-  Ui_graphics* uig;
   Agent_array* aa;
 };
 
@@ -37,10 +35,6 @@ void
 key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   struct User_ptrs* user_ptrs;
-  Ui_graphics* uig;
-  Ui* ui;
-  Ui_resp* ui_resp;
-  Keyboard_event* k_event;
 
 
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
@@ -174,7 +168,7 @@ main(int argc, char **argv)
 
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
-  Agent_vis_verts* agent_vis_verts;
+//  Agent_vis_verts* agent_vis_verts;
   int cyclecount = 0;
   /* Quadtree head pos info */
   float quad_head_pos[] = {-1.0f, -1.0f};
@@ -183,8 +177,8 @@ main(int argc, char **argv)
   Quadtree* quad;
   Quadtree_verts* quad_verts;
 
-  Ui* ui;
-  Ui_graphics* ui_gfx;
+  //Ui* ui;
+  //Ui_graphics* ui_gfx;
 
 
   // For passing structs between callbacks in glfw
@@ -224,7 +218,7 @@ main(int argc, char **argv)
   agents_insert_dead(agent_array, 10);
 
   agent_verts_new = agent_verts_create();
-  agent_vis_verts = agent_vis_verts_create();
+//  agent_vis_verts = agent_vis_verts_create();
 
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
@@ -233,16 +227,16 @@ main(int argc, char **argv)
 
 
   /* Setup UI graphics */
-  ui_gfx = ui_gfx_setup();
+//  ui_gfx = ui_gfx_setup();
 
   /* keyboard test */
-  ui = ui_setup();
+ // ui = ui_setup();
 
   /* This is to pass needed structs between glfw keyboard callback function and
    * main function, as they cannot be passed via arguments.
    * It's pretty hacky but an okay workaround*/
-  user_ptrs.ui = ui;
-  user_ptrs.uig = ui_gfx;
+  //user_ptrs.ui = ui;
+ // user_ptrs.uig = ui_gfx;
   user_ptrs.aa = agent_array;
   glfwSetWindowUserPointer(window, &user_ptrs);
 
@@ -319,8 +313,8 @@ main(int argc, char **argv)
   /* Agent verts can be persistant, so free at end, not each frame*/
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
-  ui_gfx_free(ui_gfx);
-  ui_free(ui);
+  //ui_gfx_free(ui_gfx);
+ // ui_free(ui);
   glfwTerminate();
   return 0;
 }

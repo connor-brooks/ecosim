@@ -732,13 +732,13 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
   }
 }
 
-Agent_vis_verts*
-agent_vis_verts_create()
-{
-  Agent_vis_verts* tmp = malloc(sizeof(Agent_vis_verts));
-  tmp->count = 0;
-  tmp->capacity = AGENT_VIS_VERTS_DEFAULT;
-  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
-  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
-  //
-}
+//Agent_vis_verts*
+//agent_vis_verts_create()
+//{
+//  Agent_vis_verts* tmp = malloc(sizeof(Agent_vis_verts));
+//  tmp->count = 0;
+//  tmp->capacity = AGENT_VIS_VERTS_DEFAULT;
+//  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
+//  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
+//  //
+//}

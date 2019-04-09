@@ -4,7 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "agents.h"
 #include "quadtree.h"
-#include "ui_response.h"
+//#include "ui_response.h"
 
 typedef struct RGB_ RGB;
 
@@ -30,11 +30,11 @@ void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom
 
 void gfx_quad_draw(Quadtree_verts* qv);
 
-Ui_graphics* ui_gfx_setup(void);
-void ui_gfx_free(Ui_graphics* uig);
-void ui_draw(Ui_graphics* uig);
-void ui_gfx_update(Ui_resp* resp, Ui_graphics* uig);
-
+//Ui_graphics* ui_gfx_setup(void);
+//void ui_gfx_free(Ui_graphics* uig);
+//void ui_draw(Ui_graphics* uig);
+//void ui_gfx_update(Ui_resp* resp, Ui_graphics* uig);
+//
 void gfx_text_draw(float x, float y, const unsigned char* txt);
 
 float gfx_get_scale(GLFWwindow* window);
