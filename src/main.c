@@ -19,9 +19,7 @@ float zoom = 1.0;
 float xOffset = 0.0f;
 float yOffset = 0.0f;
 
-/* For passing structs between main and callbacks, using glfw's
- * glfwGetWindowUserPointer(); function, as there is no way to pass
- * arguments to them */
+/* For passing pointers to callbacks */
 struct User_ptrs{
   Agent_array* aa;
 };
@@ -140,9 +138,6 @@ main(int argc, char **argv)
 
   /* Set the windows context */
   glfwMakeContextCurrent(window);
-  glfwSetKeyCallback(window, key_callback);
-  glfwSetMouseButtonCallback(window, mouse_button_callback);
-  glfwSetScrollCallback(window, scroll_callback);
 
   /* initalize glew and do various gl setup */
   glewInit();
@@ -151,44 +146,34 @@ main(int argc, char **argv)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   srand((unsigned int)time(NULL));
 
-  /* Setup agent arrary
-   * setup agent verts
-   * setup agent shader */
+  /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
-
   agents_insert_dead(agent_array, 10);
-
   agent_verts_new = agent_verts_create();
-  //  agent_vis_verts = agent_vis_verts_create();
-
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
-
   GLuint world_shader = gfx_world_shader();
 
-
-  /* Setup UI graphics */
-  //  ui_gfx = ui_gfx_setup();
-
-  /* keyboard test */
-  // ui = ui_setup();
-
-  /* This is to pass needed structs between glfw keyboard callback function and
-   * main function, as they cannot be passed via arguments.
-   * It's pretty hacky but an okay workaround*/
-  //user_ptrs.ui = ui;
-  // user_ptrs.uig = ui_gfx;
+  /* Setup callbacks */
   user_ptrs.aa = agent_array;
   glfwSetWindowUserPointer(window, &user_ptrs);
+  glfwSetKeyCallback(window, key_callback);
+  glfwSetMouseButtonCallback(window, mouse_button_callback);
+  glfwSetScrollCallback(window, scroll_callback);
+
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
   {
-    /* Set the viewport */
+    /* Set the viewport & grab scale*/
+    int i;
+    Agent* tmp_agent;
+    float tmp_pos;
     int width, height;
+    float scale;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
-    float scale = gfx_get_scale(window);
+    scale = gfx_get_scale(window);
 
     /* Clear*/
     glClear(GL_COLOR_BUFFER_BIT);
@@ -196,12 +181,15 @@ main(int argc, char **argv)
     /* Recreate quadtree and insert agents */
     quad = quadtree_create(quad_head_pos, quad_head_size);
 
-    for(int i = 0; i < agent_array->count; i++) {
-      Agent* tmp_ptr = (agent_array->agents[i]);
-      float tmp_pos[] = {tmp_ptr->x, tmp_ptr->y};
-      if(tmp_ptr->state != AGENT_STATE_PRUNE)
-        quadtree_insert(quad, tmp_ptr, tmp_pos);
+    /* Insert agents into quadtree */
+    for(i = 0; i < agent_array->count; i++) {
+      tmp_agent = (agent_array->agents[i]);
+      float tmp_pos[] = {tmp_agent->x, tmp_agent->y};
+      if(tmp_agent->state != AGENT_STATE_PRUNE)
+        quadtree_insert(quad, tmp_agent, tmp_pos);
     }
+
+    /* Main drawing */
     glPushMatrix();
     glScalef(zoom, zoom, 1.);
     glTranslatef(xOffset, yOffset, 1.0);
@@ -223,15 +211,10 @@ main(int argc, char **argv)
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, zoom);
     glPopMatrix();
 
-
-
-    /* Draw UI */
-    //ui_draw(ui_gfx);
-
+    /* Update */
     if(game_run)
     {
       agents_update(agent_array, quad);
-
       /* insert food agents every 100 cycles */
       if(cyclecount % 100 == 0) {
         agents_insert_dead(agent_array, 5);
@@ -240,11 +223,9 @@ main(int argc, char **argv)
         user_ptrs.aa = agent_array;
       }
       cyclecount++;
-
     }
 
     quadtree_free(quad);
-
     /* swap */
     glfwSwapBuffers(window);
     /* Poll for events */
@@ -254,9 +235,6 @@ main(int argc, char **argv)
   /* Agent verts can be persistant, so free at end, not each frame*/
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
-  //ui_gfx_free(ui_gfx);
-  // ui_free(ui);
   glfwTerminate();
   return 0;
 }
-
