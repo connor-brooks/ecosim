@@ -4,14 +4,10 @@
 #include <time.h>
 #include <string.h>
 #include <GL/glew.h>
-#include <GL/freeglut.h>
 #include <GLFW/glfw3.h>
-
 #include "agents.h"
 #include "utils.h"
 #include "graphics.h"
-//#include "keyboard.h"
-//#include "ui.h"
 #include "quadtree.h"
 
 #define DEV_AGENT_COUNT (80)
@@ -41,86 +37,78 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     if(key == GLFW_KEY_Q)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
-
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
+    /* Put this in function*/
     struct User_ptrs* user_ptrs;
+    Agent_array* aa;
     double xPos, yPos;
     int width, height;
     float xRel, yRel;
     Agent* tmp_agent;
+
+    user_ptrs = glfwGetWindowUserPointer(window);
+    aa = user_ptrs->aa;
+
     glfwGetCursorPos(window, &xPos, &yPos);
     glfwGetWindowSize(window, &width, &height);
 
     xRel = xPos / (float) width;
     yRel = yPos / (float) height;
-
     xRel *= 2;
     yRel *= 2;
-
     xRel -= 1;
     yRel -= 1;
-
     yRel = -yRel;
     xRel = (xRel - xOffset * zoom) / zoom;
     yRel = (yRel - yOffset * zoom) / zoom;
-
-    printf("x %f, y %f\n", xRel, yRel);
-
-    user_ptrs = glfwGetWindowUserPointer(window);
-    Agent_array* aa = user_ptrs->aa;
 
     tmp_agent = agent_create_random();
     tmp_agent->x = xRel;
     tmp_agent->y = yRel;
     agent_array_insert(aa, tmp_agent);
-    printf("S\n");
+
+    printf("Inserted @ x %f, y %f\n", xRel, yRel);
   }
 
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
+  /* Put this in function*/
+  int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
+  float max;
   xoffset *= 0.025;
   yoffset *= 0.025;
-  int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
-  //  printf("offset x: %f, y %f\n", xoffset, yoffset);
   if(key){
     zoom += yoffset;
-    //   printf("key %d\n", key);
 
     zoom = MAX(1.0, zoom);
     zoom = MIN(2.0, zoom);
-    printf("zoom %f\n", zoom);
 
     /* keep in window */
-    float max = (1 / zoom) - 1;
-
+    max = (1 / zoom) - 1;
     xOffset = MAX(max, xOffset);
     xOffset = MIN(-max, xOffset);
-
     yOffset = MAX(max, yOffset);
     yOffset = MIN(-max, yOffset);
 
-  }
-  else {
+    printf("Zoom @ %f\n", zoom);
+
+  } else {
     xOffset += xoffset;
     yOffset += -yoffset;
 
     /* keep in window */
-    float max = (1 / zoom) - 1;
-
+    max = (1 / zoom) - 1;
     xOffset = MAX(max, xOffset);
     xOffset = MIN(-max, xOffset);
-
     yOffset = MAX(max, yOffset);
     yOffset = MIN(-max, yOffset);
-
-    printf("set is x %f, y %f\n", xOffset, yOffset);
-
+    printf("Scroll @ x %f, y %f\n", xOffset, yOffset);
   }
 }
 
@@ -128,27 +116,17 @@ int
 main(int argc, char **argv)
 {
   GLFWwindow* window;
-
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
-  //  Agent_vis_verts* agent_vis_verts;
-  int cyclecount = 0;
-  /* Quadtree head pos info */
-  float quad_head_pos[] = {-1.0f, -1.0f};
-  float quad_head_size = 2.0f;
-
   Quadtree* quad;
   Quadtree_verts* quad_verts;
-
-  //Ui* ui;
-  //Ui_graphics* ui_gfx;
-
-
+  int cyclecount = 0;
+  float quad_head_pos[] = {-1.0f, -1.0f};
+  float quad_head_size = 2.0f;
   // For passing structs between callbacks in glfw
   struct User_ptrs user_ptrs;
 
   /* Initalize glfw and glut*/
-  glutInit(&argc, argv);
   if (!glfwInit())
     return -1; //exit
 
