@@ -17,8 +17,7 @@ quadtree_create(float pos[], float size)
   /* Copy over dimentional info  and size*/
   memcpy(&tmp->pos, pos, sizeof(float) * QUADTREE_DIMS);
   memcpy(&tmp->size, &size, sizeof(float));
-  /* create pointers array */
-
+  
   /* NULL all sub-quad pointers */
   for(i = 0; i < QUAD_COUNT; i++) tmp->sect[i] = NULL;
 
@@ -42,7 +41,6 @@ quadtree_free(Quadtree* q)
     }
   }
   free(q);
-
 }
 
 void
@@ -102,7 +100,6 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
     q->ptrs[search_pos] = ptr;
     q->ptr_count++;
   }
-
 }
 
 
@@ -249,5 +246,4 @@ quadtree_query_dump(Quadtree_query* qq)
   printf("DUMP: Got %d pointers\n", qq->ptr_count);
   for(int i =0; i < qq->ptr_count; i++)
     printf("DUMP: Got pointer 0x%x at loc %d\n", (void*) qq->ptrs[i], i);
-
 }

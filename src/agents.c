@@ -19,7 +19,6 @@ agent_array_create()
   temp->capacity = AGENT_ARRAY_DEFAULT_SIZE;
   temp->size = sizeof(Agent*) * temp->capacity;
   temp->agents = malloc(temp->size);
-
   temp->count_change = 0;
 
   return temp;
@@ -30,7 +29,6 @@ void
 agent_array_insert(Agent_array* aa, Agent* a)
 {
   /* resize of needed */
-  // printf("start: inseted, count is %d\n", aa->count);
   if(aa->count + 1 >= aa->capacity){
     aa->capacity *= 2;
     aa->size = sizeof(Agent*) * aa->capacity;
@@ -39,7 +37,6 @@ agent_array_insert(Agent_array* aa, Agent* a)
   /* save the agent to array */
   aa->agents[aa->count] = a;
   aa->count++;
-  //printf("inseted, count is %d\n", aa->count);
 }
 
 Agent_array*
@@ -48,7 +45,7 @@ agent_array_prune(Agent_array* aa)
   int i;
   Agent_array* tmp_aa;
   tmp_aa = agent_array_create();
-  for(int i = 0; i < aa->count; i++) {
+  for(i = 0; i < aa->count; i++) {
     if(aa->agents[i]->state != AGENT_STATE_PRUNE) {
       agent_array_insert(tmp_aa, aa->agents[i]);
     }
@@ -78,8 +75,6 @@ agent_create_random()
   tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
   tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
 
-
-
   /* set colors based on DNA */
   agent_setup_colors(tmp_agent);
   agent_setup_vision_quad(tmp_agent);
@@ -89,16 +84,13 @@ agent_create_random()
   tmp_agent->energy = AGENT_ENERGY_DEFAULT;
 
   return tmp_agent;
-
 }
 
 /* rules for colors */
 void
 agent_setup_colors(Agent* a_ptr)
 {
-
   float *diet = &a_ptr->dna.diet;
-  float *aggresion = &a_ptr->dna.aggresion;
   float *metabolism = &a_ptr->dna.metabolism;
   a_ptr->rgb.r = (*diet >= 0)? *diet : 0.0f;
   a_ptr->rgb.g = *metabolism; //(a_ptr->dna.diet > 0.0) ? a_ptr->dna.diet : 0.0;
@@ -113,9 +105,8 @@ agent_setup_colors(Agent* a_ptr)
   a_ptr->rgb.r /= mag;
   a_ptr->rgb.g /= mag;
   a_ptr->rgb.b /= mag;
-
-
 }
+
 void
 agents_insert_dead(Agent_array* aa, int count)
 {
@@ -181,7 +172,7 @@ agent_array_free(Agent_array* aa)
 void
 agents_update(Agent_array* aa, Quadtree* quad)
 {
-  int i;
+  int i, j;
   Agent* a_ptr;
   Agent_array* local_agents;
 
@@ -210,7 +201,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     agent_update_mv_flock(a_ptr, local_agents);
 
     /* avoid or attrack */
-    for(int j = 0; j < local_agents->count; j++){
+    for(j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
       agent_item_collision(a_ptr, local_agents->agents[j]);
     }
@@ -235,11 +226,8 @@ agents_update(Agent_array* aa, Quadtree* quad)
       glVertex3f(top_right[0], bot_left[1], 0.0);
       glVertex3f(top_right[0], top_right[1], 0.0);
       glVertex3f(bot_left[0], top_right[1], 0.0);
-
       glEnd();
-
     }
-
   }
 }
 
@@ -256,7 +244,6 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   float pos[] = {a_ptr->x, a_ptr->y};
   float *bot_left  = (a_ptr->vis_quad.bot_left);
   float *top_right = (a_ptr->vis_quad.top_right);
-
 
   /* Do query */
   quadtree_query(quad, query, pos, radius);
@@ -301,7 +288,6 @@ agents_update_location(Agent* a_ptr)
   /* also change velocity into an array */
   /* Move agents */
   float wobble[] = {0.0, 0.0};
-  float p_random[] = {0.0, 0.0};
 
   wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
@@ -370,10 +356,8 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
   /* plant eater vs platn eater */
   if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
   {
-    //printf("with mag of %f\n", *mag);
     if(*mag < 0.02 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
     else attraction = 0.0f;
-
   }
 
   /* plant eater vs living */
@@ -384,18 +368,6 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
   if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
     attraction = -1.0;
 
-
-  //  if(a_ptr->dna.diet < 0.0f && t_ptr->state == AGENT_STATE_DEAD)
-  //    attraction = 1.0 * abs(a_ptr->dna.diet);
-  //
-  //  if(a_ptr->dna.diet > 0.0f && t_ptr->state == AGENT_STATE_DEAD)
-  //    attraction = 0.0;
-  //
-  //  if(a_ptr->dna.diet > 0.0f && t_ptr->state == AGENT_STATE_LIVING)
-  //    attraction = 1.0 * abs(a_ptr->dna.diet);
-  //
-  //
-  //  if(*mag < 0.2) return 0.1;
   return attraction;
 }
 
@@ -406,7 +378,6 @@ agent_normalize_velocity(Agent* a_ptr)
       + (a_ptr->velocity.y * a_ptr->velocity.y));
   a_ptr->velocity.x = a_ptr->velocity.x / mag;
   a_ptr->velocity.y = a_ptr->velocity.y / mag;
-
 }
 
 void
@@ -475,7 +446,7 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
       count++;
     }
   }
-  //printf("total %f, %f\n", total[0], total[1]);
+
   avg[0] = (total[0] == 0) ? 0 : total[0] / (float) count;
   avg[1] = (total[1] == 0) ? 0 : total[1] / (float) count;
 
@@ -489,9 +460,8 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
   a_ptr->velocity.y += new[1] * a_ptr->dna.flock;
 
   agent_normalize_velocity(a_ptr);
-
-
 }
+
 void
 agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
@@ -501,7 +471,7 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 
   if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
       (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
-    //printf("col\n");
+
     switch(t_ptr->state){
       case AGENT_STATE_LIVING:
         if(round(a_diet) > round(t_diet)){
@@ -516,7 +486,6 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
         }
         break;
     }
-
   }
 }
 
@@ -540,12 +509,13 @@ agent_split(Agent* a_ptr, Agent_array* aa)
     tmp_agent->velocity.y = a_ptr->velocity.y;
 
     agent_array_insert(aa, tmp_agent);
-    //printf("inserting new agent\n");
   }
 }
+
 void
 agent_dna_mutate(Agent* a_ptr)
 {
+  /* SWITCH OVER TO AN ARRAY SO THIS ISNT AS LONG */
   float rate = AGENTS_DNA_MUTATE_RATE;
   float metabolism_change = RANDF_MIN(-1.0, 1.0) * rate;
   float fear_change       = RANDF_MIN(-1.0, 1.0) * rate;
@@ -731,14 +701,3 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
     av->a_count++;
   }
 }
-
-//Agent_vis_verts*
-//agent_vis_verts_create()
-//{
-//  Agent_vis_verts* tmp = malloc(sizeof(Agent_vis_verts));
-//  tmp->count = 0;
-//  tmp->capacity = AGENT_VIS_VERTS_DEFAULT;
-//  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
-//  tmp->pos_size = (sizeof(float) * 4 * 4) * tmp->capacity;
-//  //
-//}

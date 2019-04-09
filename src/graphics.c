@@ -27,7 +27,6 @@ gfx_setup_shader(const char* vs_raw, const char* fs_raw)
   glAttachShader(shader, vs);
   glLinkProgram(shader);
   return shader;
-
 }
 
 GLuint
@@ -106,7 +105,6 @@ gfx_agent_shader()
     "}";
 
   return gfx_setup_shader(agents_vs, agents_fs);
-
 }
 
 GLuint
@@ -143,16 +141,13 @@ gfx_agent_vis_shader()
     " radius+(radius * 0.01),"
     " dot(pos, pos) * 4.0);" 
 
-    //" if(length(pos) > 0.5) discard;"
     " float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"
     "color += vec4(noise_pat * 0.15);"
     "  gl_FragColor = cutoff * color * fract((length(pos) - 0.4) * 4.0) + 0.02;"
     " if(color_out.w == 0) gl_FragColor.w = 0;"
-    //    "  gl_FragColor = color_out ;"
     "}";
 
   return gfx_setup_shader(vis_vs, vis_fs);
-
 }
 
 void
@@ -189,9 +184,7 @@ gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom)
   glDisableVertexAttribArray(1);
   glUseProgram(0);
   glDisableClientState(GL_VERTEX_ARRAY);
-
 }
-
 
 void
 gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
@@ -200,7 +193,6 @@ gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_vis_pos);
   glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_vis_col);
-
 
   glUseProgram(shader);
 
@@ -218,7 +210,6 @@ gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
   glDisableVertexAttribArray(1);
   glUseProgram(0);
   glDisableClientState(GL_VERTEX_ARRAY);
-
 }
 
 /* get the scale. Since the development was done in half-screen
@@ -232,7 +223,6 @@ gfx_get_scale(GLFWwindow* window)
   int h_screen = mode->height;
   int w_window, h_window;
   float h_scale, w_scale, scale;
-
 
   glfwGetWindowSize(window, &w_window, &h_window);
 

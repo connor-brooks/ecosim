@@ -35,5 +35,4 @@ float gfx_get_scale(GLFWwindow* window);
 
 void gfx_world_texture(GLuint shader, float time);
 
-
 #endif
