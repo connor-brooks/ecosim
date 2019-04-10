@@ -217,7 +217,7 @@ main(int argc, char **argv)
     glBindTexture(GL_TEXTURE_2D, texColorBuffer);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); // we're not using the stencil buffer now
-//    glViewport(0, 0, width, height);
+    //    glViewport(0, 0, width, height);
 
     /* Main drawing */
     glPushMatrix();
@@ -250,8 +250,20 @@ main(int argc, char **argv)
     //    glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texColorBuffer);
     glColor3f(1, 0, 0);
+    glPushMatrix();
 
     glUseProgram(test_shader);
+    GLuint loc = glGetUniformLocation(test_shader, "zoom");
+    glUniform1f(loc, zoom);
+
+    glUseProgram(test_shader);
+    GLuint loc_two = glGetUniformLocation(test_shader, "pos_offset");
+    glUniform2f(loc_two, xOffset, yOffset);
+
+    glUseProgram(test_shader);
+    GLuint loc_three = glGetUniformLocation(test_shader, "time");
+    glUniform1f(loc_three, glfwGetTime());
+
     glBegin(GL_QUADS);
     glVertex2f(-1, -1);
     glVertex2f(1, -1);
@@ -260,6 +272,7 @@ main(int argc, char **argv)
     glEnd();
 
     glUseProgram(0);
+    glPopMatrix();
 
     /* Update */
     if(game_run)

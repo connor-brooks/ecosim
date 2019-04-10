@@ -40,7 +40,7 @@ gfx_test_shader(){
     "void main() {"
     "pos_out = position;"
     "color_out = color_in;"
-    "  gl_Position = position;"
+    "  gl_Position =   position;"
     "}";
 
   const char* test_fs =
@@ -48,16 +48,24 @@ gfx_test_shader(){
     "in vec4 color_out;"
     "in vec4 pos_out;"
     "uniform sampler2D fbo_texture;"
+    "uniform vec2 pos_offset;"
+    "uniform float zoom;"
+    "uniform float time;"
     "void main() {"
     "vec2 textpos = vec2(0.5, 0.5);"
     "vec2 offset = vec2(0.003, 0.003);"
     "textpos *= pos_out.xy;"
     "textpos += vec2(0.5, 0.5);"
     "vec4 sum = vec4(0.0);"
-    "float test = max(0, sin(pos_out.y*16)) * 0.007;"
-    "float test_two = max(0, sin(pos_out.x*16)) * 0.007;"
+    //"float test = max(0, sin((pos_offset.y - pos_out.y)*16 / zoom)) * 0.007;"
+    //"float test_two = max(0, sin((pos_offset.x - pos_out.x)*16 / zoom)) * 0.007;"
+    //
+    
+    "float test = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
+    "float test_two = max(0, sin((pos_offset.x - pos_out.x / zoom)*16)) * 0.007;"
+
     "sum = texture2D(fbo_texture, textpos + vec2(test, test_two )) ;"
-    "vec2 wobble = vec2(test, test_two);"
+    "vec2 wobble = vec2(test, test_two) * zoom;"
     "float blur_amt = 0.3 / 4;"
     "sum = vec4(0);"
     "sum += texture2D(fbo_texture, textpos + wobble +vec2(offset.x, offset.y)) * blur_amt;"
@@ -65,9 +73,12 @@ gfx_test_shader(){
     "sum += texture2D(fbo_texture, textpos + wobble +vec2(-offset.x, -offset.y)) * blur_amt;"
     "sum += texture2D(fbo_texture, textpos + wobble +vec2(offset.x, -offset.y)) * blur_amt;"
     "sum += texture2D(fbo_texture, textpos + wobble) * 1.0;"
+    "vec2 st = pos_offset;"
+    "st *= 1.0;"
+    "st -= 0.0;"
 
-    //"sum.x = max(0, sin(pos_out.y*16));"
-    //"sum.z = max(0, sin(pos_out.x*16));"
+    //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
+    //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*16));"
     " gl_FragColor = sum;"
     "}";
 
