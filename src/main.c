@@ -15,6 +15,7 @@
 
 /* TEMPORARY GLOBAL */
 int game_run = 1;
+int food_spawn_freq_mod = 0;
 
 /* For passing pointers to callbacks */
 struct Callback_ptrs{
@@ -32,6 +33,14 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
       game_run = !game_run;
     if(key == GLFW_KEY_Q)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
+
+    if(key == GLFW_KEY_DOWN)
+      food_spawn_freq_mod -=1;
+
+    if(key == GLFW_KEY_UP)
+      food_spawn_freq_mod +=1;
+
+    printf("spawn %d\n", food_spawn_freq_mod);
   }
 }
 
@@ -136,7 +145,6 @@ main(int argc, char **argv)
   /* Setup callbacks */
   callb_ptrs.aa = agent_array;
   callb_ptrs.wv = world_view;
-  printf("0x%x\n", callb_ptrs.wv);
 
   glfwSetWindowUserPointer(window, &callb_ptrs);
   glfwSetKeyCallback(window, key_callback);
@@ -144,9 +152,7 @@ main(int argc, char **argv)
   glfwSetScrollCallback(window, scroll_callback);
 
 
-  GLuint test_shader = gfx_test_shader();
-
-
+  GLuint fb_shader = gfx_framebuffer_shader();
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -175,74 +181,35 @@ main(int argc, char **argv)
         quadtree_insert(quad, tmp_agent, tmp_pos);
     }
 
-
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
-    glBindTexture(GL_TEXTURE_2D, framebuffer->texBuffer);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT); // we're not using the stencil buffer now
-    //    glViewport(0, 0, width, height);
-
-    /* Main drawing */
-    glPushMatrix();
-    glScalef(world_view->zoom, world_view->zoom, 1.);
-    glTranslatef(world_view->pos_offsets[0], world_view->pos_offsets[1], 1.0);
-
-    /* Every frame rebuild the quadtree verts, draw them free them
+    /* QUADTREE GRAPHICS ARE BEING REMOVED SOON
+     * Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
-    quad_verts = quadtree_verts_create();
-    quadtree_to_verts(quad, quad_verts);
+    //quad_verts = quadtree_verts_create();
+    //quadtree_to_verts(quad, quad_verts);
     //gfx_quad_draw(quad_verts);
-    quadtree_verts_free(quad_verts);
+    //quadtree_verts_free(quad_verts);
 
     /* Convert agents to verts and draw them
      * This function should only rebuild the verts array IF the agent count has changed,
      * so we free at end, as the struct should presist all through running of program*/
     agents_to_verts(agent_array, agent_verts_new);
 
+    /* Draw all the elments to framebuffer */
+    gfx_framebuffer_begin(framebuffer, world_view);
     gfx_world_texture(world_shader, glfwGetTime());
     gfx_agents_draw_new(agent_verts_new, agent_shader, scale, world_view->zoom);
     gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, world_view->zoom);
-    glPopMatrix();
+    gfx_framebuffer_end();
 
-    // second pass
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-    glViewport(0, 0, width, height);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    //    glDisable(GL_DEPTH_TEST);
-    glBindTexture(GL_TEXTURE_2D, framebuffer->texBuffer);
-    glColor3f(1, 0, 0);
-    glPushMatrix();
-
-    glUseProgram(test_shader);
-    GLuint loc = glGetUniformLocation(test_shader, "zoom");
-    glUniform1f(loc, world_view->zoom);
-
-    glUseProgram(test_shader);
-    GLuint loc_two = glGetUniformLocation(test_shader, "pos_offset");
-    glUniform2f(loc_two, world_view->pos_offsets[0], world_view->pos_offsets[1]);
-
-    glUseProgram(test_shader);
-    GLuint loc_three = glGetUniformLocation(test_shader, "time");
-    glUniform1f(loc_three, glfwGetTime());
-
-    glBegin(GL_QUADS);
-    glVertex2f(-1, -1);
-    glVertex2f(1, -1);
-    glVertex2f(1, 1);
-    glVertex2f(-1, 1);
-    glEnd();
-
-    glUseProgram(0);
-    glPopMatrix();
+    /* Draw shaded framebuffer */
+    gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
 
     /* Update */
     if(game_run)
     {
       agents_update(agent_array, quad);
       /* insert food agents every 100 cycles */
-      if(cyclecount % 100 == 0) {
+      if(cyclecount % (100 + food_spawn_freq_mod) == 0) {
         agents_insert_dead(agent_array, RANDF_MIN(5, 7));
         printf("ok\n");
         agent_array = agent_array_prune(agent_array);

@@ -29,6 +29,10 @@ GLuint gfx_agent_vis_shader();
 GLuint gfx_world_shader();
 
 Framebuffer* gfx_framebuffer_create();
+GLuint gfx_framebuffer_shader();
+void gfx_framebuffer_begin(Framebuffer* fb, World_view* wv);
+void gfx_framebuffer_end();
+void gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader);
 
 void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom);
 void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom);
@@ -47,6 +51,5 @@ void gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset);
 void gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset);
 float* gfx_world_view_relpos(World_view* wv, GLFWwindow* window, float x, float y);
 
-GLuint gfx_test_shader();
 
 #endif

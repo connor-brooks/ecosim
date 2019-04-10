@@ -38,6 +38,55 @@ gfx_framebuffer_create()
 
   return tmp_fb;
 }
+void 
+gfx_framebuffer_begin(Framebuffer* fb, World_view* wv)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, fb->framebuffer);
+    glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    /* Main drawing begin */
+    glPushMatrix();
+    glScalef(wv->zoom, wv->zoom, 1.);
+    glTranslatef(wv->pos_offsets[0], wv->pos_offsets[1], 1.0);
+}
+
+void 
+gfx_framebuffer_end()
+{
+    glPopMatrix();
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+void 
+gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+    //glViewport(0, 0, width, height);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
+
+    glUseProgram(shader);
+
+    GLuint zoom_u = glGetUniformLocation(shader, "zoom");
+    glUniform1f(zoom_u, wv->zoom);
+
+    GLuint pos_u = glGetUniformLocation(shader, "pos_offset");
+    glUniform2f(pos_u, wv->pos_offsets[0], wv->pos_offsets[1]);
+
+    /* Draw framebuffer*/
+    glBegin(GL_QUADS);
+    glVertex2f(-1, -1);
+    glVertex2f(1, -1);
+    glVertex2f(1, 1);
+    glVertex2f(-1, 1);
+    glEnd();
+
+    glUseProgram(0);
+}
 
 GLuint
 gfx_setup_shader(const char* vs_raw, const char* fs_raw)
@@ -61,7 +110,7 @@ gfx_setup_shader(const char* vs_raw, const char* fs_raw)
 }
 
 GLuint
-gfx_test_shader(){
+gfx_framebuffer_shader(){
   const char* test_vs =
     "#version 130\n"
     "in vec4 position;"
@@ -81,7 +130,6 @@ gfx_test_shader(){
     "uniform sampler2D fbo_texture;"
     "uniform vec2 pos_offset;"
     "uniform float zoom;"
-    "uniform float time;"
     "void main() {"
     "vec2 textpos = vec2(0.5, 0.5);"
     "vec2 offset = vec2(0.003, 0.003);"

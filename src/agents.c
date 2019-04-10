@@ -91,9 +91,11 @@ void
 agent_setup_colors(Agent* a_ptr)
 {
   float *diet = &a_ptr->dna.diet;
+  float *flocking = &a_ptr->dna.flock;
   float *metabolism = &a_ptr->dna.metabolism;
+  float *rebirth = &a_ptr->dna.rebirth;
   a_ptr->rgb.r = (*diet >= 0)? *diet : 0.0f;
-  a_ptr->rgb.g = *metabolism; //(a_ptr->dna.diet > 0.0) ? a_ptr->dna.diet : 0.0;
+  a_ptr->rgb.g = *flocking; //(a_ptr->dna.diet > 0.0) ? a_ptr->dna.diet : 0.0;
   a_ptr->rgb.b = (*diet < 0.0f)? -(*diet): 0.0f;
 
   float mag = sqrt(
@@ -455,7 +457,7 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
   new[0] =  (avg[0] == 0) ? 0 : avg[0] / mag;
   new[1] =  (avg[0] == 0) ? 0 : avg[1] / mag;
 
-  if(mag < 0.35) return;
+  if(mag < 0.20) return;
   a_ptr->velocity.x += new[0] * a_ptr->dna.flock;
   a_ptr->velocity.y += new[1] * a_ptr->dna.flock;
 

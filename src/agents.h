@@ -25,7 +25,7 @@
 #define AGENT_FEAR_MIN (-1.0)
 
 #define AGENT_VISION_MAX (0.1)
-#define AGENT_VISION_MIN (0.175)
+#define AGENT_VISION_MIN (0.2)
 
 #define AGENT_REBIRTH_MAX (3.00)
 #define AGENT_REBIRTH_MIN (1.00)
