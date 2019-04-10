@@ -8,13 +8,12 @@
 #include "quadtree.h"
 #include "utils.h"
 
-Framebuffer* 
+Framebuffer*
 gfx_framebuffer_create(int width, int height)
 {
   Framebuffer* tmp_fb = malloc(sizeof(Framebuffer));
   GLuint framebuffer;
   GLuint texBuffer;
-  printf("fb got %d, %d\n", width, height);
 
   /* Make framebuffer */
   glGenFramebuffers(1, &framebuffer);
@@ -28,7 +27,7 @@ gfx_framebuffer_create(int width, int height)
   glBindTexture(GL_TEXTURE_2D, 0);
 
   /* attach to framebuffer */
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
       GL_TEXTURE_2D, texBuffer, 0);
 
   /* bind to default fb */
@@ -39,54 +38,53 @@ gfx_framebuffer_create(int width, int height)
 
   return tmp_fb;
 }
-void 
+
+void
 gfx_framebuffer_begin(Framebuffer* fb, World_view* wv)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, fb->framebuffer);
-    glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_FRAMEBUFFER, fb->framebuffer);
+  glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
 
-    /* Main drawing begin */
-    glPushMatrix();
-    glScalef(wv->zoom, wv->zoom, 1.);
-    glTranslatef(wv->pos_offsets[0], wv->pos_offsets[1], 1.0);
+  /* Main drawing begin */
+  glPushMatrix();
+  glScalef(wv->zoom, wv->zoom, 1.);
+  glTranslatef(wv->pos_offsets[0], wv->pos_offsets[1], 1.0);
 }
 
-void 
+void
 gfx_framebuffer_end()
 {
-    glPopMatrix();
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glPopMatrix();
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void 
+void
 gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
-    //glViewport(0, 0, width, height);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to default
+  //glViewport(0, 0, width, height);
+  glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT);
 
-    glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
+  glBindTexture(GL_TEXTURE_2D, fb->texBuffer);
 
-    glUseProgram(shader);
+  glUseProgram(shader);
+  GLuint zoom_u = glGetUniformLocation(shader, "zoom");
+  glUniform1f(zoom_u, wv->zoom);
+  GLuint pos_u = glGetUniformLocation(shader, "pos_offset");
+  glUniform2f(pos_u, wv->pos_offsets[0], wv->pos_offsets[1]);
 
-    GLuint zoom_u = glGetUniformLocation(shader, "zoom");
-    glUniform1f(zoom_u, wv->zoom);
+  /* Draw framebuffer*/
+  glBegin(GL_QUADS);
+  glVertex2f(-1, -1);
+  glVertex2f(1, -1);
+  glVertex2f(1, 1);
+  glVertex2f(-1, 1);
+  glEnd();
 
-    GLuint pos_u = glGetUniformLocation(shader, "pos_offset");
-    glUniform2f(pos_u, wv->pos_offsets[0], wv->pos_offsets[1]);
-
-    /* Draw framebuffer*/
-    glBegin(GL_QUADS);
-    glVertex2f(-1, -1);
-    glVertex2f(1, -1);
-    glVertex2f(1, 1);
-    glVertex2f(-1, 1);
-    glEnd();
-
-    glUseProgram(0);
+  glUseProgram(0);
 }
 
 GLuint
@@ -137,15 +135,9 @@ gfx_framebuffer_shader(){
     "textpos *= pos_out.xy;"
     "textpos += vec2(0.5, 0.5);"
     "vec4 sum = vec4(0.0);"
-    //"float test = max(0, sin((pos_offset.y - pos_out.y)*16 / zoom)) * 0.007;"
-    //"float test_two = max(0, sin((pos_offset.x - pos_out.x)*16 / zoom)) * 0.007;"
-    //
-
     "float test = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
     "float test_two = max(0, sin((pos_offset.x - pos_out.x / zoom)*24)) * 0.007;"
-
     "sum = texture2D(fbo_texture, textpos + vec2(test, test_two )) ;"
-
     "vec2 wobble = vec2(test, test_two) * zoom;"
     "float blur_amt = 0.4 / 4;"
     "sum = vec4(0);"
@@ -164,7 +156,6 @@ gfx_framebuffer_shader(){
     "}";
 
   return gfx_setup_shader(test_vs, test_fs);
-
 }
 
 GLuint

@@ -96,16 +96,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void window_size_callback(GLFWwindow* window, int width, int height)
 {
   struct Callback_ptrs* callb_ptrs;
-  World_view* wv;
-  Framebuffer* fb;
   Framebuffer** fb_ptr;
 
-  printf("w %d, h %d\n", width, height);
-
-
+  /* Rebuild framebuffer to width x height */
   callb_ptrs = glfwGetWindowUserPointer(window);
-  wv = callb_ptrs->wv;
-  fb = callb_ptrs->fb;
   fb_ptr = callb_ptrs->fb_ptr;
   *fb_ptr = gfx_framebuffer_create(width, height);
 
@@ -133,7 +127,7 @@ main(int argc, char **argv)
     return -1; //exit
 
   /* Create window */
-  window = glfwCreateWindow(300, 300, "ecosim", NULL, NULL);
+  window = glfwCreateWindow(1600, 900, "ecosim", NULL, NULL);
   if (!window)
   {
     glfwTerminate();
@@ -148,12 +142,13 @@ main(int argc, char **argv)
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
   srand((unsigned int)time(NULL));
 
   /* Setup world view */
   framebuffer = gfx_framebuffer_create(1600, 900);
+  GLuint fb_shader = gfx_framebuffer_shader();
   world_view = gfx_world_view_create();
-  printf("0x%x\n", world_view);
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -168,15 +163,11 @@ main(int argc, char **argv)
   callb_ptrs.wv = world_view;
   callb_ptrs.fb = framebuffer;
   callb_ptrs.fb_ptr = &framebuffer;
-
   glfwSetWindowUserPointer(window, &callb_ptrs);
   glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
   glfwSetWindowSizeCallback(window, window_size_callback);
-
-
-  GLuint fb_shader = gfx_framebuffer_shader();
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -233,9 +224,10 @@ main(int argc, char **argv)
     {
       agents_update(agent_array, quad);
       /* insert food agents every 100 cycles */
+      // Convert to time, don't use cycles 
       if(cyclecount % (100 + food_spawn_freq_mod) == 0) {
         agents_insert_dead(agent_array, RANDF_MIN(5, 7));
-        printf("ok\n");
+        printf("Food added & agent array pruned\n");
         agent_array = agent_array_prune(agent_array);
         callb_ptrs.aa = agent_array;
       }
