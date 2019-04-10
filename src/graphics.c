@@ -29,7 +29,7 @@ gfx_setup_shader(const char* vs_raw, const char* fs_raw)
   return shader;
 }
 
-GLuint 
+GLuint
 gfx_test_shader(){
   const char* test_vs =
     "#version 130\n"
@@ -60,7 +60,7 @@ gfx_test_shader(){
     //"float test = max(0, sin((pos_offset.y - pos_out.y)*16 / zoom)) * 0.007;"
     //"float test_two = max(0, sin((pos_offset.x - pos_out.x)*16 / zoom)) * 0.007;"
     //
-    
+
     "float test = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
     "float test_two = max(0, sin((pos_offset.x - pos_out.x / zoom)*24)) * 0.007;"
 
@@ -79,7 +79,7 @@ gfx_test_shader(){
     "st -= 0.0;"
 
     //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
-   //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
+    //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
     " gl_FragColor = sum;"
     "}";
 
@@ -145,7 +145,7 @@ gfx_agent_shader()
     "void main() {"
     " vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
-    " vec2 diff_pos = pos;" 
+    " vec2 diff_pos = pos;"
     " diff_pos.x *= 1.0;"
     " diff_pos.y *= 1.0;"
     " float r = length(diff_pos)*1.0;"
@@ -155,11 +155,11 @@ gfx_agent_shader()
     " float radius = 1.0;" //0.25;;"
     " float cutoff = 1.0 - smoothstep(radius - (radius * 0.01),"
     " radius+(radius * 0.01),"
-    " dot(diff_pos, diff_pos) * 4.0);" 
+    " dot(diff_pos, diff_pos) * 4.0);"
     //" if(length(pos) > 0.5) discard;"
     //" color.w = (alpha + color.w) ;"
     " if(color_out.w == 0) color.w = 0;"// 1.5 made it brighter
-    " gl_FragColor =  alpha * cutoff * color * ((1.0 - (length(pos) )) * 1.5) ;" 
+    " gl_FragColor =  alpha * cutoff * color * ((1.0 - (length(pos) )) * 1.5) ;"
     "}";
 
   return gfx_setup_shader(agents_vs, agents_fs);
@@ -197,7 +197,7 @@ gfx_agent_vis_shader()
     " float radius = 1.0;" //0.25;;"
     " float cutoff = 1.0 - smoothstep(radius - (radius * 0.01),"
     " radius+(radius * 0.01),"
-    " dot(pos, pos) * 4.0);" 
+    " dot(pos, pos) * 4.0);"
 
     " float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"
     "color += vec4(noise_pat * 0.15);"
@@ -290,7 +290,7 @@ gfx_get_scale(GLFWwindow* window)
   return scale;
 }
 
-World_view* 
+World_view*
 gfx_world_view_create()
 {
   World_view* tmp = malloc(sizeof(World_view));
@@ -298,6 +298,46 @@ gfx_world_view_create()
   tmp->pos_offsets[0] = 0.0f;
   tmp->pos_offsets[1] = 0.0f;
   return tmp;
+}
+
+void
+gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset)
+{
+  xoffset *= 0.020;
+  yoffset *= 0.020;
+
+  wv->zoom += yoffset;
+
+  wv->zoom = MAX(1.0, wv->zoom);
+  wv->zoom = MIN(2.0, wv->zoom);
+
+  /* keep in frame */
+  gfx_world_view_constrain(wv);
+
+}
+
+void
+gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset)
+{
+  xoffset *= 0.020;
+  yoffset *= 0.020;
+
+  wv->pos_offsets[0] += xoffset;
+  wv->pos_offsets[1] += -yoffset;
+
+  gfx_world_view_constrain(wv);
+
+}
+
+void
+gfx_world_view_constrain(World_view *wv)
+{
+  float max;
+  max = (1 / wv->zoom) - 1;
+  wv->pos_offsets[0] = MAX(max, wv->pos_offsets[0]);
+  wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
+  wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
+  wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
 }
 
 void gfx_world_texture(GLuint shader, float time)

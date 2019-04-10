@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include "agents.h"
 #include "quadtree.h"
+#define GFX_WORLD_VIEW_SCROLL_FACTOR
 
 typedef struct RGB_ RGB;
 
@@ -32,6 +33,9 @@ float gfx_get_scale(GLFWwindow* window);
 void gfx_world_texture(GLuint shader, float time);
 
 World_view* gfx_world_view_create();
+void gfx_world_view_constrain(World_view *wv);
+void gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset);
+void gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset);
 
 GLuint gfx_test_shader();
 

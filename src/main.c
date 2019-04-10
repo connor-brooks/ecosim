@@ -76,52 +76,22 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-  /* Put this in function*/
   struct Callback_ptrs* callb_ptrs;
-  int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
-  float max;
-  World_view* wv ;
+  int key;
+  World_view* wv;
 
+  /* grab pointers */
   callb_ptrs = glfwGetWindowUserPointer(window);
   wv = callb_ptrs->wv;
 
-  xoffset *= 0.025;
-  yoffset *= 0.025;
+  /* is ctrl clicked */
+  key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
 
   if(key){
-    //zoom += yoffset;
-    wv->zoom += yoffset;
-
-    //zoom = MAX(1.0, zoom);
-    //zoom = MIN(2.0, zoom);
-
-    wv->zoom = MAX(1.0, wv->zoom);
-    wv->zoom = MIN(2.0, wv->zoom);
-
-    /* keep in window */
-    //    max = (1 / zoom) - 1;
-    //    xOffset = MAX(max, xOffset);
-    //    xOffset = MIN(-max, xOffset);
-    //    yOffset = MAX(max, yOffset);
-    //    yOffset = MIN(-max, yOffset);
-    //
-    max = (1 / wv->zoom) - 1;
-    wv->pos_offsets[0] = MAX(max, wv->pos_offsets[0]);
-    wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
-    wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
-    wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
-
+    gfx_world_view_zoom(wv, xoffset, yoffset);
 
   } else {
-    wv->pos_offsets[0] += xoffset;
-    wv->pos_offsets[1] += -yoffset;
-
-    /* keep in window */
-    max = (1 / wv->zoom) - 1;
-    wv->pos_offsets[0] = MAX(max, wv->pos_offsets[0]);
-    wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
-    wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
-    wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
+    gfx_world_view_scroll(wv, xoffset, yoffset);
   }
 }
 
@@ -303,7 +273,7 @@ main(int argc, char **argv)
       agents_update(agent_array, quad);
       /* insert food agents every 100 cycles */
       if(cyclecount % 100 == 0) {
-        agents_insert_dead(agent_array, 5);
+        agents_insert_dead(agent_array, RANDF_MIN(5, 7));
         printf("ok\n");
         agent_array = agent_array_prune(agent_array);
         callb_ptrs.aa = agent_array;
