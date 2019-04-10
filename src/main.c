@@ -21,6 +21,8 @@ int food_spawn_freq_mod = 0;
 struct Callback_ptrs{
   Agent_array* aa;
   World_view* wv;
+  Framebuffer* fb;
+  Framebuffer** fb_ptr;
 };
 
 /* Keyboard callback */
@@ -91,6 +93,25 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
   }
 }
 
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
+  struct Callback_ptrs* callb_ptrs;
+  World_view* wv;
+  Framebuffer* fb;
+  Framebuffer** fb_ptr;
+
+  printf("w %d, h %d\n", width, height);
+
+
+  callb_ptrs = glfwGetWindowUserPointer(window);
+  wv = callb_ptrs->wv;
+  fb = callb_ptrs->fb;
+  fb_ptr = callb_ptrs->fb_ptr;
+  *fb_ptr = gfx_framebuffer_create(width, height);
+
+
+}
+
 int
 main(int argc, char **argv)
 {
@@ -130,7 +151,7 @@ main(int argc, char **argv)
   srand((unsigned int)time(NULL));
 
   /* Setup world view */
-  framebuffer = gfx_framebuffer_create();
+  framebuffer = gfx_framebuffer_create(1600, 900);
   world_view = gfx_world_view_create();
   printf("0x%x\n", world_view);
 
@@ -145,11 +166,14 @@ main(int argc, char **argv)
   /* Setup callbacks */
   callb_ptrs.aa = agent_array;
   callb_ptrs.wv = world_view;
+  callb_ptrs.fb = framebuffer;
+  callb_ptrs.fb_ptr = &framebuffer;
 
   glfwSetWindowUserPointer(window, &callb_ptrs);
   glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
+  glfwSetWindowSizeCallback(window, window_size_callback);
 
 
   GLuint fb_shader = gfx_framebuffer_shader();

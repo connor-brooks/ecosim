@@ -28,7 +28,7 @@ GLuint gfx_agent_vis_shader();
 
 GLuint gfx_world_shader();
 
-Framebuffer* gfx_framebuffer_create();
+Framebuffer* gfx_framebuffer_create(int width, int height);
 GLuint gfx_framebuffer_shader();
 void gfx_framebuffer_begin(Framebuffer* fb, World_view* wv);
 void gfx_framebuffer_end();
