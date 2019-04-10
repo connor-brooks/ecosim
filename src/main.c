@@ -38,13 +38,10 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-    /* Put this in function*/
     struct Callback_ptrs* callb_ptrs;
     Agent_array* aa;
     World_view* wv ;
     double xPos, yPos;
-    int width, height;
-    float xRel, yRel;
     Agent* tmp_agent;
 
     callb_ptrs = glfwGetWindowUserPointer(window);
@@ -52,24 +49,14 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     wv = callb_ptrs->wv;
 
     glfwGetCursorPos(window, &xPos, &yPos);
-    glfwGetWindowSize(window, &width, &height);
 
-    xRel = xPos / (float) width;
-    yRel = yPos / (float) height;
-    xRel *= 2;
-    yRel *= 2;
-    xRel -= 1;
-    yRel -= 1;
-    yRel = -yRel;
-    xRel = (xRel - wv->pos_offsets[0] * wv->zoom) / wv->zoom;
-    yRel = (yRel - wv->pos_offsets[1]* wv->zoom) / wv->zoom;
+    float* relPos = gfx_world_view_relpos(wv, window, xPos, yPos);
 
     tmp_agent = agent_create_random();
-    tmp_agent->x = xRel;
-    tmp_agent->y = yRel;
+    tmp_agent->x = relPos[0];
+    tmp_agent->y = relPos[1];
+    free(relPos);
     agent_array_insert(aa, tmp_agent);
-
-    printf("Inserted @ x %f, y %f\n", xRel, yRel);
   }
 
 }
@@ -99,6 +86,7 @@ int
 main(int argc, char **argv)
 {
   GLFWwindow* window;
+  Framebuffer* framebuffer;
   World_view* world_view;
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
@@ -133,6 +121,7 @@ main(int argc, char **argv)
   srand((unsigned int)time(NULL));
 
   /* Setup world view */
+  framebuffer = gfx_framebuffer_create();
   world_view = gfx_world_view_create();
   printf("0x%x\n", world_view);
 
@@ -154,25 +143,6 @@ main(int argc, char **argv)
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
 
-
-  unsigned int framebuffer;
-  glGenFramebuffers(1, &framebuffer);
-  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-
-  // generate texture
-  unsigned int texColorBuffer;
-  glGenTextures(1, &texColorBuffer);
-  glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1600, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  // attach it to currently bound framebuffer object
-  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0);
-
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
   GLuint test_shader = gfx_test_shader();
 
@@ -206,8 +176,8 @@ main(int argc, char **argv)
     }
 
 
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer->framebuffer);
+    glBindTexture(GL_TEXTURE_2D, framebuffer->texBuffer);
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT); // we're not using the stencil buffer now
     //    glViewport(0, 0, width, height);
@@ -241,7 +211,7 @@ main(int argc, char **argv)
     glClear(GL_COLOR_BUFFER_BIT);
 
     //    glDisable(GL_DEPTH_TEST);
-    glBindTexture(GL_TEXTURE_2D, texColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, framebuffer->texBuffer);
     glColor3f(1, 0, 0);
     glPushMatrix();
 
@@ -291,6 +261,7 @@ main(int argc, char **argv)
   /* Agent verts can be persistant, so free at end, not each frame*/
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
+  free(framebuffer);
   glfwTerminate();
   return 0;
 }

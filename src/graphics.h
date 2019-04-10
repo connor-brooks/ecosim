@@ -10,16 +10,25 @@ typedef struct RGB_ RGB;
 
 typedef struct _World_view World_view;
 
+typedef struct _Framebuffer Framebuffer;
+
 struct _World_view {
   float zoom;
   float pos_offsets[2];
 };
+
+struct _Framebuffer {
+  GLuint framebuffer;
+ GLuint texBuffer;
+}; 
 
 GLuint gfx_setup_shader(const char* vs_raw, const char* fs_raw);
 GLuint gfx_agent_shader();
 GLuint gfx_agent_vis_shader();
 
 GLuint gfx_world_shader();
+
+Framebuffer* gfx_framebuffer_create();
 
 void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom);
 void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom);
@@ -36,6 +45,7 @@ World_view* gfx_world_view_create();
 void gfx_world_view_constrain(World_view *wv);
 void gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset);
 void gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset);
+float* gfx_world_view_relpos(World_view* wv, GLFWwindow* window, float x, float y);
 
 GLuint gfx_test_shader();
 

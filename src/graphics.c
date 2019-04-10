@@ -8,6 +8,37 @@
 #include "quadtree.h"
 #include "utils.h"
 
+Framebuffer* 
+gfx_framebuffer_create()
+{
+  Framebuffer* tmp_fb = malloc(sizeof(Framebuffer));
+  GLuint framebuffer;
+  GLuint texBuffer;
+
+  /* Make framebuffer */
+  glGenFramebuffers(1, &framebuffer);
+  glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+  glGenTextures(1, &texBuffer);
+  glBindTexture(GL_TEXTURE_2D, texBuffer);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1600, 900, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  /* attach to framebuffer */
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, 
+      GL_TEXTURE_2D, texBuffer, 0);
+
+  /* bind to default fb */
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+  tmp_fb->framebuffer = framebuffer;
+  tmp_fb->texBuffer = texBuffer;
+
+  return tmp_fb;
+}
+
 GLuint
 gfx_setup_shader(const char* vs_raw, const char* fs_raw)
 {
@@ -338,6 +369,29 @@ gfx_world_view_constrain(World_view *wv)
   wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
   wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
   wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
+}
+float*
+gfx_world_view_relpos(World_view* wv, GLFWwindow* window, float x, float y)
+{
+  float xRel, yRel;
+  int win_width, win_height;
+  float* tmp = malloc(sizeof(float) * 2);
+  glfwGetWindowSize(window, &win_width, &win_height);
+
+  xRel = x / (float) win_width;
+  yRel = y / (float) win_height;
+  xRel *= 2;
+  yRel *= 2;
+  xRel -= 1;
+  yRel -= 1;
+  yRel = -yRel;
+  xRel = (xRel - wv->pos_offsets[0] * wv->zoom) / wv->zoom;
+  yRel = (yRel - wv->pos_offsets[1]* wv->zoom) / wv->zoom;
+
+  tmp[0] = xRel;
+  tmp[1] = yRel;
+
+  return tmp;
 }
 
 void gfx_world_texture(GLuint shader, float time)
