@@ -62,11 +62,12 @@ gfx_test_shader(){
     //
     
     "float test = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
-    "float test_two = max(0, sin((pos_offset.x - pos_out.x / zoom)*16)) * 0.007;"
+    "float test_two = max(0, sin((pos_offset.x - pos_out.x / zoom)*24)) * 0.007;"
 
     "sum = texture2D(fbo_texture, textpos + vec2(test, test_two )) ;"
+
     "vec2 wobble = vec2(test, test_two) * zoom;"
-    "float blur_amt = 0.3 / 4;"
+    "float blur_amt = 0.4 / 4;"
     "sum = vec4(0);"
     "sum += texture2D(fbo_texture, textpos + wobble +vec2(offset.x, offset.y)) * blur_amt;"
     "sum += texture2D(fbo_texture, textpos + wobble +vec2(-offset.x, offset.y)) * blur_amt;"
@@ -78,7 +79,7 @@ gfx_test_shader(){
     "st -= 0.0;"
 
     //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
-    //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*16));"
+   //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
     " gl_FragColor = sum;"
     "}";
 
@@ -287,6 +288,16 @@ gfx_get_scale(GLFWwindow* window)
   h_scale = (float)h_window / ((float)h_screen / 2.0);
   scale = (h_scale + w_scale) / 2.0f;
   return scale;
+}
+
+World_view* 
+gfx_world_view_create()
+{
+  World_view* tmp = malloc(sizeof(World_view));
+  tmp->zoom = 0.0f;
+  tmp->pos_offsets[0] = 0.0f;
+  tmp->pos_offsets[1] = 0.0f;
+  return tmp;
 }
 
 void gfx_world_texture(GLuint shader, float time)

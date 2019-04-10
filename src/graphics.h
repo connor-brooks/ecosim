@@ -7,16 +7,12 @@
 
 typedef struct RGB_ RGB;
 
-struct _Ui_graphics {
-  float height;
-  float* vertex_data;
-  RGB* color;
-  char* cmd_txt;
-  int show_sel;
-  float selection[4];
-};
+typedef struct _World_view World_view;
 
-typedef struct _Ui_graphics Ui_graphics;
+struct _World_view {
+  float zoom;
+  float pos_offsets[2];
+};
 
 GLuint gfx_setup_shader(const char* vs_raw, const char* fs_raw);
 GLuint gfx_agent_shader();
@@ -34,6 +30,8 @@ void gfx_text_draw(float x, float y, const unsigned char* txt);
 float gfx_get_scale(GLFWwindow* window);
 
 void gfx_world_texture(GLuint shader, float time);
+
+World_view* gfx_world_view_create();
 
 GLuint gfx_test_shader();
 

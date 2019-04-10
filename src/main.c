@@ -20,7 +20,7 @@ float xOffset = 0.0f;
 float yOffset = 0.0f;
 
 /* For passing pointers to callbacks */
-struct User_ptrs{
+struct Callback_ptrs{
   Agent_array* aa;
 };
 
@@ -41,15 +41,15 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
   if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
     /* Put this in function*/
-    struct User_ptrs* user_ptrs;
+    struct Callback_ptrs* callb_ptrs;
     Agent_array* aa;
     double xPos, yPos;
     int width, height;
     float xRel, yRel;
     Agent* tmp_agent;
 
-    user_ptrs = glfwGetWindowUserPointer(window);
-    aa = user_ptrs->aa;
+    callb_ptrs = glfwGetWindowUserPointer(window);
+    aa = callb_ptrs->aa;
 
     glfwGetCursorPos(window, &xPos, &yPos);
     glfwGetWindowSize(window, &width, &height);
@@ -114,6 +114,7 @@ int
 main(int argc, char **argv)
 {
   GLFWwindow* window;
+  World_view* world_view;
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
   Quadtree* quad;
@@ -122,7 +123,7 @@ main(int argc, char **argv)
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
   // For passing structs between callbacks in glfw
-  struct User_ptrs user_ptrs;
+  struct Callback_ptrs callb_ptrs;
 
   /* Initalize glfw and glut*/
   if (!glfwInit())
@@ -146,6 +147,9 @@ main(int argc, char **argv)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   srand((unsigned int)time(NULL));
 
+  /* Setup world view */
+  world_view = gfx_world_view_create();
+
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
   agents_insert_dead(agent_array, 10);
@@ -155,8 +159,8 @@ main(int argc, char **argv)
   GLuint world_shader = gfx_world_shader();
 
   /* Setup callbacks */
-  user_ptrs.aa = agent_array;
-  glfwSetWindowUserPointer(window, &user_ptrs);
+  callb_ptrs.aa = agent_array;
+  glfwSetWindowUserPointer(window, &callb_ptrs);
   glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
@@ -283,7 +287,7 @@ main(int argc, char **argv)
         agents_insert_dead(agent_array, 5);
         printf("ok\n");
         agent_array = agent_array_prune(agent_array);
-        user_ptrs.aa = agent_array;
+        callb_ptrs.aa = agent_array;
       }
       cyclecount++;
     }
