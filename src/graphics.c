@@ -294,7 +294,7 @@ World_view*
 gfx_world_view_create()
 {
   World_view* tmp = malloc(sizeof(World_view));
-  tmp->zoom = 0.0f;
+  tmp->zoom = 1.0f;
   tmp->pos_offsets[0] = 0.0f;
   tmp->pos_offsets[1] = 0.0f;
   return tmp;

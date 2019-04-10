@@ -15,13 +15,11 @@
 
 /* TEMPORARY GLOBAL */
 int game_run = 1;
-float zoom = 1.0;
-float xOffset = 0.0f;
-float yOffset = 0.0f;
 
 /* For passing pointers to callbacks */
 struct Callback_ptrs{
   Agent_array* aa;
+  World_view* wv;
 };
 
 /* Keyboard callback */
@@ -43,6 +41,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     /* Put this in function*/
     struct Callback_ptrs* callb_ptrs;
     Agent_array* aa;
+    World_view* wv ;
     double xPos, yPos;
     int width, height;
     float xRel, yRel;
@@ -50,6 +49,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
     callb_ptrs = glfwGetWindowUserPointer(window);
     aa = callb_ptrs->aa;
+    wv = callb_ptrs->wv;
 
     glfwGetCursorPos(window, &xPos, &yPos);
     glfwGetWindowSize(window, &width, &height);
@@ -61,8 +61,8 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     xRel -= 1;
     yRel -= 1;
     yRel = -yRel;
-    xRel = (xRel - xOffset * zoom) / zoom;
-    yRel = (yRel - yOffset * zoom) / zoom;
+    xRel = (xRel - wv->pos_offsets[0] * wv->zoom) / wv->zoom;
+    yRel = (yRel - wv->pos_offsets[1]* wv->zoom) / wv->zoom;
 
     tmp_agent = agent_create_random();
     tmp_agent->x = xRel;
@@ -77,36 +77,51 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
   /* Put this in function*/
+  struct Callback_ptrs* callb_ptrs;
   int key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
   float max;
+  World_view* wv ;
+
+  callb_ptrs = glfwGetWindowUserPointer(window);
+  wv = callb_ptrs->wv;
+
   xoffset *= 0.025;
   yoffset *= 0.025;
-  if(key){
-    zoom += yoffset;
 
-    zoom = MAX(1.0, zoom);
-    zoom = MIN(2.0, zoom);
+  if(key){
+    //zoom += yoffset;
+    wv->zoom += yoffset;
+
+    //zoom = MAX(1.0, zoom);
+    //zoom = MIN(2.0, zoom);
+
+    wv->zoom = MAX(1.0, wv->zoom);
+    wv->zoom = MIN(2.0, wv->zoom);
 
     /* keep in window */
-    max = (1 / zoom) - 1;
-    xOffset = MAX(max, xOffset);
-    xOffset = MIN(-max, xOffset);
-    yOffset = MAX(max, yOffset);
-    yOffset = MIN(-max, yOffset);
+    //    max = (1 / zoom) - 1;
+    //    xOffset = MAX(max, xOffset);
+    //    xOffset = MIN(-max, xOffset);
+    //    yOffset = MAX(max, yOffset);
+    //    yOffset = MIN(-max, yOffset);
+    //
+    max = (1 / wv->zoom) - 1;
+    wv->pos_offsets[0] = MAX(max, wv->pos_offsets[0]);
+    wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
+    wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
+    wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
 
-    printf("Zoom @ %f\n", zoom);
 
   } else {
-    xOffset += xoffset;
-    yOffset += -yoffset;
+    wv->pos_offsets[0] += xoffset;
+    wv->pos_offsets[1] += -yoffset;
 
     /* keep in window */
-    max = (1 / zoom) - 1;
-    xOffset = MAX(max, xOffset);
-    xOffset = MIN(-max, xOffset);
-    yOffset = MAX(max, yOffset);
-    yOffset = MIN(-max, yOffset);
-    printf("Scroll @ x %f, y %f\n", xOffset, yOffset);
+    max = (1 / wv->zoom) - 1;
+    wv->pos_offsets[0] = MAX(max, wv->pos_offsets[0]);
+    wv->pos_offsets[0] = MIN(-max, wv->pos_offsets[0]);
+    wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
+    wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
   }
 }
 
@@ -149,6 +164,7 @@ main(int argc, char **argv)
 
   /* Setup world view */
   world_view = gfx_world_view_create();
+  printf("0x%x\n", world_view);
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -160,6 +176,9 @@ main(int argc, char **argv)
 
   /* Setup callbacks */
   callb_ptrs.aa = agent_array;
+  callb_ptrs.wv = world_view;
+  printf("0x%x\n", callb_ptrs.wv);
+
   glfwSetWindowUserPointer(window, &callb_ptrs);
   glfwSetKeyCallback(window, key_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
@@ -225,8 +244,8 @@ main(int argc, char **argv)
 
     /* Main drawing */
     glPushMatrix();
-    glScalef(zoom, zoom, 1.);
-    glTranslatef(xOffset, yOffset, 1.0);
+    glScalef(world_view->zoom, world_view->zoom, 1.);
+    glTranslatef(world_view->pos_offsets[0], world_view->pos_offsets[1], 1.0);
 
     /* Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
@@ -241,8 +260,8 @@ main(int argc, char **argv)
     agents_to_verts(agent_array, agent_verts_new);
 
     gfx_world_texture(world_shader, glfwGetTime());
-    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, zoom);
-    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, zoom);
+    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, world_view->zoom);
+    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, world_view->zoom);
     glPopMatrix();
 
     // second pass
@@ -258,11 +277,11 @@ main(int argc, char **argv)
 
     glUseProgram(test_shader);
     GLuint loc = glGetUniformLocation(test_shader, "zoom");
-    glUniform1f(loc, zoom);
+    glUniform1f(loc, world_view->zoom);
 
     glUseProgram(test_shader);
     GLuint loc_two = glGetUniformLocation(test_shader, "pos_offset");
-    glUniform2f(loc_two, xOffset, yOffset);
+    glUniform2f(loc_two, world_view->pos_offsets[0], world_view->pos_offsets[1]);
 
     glUseProgram(test_shader);
     GLuint loc_three = glGetUniformLocation(test_shader, "time");
