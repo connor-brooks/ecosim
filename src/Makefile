@@ -1,8 +1,17 @@
 CC=gcc
-CFLAGS=-g3
-LIBS=-lGL -lm -lglut -lglfw -lGLEW
 
 all: ecosim
+
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Linux)
+	CFLAGS=-g3
+	LIBS=-lGL -lm -lglfw -lGLEW
+endif
+
+ifeq ($(UNAME_S),Darwin)
+	CFLAGS=-g3
+	LIBS=-framework OpenGl -I/usr/local/include -lglfw3 -lm --lGLEW
+endif
 
 ecosim: quadtree.o graphics.o utils.o agents.o main.o
 	$(CC) $(CFLAGS) $(LIBS) quadtree.o graphics.o utils.o agents.o main.o -o ecosim
@@ -16,12 +25,6 @@ agents.o: agents.c
 utils.o: utils.c
 	$(CC) -c utils.c
 
-#keyboard.o: keyboard.c
-#	$(CC) -c keyboard.c
-
-#ui.o: ui.c
-#	$(CC) -c ui.c
-
 graphics.o: graphics.c
 	$(CC) -c graphics.c
 
@@ -29,5 +32,5 @@ quadtree.o: quadtree.c
 	$(CC) -c quadtree.c
 
 clean:
-		rm *.o
-		rm ecosim
+	rm *.o
+	rm ecosim
