@@ -12,23 +12,23 @@ Ecosim is an ecosystem simulator:
 * libglfw3-dev
 * freeglut3-dev
 ## How to use
-* Install dependacies
+ Install dependacies
 
 `$ sudo apt-get install libglfw3-dev freeglut3-dev`
 
-* Grab the code:
+ Grab the code:
 
 `$ git clone https://github.com/connor-brooks/ecosim`
 
-* Enter source directory:
+ Enter source directory:
 
 `$ cd ecosim/src`
 
-* Build:
+ Build:
 
 `$ make`
 
-* Run the simulation: 
+ Run the simulation: 
 
 `$ ./ecosim`
 ## Controls 
