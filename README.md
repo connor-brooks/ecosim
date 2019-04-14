@@ -10,12 +10,12 @@ Ecosim is an ecosystem simulator:
 * make
 * gcc
 * libglfw3-dev
-* freeglut3-dev
+* libglew-dev
 * ffplay (optional)
 ## How to use
  Install dependacies
 
-`$ sudo apt-get install libglfw3-dev freeglut3-dev ffmpeg`
+`$ sudo apt-get install libglfw3-dev libglew-dev ffmpeg`
 
  Grab the code:
 
@@ -38,5 +38,8 @@ Ecosim is an ecosystem simulator:
 * Pause: `space`
 * Quit: `q`
 * Insert agent: `left click`
+
+## Notes 
+* If you'd like some background noise to play whilst running the simulation, install ffmpeg, otherwise it's not required
 
 
