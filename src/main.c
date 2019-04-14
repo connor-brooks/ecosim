@@ -152,7 +152,7 @@ main(int argc, char **argv)
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
-  agents_insert_dead(agent_array, 10);
+  agents_insert_dead(agent_array, 25);
   agent_verts_new = agent_verts_create();
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
@@ -168,6 +168,9 @@ main(int argc, char **argv)
   glfwSetMouseButtonCallback(window, mouse_button_callback);
   glfwSetScrollCallback(window, scroll_callback);
   glfwSetWindowSizeCallback(window, window_size_callback);
+
+  /* Play background noise */
+  system("ffplay ambient.wav -loop 0 -nodisp -loglevel quiet &");
 
   /* Main loop */
   while(!glfwWindowShouldClose(window))
@@ -245,6 +248,8 @@ main(int argc, char **argv)
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
   free(framebuffer);
+  system("pkill ffplay");
+  printf("KILLED\n");
   glfwTerminate();
   return 0;
 }
