@@ -11,10 +11,11 @@ Ecosim is an ecosystem simulator:
 * gcc
 * libglfw3-dev
 * freeglut3-dev
+* ffplay (optional)
 ## How to use
  Install dependacies
 
-`$ sudo apt-get install libglfw3-dev freeglut3-dev`
+`$ sudo apt-get install libglfw3-dev freeglut3-dev ffmpeg`
 
  Grab the code:
 
