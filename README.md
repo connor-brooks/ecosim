@@ -38,6 +38,7 @@ Ecosim is an ecosystem simulator:
 * Pause: `space`
 * Quit: `q`
 * Insert agent: `left click`
+* Cycle agents: `left click` (hold)
 
 ## Notes 
 * If you'd like some background noise to play whilst running the simulation, install ffmpeg, otherwise it's not required
