@@ -9,13 +9,15 @@ Ecosim is an ecosystem simulator:
 * GNU/Linux
 * make
 * gcc
+* libglfw3
+* libglew2.0
 * libglfw3-dev
 * libglew-dev
 * ffplay (optional)
 ## How to use
  Install dependacies
 
-`$ sudo apt-get install libglfw3-dev libglew-dev ffmpeg`
+`$ sudo apt-get install libglfw3 libglew2.0 libglfw3-dev libglew-dev ffmpeg`
 
  Grab the code:
 
