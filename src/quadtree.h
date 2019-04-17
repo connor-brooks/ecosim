@@ -2,7 +2,7 @@
 #ifndef QUADTREE_H
 #define QUADTREE_H
 #define QUAD_COUNT (4)
-#define QUADTREE_MAX_PER_CELL (2)
+#define QUADTREE_MAX_PER_CELL (4)
 #define QUADTREE_DIMS (2)
 
 typedef struct Quadtree_ Quadtree;

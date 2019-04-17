@@ -170,7 +170,7 @@ gfx_world_shader()
     "void main() {"
     "pos_out = position;"
     "color_out = color_in;"
-    "gl_Position = position;"
+    "gl_Position = gl_ModelViewProjectionMatrix * position;"
     "}";
 
   const char* world_fs =
@@ -186,6 +186,7 @@ gfx_world_shader()
     "vec4 new_col = vec4(1.0, 1.0, 1.0, 1.0);"
     "float noise = rand(pos.x * pos.y) * 0.02;"
     "new_col.a = noise;"
+    //"new_col = vec4( 1 - length(pos));"
     "gl_FragColor = new_col;"
     "}";
 

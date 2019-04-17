@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "agents.h"
 #include "utils.h"
+#include "input.h"
 #include "graphics.h"
 #include "quadtree.h"
 
@@ -20,6 +21,7 @@ int food_spawn_freq_mod = 0;
 /* For passing pointers to callbacks */
 struct Callback_ptrs{
   Agent_array* aa;
+  Input* inp;
   World_view* wv;
   Framebuffer* fb;
   Framebuffer** fb_ptr;
@@ -33,42 +35,34 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   {
     if(key == GLFW_KEY_SPACE)
       game_run = !game_run;
-    if(key == GLFW_KEY_Q)
+
+    else if(key == GLFW_KEY_Q)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
-
-    if(key == GLFW_KEY_DOWN)
-      food_spawn_freq_mod -=1;
-
-    if(key == GLFW_KEY_UP)
-      food_spawn_freq_mod +=1;
-
-    printf("spawn %d\n", food_spawn_freq_mod);
   }
 }
 
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
-  if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS){
-    struct Callback_ptrs* callb_ptrs;
-    Agent_array* aa;
-    World_view* wv ;
-    double xPos, yPos;
-    Agent* tmp_agent;
+  struct Callback_ptrs* callb_ptrs;
+  Input* input;
+  World_view* wv ;
+  double xPos, yPos;
 
-    callb_ptrs = glfwGetWindowUserPointer(window);
-    aa = callb_ptrs->aa;
-    wv = callb_ptrs->wv;
+  callb_ptrs = glfwGetWindowUserPointer(window);
+  input = callb_ptrs->inp;
+  wv = callb_ptrs->wv;
 
+  /* Begin a spawn cycle if mouse is pressed */
+  if(button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
+  {
     glfwGetCursorPos(window, &xPos, &yPos);
-
     float* relPos = gfx_world_view_relpos(wv, window, xPos, yPos);
-
-    tmp_agent = agent_create_random();
-    tmp_agent->x = relPos[0];
-    tmp_agent->y = relPos[1];
+    input_spawn_begin(input, relPos);
     free(relPos);
-    agent_array_insert(aa, tmp_agent);
   }
+  /* End spawn cycle when mouse is release */
+  else if(button == GLFW_MOUSE_BUTTON_LEFT  && action == GLFW_RELEASE)
+    input_spawn_end(input);
 
 }
 
@@ -102,8 +96,6 @@ void window_size_callback(GLFWwindow* window, int width, int height)
   callb_ptrs = glfwGetWindowUserPointer(window);
   fb_ptr = callb_ptrs->fb_ptr;
   *fb_ptr = gfx_framebuffer_create(width, height);
-
-
 }
 
 int
@@ -112,6 +104,7 @@ main(int argc, char **argv)
   GLFWwindow* window;
   Framebuffer* framebuffer;
   World_view* world_view;
+  Input* input;
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
   Quadtree* quad;
@@ -149,6 +142,7 @@ main(int argc, char **argv)
   framebuffer = gfx_framebuffer_create(1600, 900);
   GLuint fb_shader = gfx_framebuffer_shader();
   world_view = gfx_world_view_create();
+  input = input_create();
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -159,6 +153,7 @@ main(int argc, char **argv)
   GLuint world_shader = gfx_world_shader();
 
   /* Setup callbacks */
+  callb_ptrs.inp = input;
   callb_ptrs.aa = agent_array;
   callb_ptrs.wv = world_view;
   callb_ptrs.fb = framebuffer;
@@ -222,12 +217,16 @@ main(int argc, char **argv)
     /* Draw shaded framebuffer */
     gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
 
+    if(input->btn_left.is_down) {
+      input_spawn_cycle(input, agent_array);
+    }
+
     /* Update */
     if(game_run)
     {
       agents_update(agent_array, quad);
       /* insert food agents every 100 cycles */
-      // Convert to time, don't use cycles 
+      // Convert to time, don't use cycles
       if(cyclecount % (100 + food_spawn_freq_mod) == 0) {
         agents_insert_dead(agent_array, RANDF_MIN(5, 7));
         printf("Food added & agent array pruned\n");
@@ -248,6 +247,7 @@ main(int argc, char **argv)
   agent_array_free(agent_array);
   agent_verts_free(agent_verts_new);
   free(framebuffer);
+  input_free(input);
   system("pkill ffplay");
   printf("KILLED\n");
   glfwTerminate();
