@@ -6,11 +6,14 @@ CFLAGS=-g3
 LIBS=-lGL -lm -lglfw -lGLEW
 
 
-ecosim: quadtree.o graphics.o utils.o agents.o main.o
-	$(CC) $(CFLAGS) $(LIBS) quadtree.o graphics.o utils.o agents.o main.o -o ecosim
+ecosim: quadtree.o graphics.o utils.o agents.o input.o main.o
+	$(CC) $(CFLAGS) quadtree.o graphics.o utils.o agents.o input.o main.o -o ecosim $(LIBS) 
 
 main.o: main.c
 	$(CC) -c main.c
+
+input.o: input.c
+	$(CC) -c input.c
 
 agents.o: agents.c
 	$(CC) -c agents.c
