@@ -197,10 +197,20 @@ main(int argc, char **argv)
       input_spawn_cycle(input, agent_array);
       agents_to_verts(agent_array, agent_verts_new);
     }
+    
+//    if(glfwGetTime() > last_update_time + 1.0 / DEV_GAME_FPS) {
+//      usleep((1.0 / DEV_GAME_FPS) * 1000);
+//      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
+//    printf("time %f\n", glfwGetTime());
+//    }
+
 
     /* Main update cycle */
-    if(game_run)
+//    printf("time %f\n", glfwGetTime());
+    if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
     {
+ //     printf("updated at %f\n", glfwGetTime());
+      last_update_time = glfwGetTime();
       /* Recreate quadtree and insert agents */
       quad = quadtree_create(quad_head_pos, quad_head_size);
       for(i = 0; i < agent_array->count; i++) {
@@ -241,13 +251,6 @@ main(int argc, char **argv)
     gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
 
     
-    if(glfwGetTime() > last_update_time + 1.0 / DEV_GAME_FPS) {
-      usleep((1.0 / DEV_GAME_FPS) * 1000);
-      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
-    last_update_time += 1.0 / DEV_GAME_FPS;
-    printf("time %f\n", glfwGetTime());
-    }
-
     /* swap */
     glfwSwapBuffers(window);
     /* Poll for events */
