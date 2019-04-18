@@ -199,7 +199,6 @@ main(int argc, char **argv)
     /* Main update cycle */
     if(game_run)
     {
-      last_update_time += 1.0 / DEV_GAME_FPS;
       /* Recreate quadtree and insert agents */
       quad = quadtree_create(quad_head_pos, quad_head_size);
       for(i = 0; i < agent_array->count; i++) {
@@ -241,6 +240,7 @@ main(int argc, char **argv)
     
     if(glfwGetTime() < last_update_time + 1.0 / DEV_GAME_FPS) {
       usleep((1.0 / DEV_GAME_FPS) * 1000);
+      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
     }
     last_update_time += 1.0 / DEV_GAME_FPS;
 
