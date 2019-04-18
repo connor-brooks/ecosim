@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <math.h>
 #include <time.h>
 #include <string.h>
@@ -12,6 +13,7 @@
 #include "quadtree.h"
 
 #define DEV_AGENT_COUNT (80)
+#define DEV_GAME_FPS (60)
 
 
 /* TEMPORARY GLOBAL */
@@ -112,6 +114,7 @@ main(int argc, char **argv)
   int cyclecount = 0;
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
+  float last_update_time = glfwGetTime();
   // For passing structs between callbacks in glfw
   struct Callback_ptrs callb_ptrs;
 
@@ -180,20 +183,6 @@ main(int argc, char **argv)
     glViewport(0, 0, width, height);
     scale = gfx_get_scale(window);
 
-    /* Clear*/
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    /* Recreate quadtree and insert agents */
-    quad = quadtree_create(quad_head_pos, quad_head_size);
-
-    /* Insert agents into quadtree */
-    for(i = 0; i < agent_array->count; i++) {
-      tmp_agent = (agent_array->agents[i]);
-      float tmp_pos[] = {tmp_agent->x, tmp_agent->y};
-      if(tmp_agent->state != AGENT_STATE_PRUNE)
-        quadtree_insert(quad, tmp_agent, tmp_pos);
-    }
-
     /* QUADTREE GRAPHICS ARE BEING REMOVED SOON
      * Every frame rebuild the quadtree verts, draw them free them
      * will sort out later */
@@ -202,31 +191,31 @@ main(int argc, char **argv)
     //gfx_quad_draw(quad_verts);
     //quadtree_verts_free(quad_verts);
 
-    /* Convert agents to verts and draw them
-     * This function should only rebuild the verts array IF the agent count has changed,
-     * so we free at end, as the struct should presist all through running of program*/
-    agents_to_verts(agent_array, agent_verts_new);
-
-    /* Draw all the elments to framebuffer */
-    gfx_framebuffer_begin(framebuffer, world_view);
-    gfx_world_texture(world_shader, glfwGetTime());
-    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, world_view->zoom);
-    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, world_view->zoom);
-    gfx_framebuffer_end();
-
-    /* Draw shaded framebuffer */
-    gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
-
     if(input->btn_left.is_down) {
       input_spawn_cycle(input, agent_array);
+      agents_to_verts(agent_array, agent_verts_new);
     }
 
-    /* Update */
+    /* Main update cycle */
     if(game_run)
     {
+      last_update_time += 1.0 / DEV_GAME_FPS;
+      /* Recreate quadtree and insert agents */
+      quad = quadtree_create(quad_head_pos, quad_head_size);
+      for(i = 0; i < agent_array->count; i++) {
+        tmp_agent = (agent_array->agents[i]);
+        float tmp_pos[] = {tmp_agent->x, tmp_agent->y};
+        if(tmp_agent->state != AGENT_STATE_PRUNE)
+          quadtree_insert(quad, tmp_agent, tmp_pos);
+      }
+
+      /* Update agents position using quadtree, convert
+       * them into their verts*/
       agents_update(agent_array, quad);
-      /* insert food agents every 100 cycles */
-      // Convert to time, don't use cycles
+      agents_to_verts(agent_array, agent_verts_new);
+
+      /* Every 100 cycles insert food and prune redundant
+       * agents */
       if(cyclecount % (100 + food_spawn_freq_mod) == 0) {
         agents_insert_dead(agent_array, RANDF_MIN(5, 7));
         printf("Food added & agent array pruned\n");
@@ -234,9 +223,27 @@ main(int argc, char **argv)
         callb_ptrs.aa = agent_array;
       }
       cyclecount++;
+
+      quadtree_free(quad);
     }
 
-    quadtree_free(quad);
+    /* Draw all the elments to framebuffer */
+    glClear(GL_COLOR_BUFFER_BIT);
+    gfx_framebuffer_begin(framebuffer, world_view);
+    gfx_world_texture(world_shader, glfwGetTime());
+    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, world_view->zoom);
+    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, world_view->zoom);
+    gfx_framebuffer_end();
+
+    /* Draw a shaded version of the framebuffer */
+    gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
+
+    
+    if(glfwGetTime() < last_update_time + 1.0 / DEV_GAME_FPS) {
+      usleep((1.0 / DEV_GAME_FPS) * 1000);
+    }
+    last_update_time += 1.0 / DEV_GAME_FPS;
+
     /* swap */
     glfwSwapBuffers(window);
     /* Poll for events */
