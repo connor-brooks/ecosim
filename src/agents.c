@@ -9,13 +9,6 @@
 #include "agents.h"
 #include "quadtree.h"
 
-/* DEBUG */
-float prec(float n, float i) 
-{ 
-      return floor(pow(10,i)*n)/pow(10,i); 
-}
-
-
 
 /* Create empty agent array */
 Agent_array*
@@ -67,30 +60,20 @@ agent_create_random()
 {
   Agent* tmp_agent = malloc(sizeof(Agent));
   /* random DNA */
-  tmp_agent->dna.metabolism = 
-    prec(RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX), 5);
-  tmp_agent->dna.fear = 
-    prec(RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX), 5);
-  tmp_agent->dna.vision = 
-    prec(RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX), 5);
-  tmp_agent->dna.rebirth = 
-    prec(RANDF_MIN(AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX), 5);
-  tmp_agent->dna.aggresion = 
-    prec(RANDF_MIN(AGENT_AGGRESION_MIN, AGENT_AGGRESION_MAX), 5);
-  tmp_agent->dna.diet = 
-   prec( RANDF_MIN(AGENT_DIET_MIN, AGENT_DIET_MAX), 5);
-  tmp_agent->dna.flock = 
-    prec(RANDF_MIN(AGENT_FLOCK_MIN, AGENT_FLOCK_MAX), 5);
-  tmp_agent->dna.wobble= 
-    prec(RANDF_MIN(AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX), 5);
+  tmp_agent->dna.metabolism = RANDF_MIN(AGENT_METAB_MIN, AGENT_METAB_MAX);
+  tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
+  tmp_agent->dna.vision = RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX);
+  tmp_agent->dna.rebirth = RANDF_MIN(AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX);
+  tmp_agent->dna.aggresion = RANDF_MIN(AGENT_AGGRESION_MIN, AGENT_AGGRESION_MAX);
+  tmp_agent->dna.diet = RANDF_MIN(AGENT_DIET_MIN, AGENT_DIET_MAX);
+  tmp_agent->dna.flock = RANDF_MIN(AGENT_FLOCK_MIN, AGENT_FLOCK_MAX);
+  tmp_agent->dna.wobble= RANDF_MIN(AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX);
 
   /* random pos / directional info */
-  tmp_agent->x = prec(RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD), 5);
-  tmp_agent->y = prec(RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD), 5);
-  tmp_agent->velocity.x = 
-    prec(RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY), 5);
-  tmp_agent->velocity.y = 
-    prec(RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY), 5);
+  tmp_agent->x = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+  tmp_agent->y = RANDF_MIN(WORLD_MIN_COORD, WORLD_MAX_COORD);
+  tmp_agent->velocity.x = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
+  tmp_agent->velocity.y = RANDF_MIN(AGENT_MIN_VELOCITY, AGENT_MAX_VELOCITY);
 
   /* set colors based on DNA */
   agent_setup_colors(tmp_agent);
@@ -217,7 +200,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     local_agents = agents_get_local(a_ptr, quad, a_ptr->dna.vision);
 
     /* flock */
-    //agent_update_mv_flock(a_ptr, local_agents);
+    agent_update_mv_flock(a_ptr, local_agents);
 
     /* avoid or attrack */
     for(j = 0; j < local_agents->count; j++){
@@ -310,11 +293,8 @@ agents_update_location(Agent* a_ptr)
 
   wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
-  a_ptr->x += prec(a_ptr->velocity.x, 5) * mv_amt; // * fabs(wobble[0]);
-  a_ptr->y += prec(a_ptr->velocity.y, 5) * mv_amt; // fabs(wobble[1]);
-
-  a_ptr->x = prec(a_ptr->x, 5);
-  a_ptr->y = prec(a_ptr->y, 5);
+  a_ptr->x += a_ptr->velocity.x * mv_amt * fabs(wobble[0]);
+  a_ptr->y += a_ptr->velocity.y * mv_amt * fabs(wobble[1]);
 
   /* Wrap if needed */
   agents_update_mv_wrap(a_ptr);
@@ -323,7 +303,7 @@ agents_update_location(Agent* a_ptr)
 float
 agents_update_mv_amt(Agent* a_ptr)
 {
-  return prec(AGENT_MAX_SPEED * a_ptr->dna.metabolism, 5);
+  return AGENT_MAX_SPEED * a_ptr->dna.metabolism;
 }
 
 /* This function is stupid.
@@ -398,7 +378,6 @@ agent_normalize_velocity(Agent* a_ptr)
 {
   float mag = sqrt((a_ptr->velocity.x * a_ptr->velocity.x)
       + (a_ptr->velocity.y * a_ptr->velocity.y));
-  mag = prec(mag, 5);
   a_ptr->velocity.x = a_ptr->velocity.x / mag;
   a_ptr->velocity.y = a_ptr->velocity.y / mag;
 }
