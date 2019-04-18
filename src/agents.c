@@ -310,8 +310,8 @@ agents_update_location(Agent* a_ptr)
 
   wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
-  a_ptr->x += a_ptr->velocity.x * mv_amt; // * fabs(wobble[0]);
-  a_ptr->y += a_ptr->velocity.y * mv_amt; // fabs(wobble[1]);
+  a_ptr->x += prec(a_ptr->velocity.x, 5) * mv_amt; // * fabs(wobble[0]);
+  a_ptr->y += prec(a_ptr->velocity.y, 5) * mv_amt; // fabs(wobble[1]);
 
   a_ptr->x = prec(a_ptr->x, 5);
   a_ptr->y = prec(a_ptr->y, 5);
@@ -398,6 +398,7 @@ agent_normalize_velocity(Agent* a_ptr)
 {
   float mag = sqrt((a_ptr->velocity.x * a_ptr->velocity.x)
       + (a_ptr->velocity.y * a_ptr->velocity.y));
+  mag = prec(mag, 5);
   a_ptr->velocity.x = a_ptr->velocity.x / mag;
   a_ptr->velocity.y = a_ptr->velocity.y / mag;
 }
