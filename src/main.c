@@ -241,11 +241,12 @@ main(int argc, char **argv)
     gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
 
     
-    if(glfwGetTime() < last_update_time + 1.0 / DEV_GAME_FPS) {
+    if(glfwGetTime() > last_update_time + 1.0 / DEV_GAME_FPS) {
       usleep((1.0 / DEV_GAME_FPS) * 1000);
-//      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
-    }
+      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
     last_update_time += 1.0 / DEV_GAME_FPS;
+    printf("time %f\n", glfwGetTime());
+    }
 
     /* swap */
     glfwSwapBuffers(window);
