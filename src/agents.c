@@ -310,8 +310,11 @@ agents_update_location(Agent* a_ptr)
 
   wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
-  a_ptr->x += a_ptr->velocity.x * mv_amt * fabs(wobble[0]);
-  a_ptr->y += a_ptr->velocity.y * mv_amt * fabs(wobble[1]);
+  a_ptr->x += a_ptr->velocity.x * mv_amt; // * fabs(wobble[0]);
+  a_ptr->y += a_ptr->velocity.y * mv_amt; // fabs(wobble[1]);
+
+  a_ptr->x = prec(a_ptr->x, 5);
+  a_ptr->y = prec(a_ptr->y, 5);
 
   /* Wrap if needed */
   agents_update_mv_wrap(a_ptr);
@@ -320,7 +323,7 @@ agents_update_location(Agent* a_ptr)
 float
 agents_update_mv_amt(Agent* a_ptr)
 {
-  return AGENT_MAX_SPEED * a_ptr->dna.metabolism;
+  return prec(AGENT_MAX_SPEED * a_ptr->dna.metabolism, 5);
 }
 
 /* This function is stupid.
