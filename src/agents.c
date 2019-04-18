@@ -207,6 +207,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
       agent_item_collision(a_ptr, local_agents->agents[j]);
     }
+      agent_normalize_velocity(a_ptr);
 
     /* updates */
     agents_update_location(a_ptr);
@@ -400,8 +401,8 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   new_vel[1] = (diff[1] / mag);
 
   /* Take into account metabolism for speed */
-  new_vel[0] *= a_ptr->dna.metabolism / 2.0;
-  new_vel[1] *= a_ptr->dna.metabolism / 2.0;
+  //new_vel[0] *= a_ptr->dna.metabolism / 2.0;
+  //new_vel[1] *= a_ptr->dna.metabolism / 2.0;
 
   /* Is agent attracted or repeled? */
   attraction = agent_item_attraction(a_ptr, t_ptr, &mag);
@@ -419,7 +420,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   glEnd();
   glLineWidth(1.0);
 
-  agent_normalize_velocity(a_ptr);
+//  agent_normalize_velocity(a_ptr);
 }
 
 void
@@ -461,7 +462,7 @@ agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
   a_ptr->velocity.x += new[0] * a_ptr->dna.flock;
   a_ptr->velocity.y += new[1] * a_ptr->dna.flock;
 
-  agent_normalize_velocity(a_ptr);
+  //agent_normalize_velocity(a_ptr);
 }
 
 void
