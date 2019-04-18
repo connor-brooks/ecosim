@@ -141,7 +141,7 @@ main(int argc, char **argv)
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  srand((unsigned int)time(NULL));
+  srand((unsigned int) 0 ); //time(NULL));
 
   /* Setup world view */
   framebuffer = gfx_framebuffer_create(1600, 900);
