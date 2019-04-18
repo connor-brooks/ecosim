@@ -14,6 +14,7 @@
 
 #define DEV_AGENT_COUNT (80)
 #define DEV_GAME_FPS (60)
+#define DEV_GAME_FOOD_SPAWN_FREQ (2)
 
 
 /* TEMPORARY GLOBAL */
@@ -115,6 +116,7 @@ main(int argc, char **argv)
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
   float last_update_time = glfwGetTime();
+  float last_food_time = last_update_time;
   // For passing structs between callbacks in glfw
   struct Callback_ptrs callb_ptrs;
 
@@ -215,11 +217,12 @@ main(int argc, char **argv)
 
       /* Every 100 cycles insert food and prune redundant
        * agents */
-      if(cyclecount % (100 + food_spawn_freq_mod) == 0) {
+      if(glfwGetTime() > last_food_time + DEV_GAME_FOOD_SPAWN_FREQ) {
         agents_insert_dead(agent_array, RANDF_MIN(5, 7));
         printf("Food added & agent array pruned\n");
         agent_array = agent_array_prune(agent_array);
         callb_ptrs.aa = agent_array;
+        last_food_time = glfwGetTime();
       }
       cyclecount++;
 
@@ -240,7 +243,7 @@ main(int argc, char **argv)
     
     if(glfwGetTime() < last_update_time + 1.0 / DEV_GAME_FPS) {
       usleep((1.0 / DEV_GAME_FPS) * 1000);
-      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
+//      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
     }
     last_update_time += 1.0 / DEV_GAME_FPS;
 
