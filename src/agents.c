@@ -468,21 +468,32 @@ void
 agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
   float close = 0.02;
-  float a_diet = a_ptr->dna.diet;
-  float t_diet = t_ptr->dna.diet;
+  //float a_diet = a_ptr->dna.diet;
+  //float t_diet = t_ptr->dna.diet;
+  int a_diet = (a_ptr->dna.diet > 0.0f) ?
+    AGENT_DIET_LIVING :
+    AGENT_DIET_DEAD;
+
+  int t_diet = (t_ptr->dna.diet > 0.0f) ?
+    AGENT_DIET_LIVING :
+    AGENT_DIET_DEAD;
+
+
 
   if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
       (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
 
     switch(t_ptr->state){
       case AGENT_STATE_LIVING:
-        if(round(a_diet) > round(t_diet)){
+        if(a_diet == AGENT_DIET_LIVING &&
+          (t_diet == AGENT_DIET_DEAD))
+        {
           t_ptr->state = AGENT_STATE_PRUNE;
           a_ptr->energy += t_ptr->energy;
         }
         break;
       case AGENT_STATE_DEAD:
-        if(a_ptr->dna.diet < 0) {
+        if(a_diet == AGENT_DIET_DEAD) {
           t_ptr->state = AGENT_STATE_PRUNE;
           a_ptr->energy += t_ptr->energy;
         }
