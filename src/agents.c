@@ -53,6 +53,7 @@ agent_array_prune(Agent_array* aa)
   free(aa);
   return tmp_aa;
 }
+  //
 
 /* Create random agent */
 Agent*
@@ -318,7 +319,7 @@ agents_update_mv_wrap(Agent* a_ptr)
 float
 agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 {
-  float attraction = 0.0f; //(a_ptr->dna.aggresion);
+  float attraction = AGENT_NEUTRAL;// 0.0f; //(a_ptr->dna.aggresion);
 
   int a_diet = (a_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
@@ -330,44 +331,36 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 
   int t_state = t_ptr->state;
 
-  if(t_state == AGENT_STATE_PRUNE) return 0.0;
-
+  if(t_state == AGENT_STATE_PRUNE) return AGENT_NEUTRAL;
 
   /* meat eater vs other meat eater */
-  if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
+  else if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
     //if(*mag < 0.01 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
-    attraction = 0.0f;
+    attraction = AGENT_NEUTRAL;
   }
   /* meat eater vs any living */
   else if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_LIVING)
-    attraction = 1.0;
+    attraction = AGENT_ATTRACT;
 
   /* meat eater vs dead */
   else if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_DEAD)
-    attraction = 0.0;
+    attraction = AGENT_NEUTRAL;
 
   /* plant eater vs dead */
   else if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_DEAD)
-  {
-    attraction = 1.0;
-    printf("p eat\n");
-  }
+    attraction = AGENT_ATTRACT;
 
   /* plant eater vs platn eater */
-  else  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
-  {
-    //if(*mag < 0.01 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
-    attraction = 0.0f;
-  }
+  else if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
+    attraction = AGENT_NEUTRAL;
 
   /* plant eater vs meat eater*/
-  else  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
-    attraction = -1.0;
+  else if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
+    attraction = AGENT_AVOID;
 
   /* plant eater vs living */
-  else  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
-    attraction = 0.0;
-
+  else if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
+    attraction = AGENT_NEUTRAL;
 
   return attraction;
 }
@@ -428,17 +421,18 @@ void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
   float* cohes_vel = agent_mv_flock_cohesion(a_ptr, aa);
   float* serpa_vel = agent_mv_flock_seperation(a_ptr, aa);
 
+  /* Velocity alignment */
   final_vel[0] += align_vel[0];
   final_vel[1] += align_vel[1];
-  //
-  //  printf("FINAL align vel %f %f\n", align_vel[0], align_vel[1]);
 
+  /* Cohesion: Go to center of mass */
   final_vel[0] += cohes_vel[0];
   final_vel[1] += cohes_vel[1];
-  ///
+
+  /* Seperation: Avoid otherss */
   final_vel[0] += serpa_vel[0];
   final_vel[1] += serpa_vel[1];
-  //
+  
   free(align_vel);
   free(cohes_vel);
   free(serpa_vel);
