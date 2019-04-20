@@ -51,7 +51,7 @@ agent_array_prune(Agent_array* aa)
     }
   }
   free(aa);
-return tmp_aa;
+  return tmp_aa;
 }
 
 /* Create random agent */
@@ -183,16 +183,6 @@ agents_update(Agent_array* aa, Quadtree* quad)
     /* temp pointer for agent */
     a_ptr = aa->agents[i];
 
-//    glColor3f(1.0, 0.0, 0.0);
-//    float vis = AGENT_ENERGY_SIZE_SCALE(a_ptr->energy);
-//    printf("vis %f\n", vis);
-//    glBegin(GL_QUADS);
-//    glVertex3f(a_ptr->x, a_ptr->y, 0.0f);
-//    glVertex3f(a_ptr->x + vis, a_ptr->y, 0.0f);
-//    glVertex3f(a_ptr->x + vis, a_ptr->y + vis, 0.0f);
-//    glVertex3f(a_ptr->x , a_ptr->y + vis, 0.0f);
-//    glEnd();
-//
     // If the agent isn't living, don't update anything
     if(a_ptr->state != AGENT_STATE_LIVING) continue;
 
@@ -200,14 +190,16 @@ agents_update(Agent_array* aa, Quadtree* quad)
     local_agents = agents_get_local(a_ptr, quad, a_ptr->dna.vision);
 
     /* flock */
-    agent_update_mv_flock(a_ptr, local_agents);
+    agent_mv_flock(a_ptr, local_agents);
+    agent_normalize_velocity(a_ptr);
 
     /* avoid or attrack */
     for(j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
       agent_item_collision(a_ptr, local_agents->agents[j]);
+
+      //printf("agent %d velocity %f %f\n", j, local_agents->agents[j]->velocity.x, local_agents->agents[j]->velocity.y);
     }
-      agent_normalize_velocity(a_ptr);
 
     /* updates */
     agents_update_location(a_ptr);
@@ -324,52 +316,58 @@ agents_update_mv_wrap(Agent* a_ptr)
 }
 
 float
-agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag)
+agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 {
   float attraction = 0.0f; //(a_ptr->dna.aggresion);
 
-  int a_diet = (a_ptr->dna.diet > 0.0f) ?
+  int a_diet = (a_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
-  int t_diet = (t_ptr->dna.diet > 0.0f) ?
+  int t_diet = (t_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
   int t_state = t_ptr->state;
 
-  /* meat eater vs any living */
-  if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_LIVING)
-    attraction = 1.0;
+  if(t_state == AGENT_STATE_PRUNE) return 0.0;
+
 
   /* meat eater vs other meat eater */
   if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
-    if(*mag < 0.02 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
-    else attraction = 0.0f;
+    //if(*mag < 0.01 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+    attraction = 0.0f;
   }
+  /* meat eater vs any living */
+  else if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_LIVING)
+    attraction = 1.0;
 
   /* meat eater vs dead */
-  if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_DEAD)
+  else if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_DEAD)
     attraction = 0.0;
 
   /* plant eater vs dead */
-  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_DEAD)
-    attraction = 1.0;
-
-  /* plant eater vs platn eater */
-  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
+  else if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_DEAD)
   {
-    if(*mag < 0.02 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
-    else attraction = 0.0f;
+    attraction = 1.0;
+    printf("p eat\n");
   }
 
-  /* plant eater vs living */
-  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
-    attraction = 0.0;
+  /* plant eater vs platn eater */
+  else  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_DEAD)
+  {
+    //if(*mag < 0.01 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+    attraction = 0.0f;
+  }
 
   /* plant eater vs meat eater*/
-  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
+  else  if(a_diet == AGENT_DIET_DEAD && t_diet == AGENT_DIET_LIVING)
     attraction = -1.0;
+
+  /* plant eater vs living */
+  else  if(a_diet == AGENT_DIET_DEAD && t_state == AGENT_STATE_LIVING)
+    attraction = 0.0;
+
 
   return attraction;
 }
@@ -405,7 +403,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   //new_vel[1] *= a_ptr->dna.metabolism / 2.0;
 
   /* Is agent attracted or repeled? */
-  attraction = agent_item_attraction(a_ptr, t_ptr, &mag);
+  attraction = agent_item_attraction(a_ptr, t_ptr);
 
   /* sub from existing vector */
   a_ptr->velocity.x -= new_vel[0] * attraction;
@@ -420,49 +418,166 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   glEnd();
   glLineWidth(1.0);
 
-//  agent_normalize_velocity(a_ptr);
+  agent_normalize_velocity(a_ptr);
 }
 
-void
-agent_update_mv_flock(Agent* a_ptr, Agent_array* aa)
+void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
+{
+  float final_vel[] = {0.0f, 0.0f};
+  float* align_vel = agent_mv_flock_align(a_ptr, aa);
+  float* cohes_vel = agent_mv_flock_cohesion(a_ptr, aa);
+  float* serpa_vel = agent_mv_flock_seperation(a_ptr, aa);
+
+  final_vel[0] += align_vel[0];
+  final_vel[1] += align_vel[1];
+  //
+  //  printf("FINAL align vel %f %f\n", align_vel[0], align_vel[1]);
+
+  final_vel[0] += cohes_vel[0];
+  final_vel[1] += cohes_vel[1];
+  ///
+  final_vel[0] += serpa_vel[0];
+  final_vel[1] += serpa_vel[1];
+  //
+  free(align_vel);
+  free(cohes_vel);
+  free(serpa_vel);
+
+  a_ptr->velocity.x += final_vel[0];
+  a_ptr->velocity.y += final_vel[1];
+  //  agent_normalize_velocity(a_ptr);
+
+}
+float*
+agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
 {
   int i;
-  int count;
+  int count = 0;
+  float* return_vel = malloc(sizeof(float) * 2);
   float total[] = {0.0f, 0.0f};
   float avg[] = {0.0f, 0.0f};
-  float new[] = {0.0f, 0.0f};
-  Agent* tmp_agent;
-
+  float mag;
   float attraction;
-  float dummy_f = 1.0f;
-  int loop_amt = MIN(8, aa->count);
 
-  if(aa->count == 0) return;
+  return_vel[0] = 0.0f;
+  return_vel[1] = 0.0f;
 
-  for(i = 0; i < loop_amt; i++) {
-    tmp_agent = aa->agents[i];
-    attraction = agent_item_attraction(a_ptr, tmp_agent, &dummy_f);
-    //if(aa->agents[i]->state != AGENT_STATE_LIVING) continue;
-    if(attraction >= 0){
+  /* Get total */
+  for(i = 0; i < aa->count; i++) {
+    attraction = agent_item_attraction(a_ptr, aa->agents[i]);
+    if(aa->agents[i]->state == AGENT_STATE_LIVING && attraction == 0)
+    {
       total[0] += aa->agents[i]->velocity.x;
       total[1] += aa->agents[i]->velocity.y;
       count++;
     }
   }
+  if(count == 0) return return_vel;
 
-  avg[0] = (total[0] == 0) ? 0 : total[0] / (float) count;
-  avg[1] = (total[1] == 0) ? 0 : total[1] / (float) count;
+  /* Get average */
+  avg[0] = total[0] / (float) count;
+  avg[1] = total[1] / (float) count;
 
-  float mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
-  mag += 0.00001;
-  new[0] =  (avg[0] == 0) ? 0 : avg[0] / mag;
-  new[1] =  (avg[0] == 0) ? 0 : avg[1] / mag;
 
-  if(mag < 0.20) return;
-  a_ptr->velocity.x += new[0] * a_ptr->dna.flock;
-  a_ptr->velocity.y += new[1] * a_ptr->dna.flock;
+  /* Normalise */
+  mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
+  if(mag == 0) return return_vel;
+  return_vel[0] = avg[0] / mag;
+  return_vel[1] = avg[1] / mag;
 
-  //agent_normalize_velocity(a_ptr);
+  return return_vel;
+}
+
+float*
+agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
+{
+  int i;
+  int count = 0;
+  float* return_vel = malloc(sizeof(float) * 2);
+  float total[] = {0.0f, 0.0f};
+  float avg[] = {0.0f, 0.0f};
+  float mass_dir[] = {0.0f, 0.0f};
+  float mag;
+  float attraction;
+
+  return_vel[0] = 0.0f;
+  return_vel[1] = 0.0f;
+
+  /* Get total */
+  for(i = 0; i < aa->count; i++) {
+    attraction = agent_item_attraction(a_ptr, aa->agents[i]);
+    if(aa->agents[i]->state == AGENT_STATE_LIVING && attraction == 0)
+    {
+      total[0] += aa->agents[i]->x;
+      total[1] += aa->agents[i]->y;
+      count++;
+    }
+  }
+  if(count == 0) return return_vel;
+
+  /* Get average */
+  avg[0] = total[0] / (float) count;
+  avg[1] = total[1] / (float) count;
+
+  mass_dir[0] = avg[0] - a_ptr->x;
+  mass_dir[1] = avg[1] - a_ptr->y;
+
+  //  printf("massd %f %f\n", mass_dir[0], mass_dir[1]);
+
+
+  /* Normalise */
+  mag = sqrt((mass_dir[0] * mass_dir[0]) + (mass_dir[1] * mass_dir[1]));
+  if(mag == 0) return return_vel;
+  //printf("mag %f\n", mag);
+  return_vel[0] = mass_dir[0] / mag;
+  return_vel[1] = mass_dir[1] / mag;
+  //  printf("ret %f %f\n", return_vel[0], return_vel[1]);
+
+  return return_vel;
+
+}
+
+float*
+agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
+{
+  int i;
+  int count = 0;
+  float* return_vel = malloc(sizeof(float) * 2);
+  float total[] = {0.0f, 0.0f};
+  float avg[] = {0.0f, 0.0f};
+  float mag;
+  float attraction;
+
+  return_vel[0] = 0.0f;
+  return_vel[1] = 0.0f;
+
+  /* Get total */
+  for(i = 0; i < aa->count; i++) {
+    attraction = agent_item_attraction(a_ptr, aa->agents[i]);
+    if(aa->agents[i]->state == AGENT_STATE_LIVING && attraction == 0)
+    {
+      total[0] += aa->agents[i]->x - a_ptr->x;
+      total[1] += aa->agents[i]->y - a_ptr->y;
+      count++;
+    }
+  }
+  if(count == 0) return return_vel;
+
+  /* Get average */
+  avg[0] = total[0] / (float) count;
+  avg[1] = total[1] / (float) count;
+
+  avg[0] *= -1;
+  avg[1] *= -1;
+
+  /* Normalise */
+  mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
+  if(mag == 0) return return_vel;
+  return_vel[0] = avg[0] / mag;
+  return_vel[1] = avg[1] / mag;
+
+  return return_vel;
+
 }
 
 void
@@ -479,15 +594,13 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
-
-
   if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
       (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
 
     switch(t_ptr->state){
       case AGENT_STATE_LIVING:
         if(a_diet == AGENT_DIET_LIVING &&
-          (t_diet == AGENT_DIET_DEAD))
+            (t_diet == AGENT_DIET_DEAD))
         {
           t_ptr->state = AGENT_STATE_PRUNE;
           a_ptr->energy += t_ptr->energy;

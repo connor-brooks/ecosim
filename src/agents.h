@@ -157,14 +157,17 @@ void agents_insert_dead(Agent_array* aa, int count);
 
 void agent_normalize_velocity(Agent* a_ptr);
 void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);
-float agent_item_attraction(Agent* a_ptr, Agent* t_ptr, float* mag);
+float agent_item_attraction(Agent* a_ptr, Agent* t_ptr);
+
+void agent_mv_flock(Agent* a_ptr, Agent_array* aa);
+float* agent_mv_flock_align(Agent* a_ptr, Agent_array* aa);
+float* agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa);
+float* agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa);
 
 void agent_item_collision(Agent* a_ptr, Agent* t_ptr);
 
 void agent_split(Agent* a_ptr, Agent_array* aa);
 void agent_dna_mutate(Agent* a_ptr);
-
-void agent_update_mv_flock(Agent* a_ptr, Agent_array* aa);
 
 /* verts */
 Agent_verts* agent_verts_create();
@@ -172,6 +175,7 @@ void agent_verts_free(Agent_verts* av);
 void agents_to_verts(Agent_array* aa, Agent_verts* av);
 
 //Agent_vis_verts* agent_vis_verts_create();
+//
 
 #endif
 
