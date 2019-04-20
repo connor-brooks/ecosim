@@ -198,18 +198,9 @@ main(int argc, char **argv)
       agents_to_verts(agent_array, agent_verts_new);
     }
     
-//    if(glfwGetTime() > last_update_time + 1.0 / DEV_GAME_FPS) {
-//      usleep((1.0 / DEV_GAME_FPS) * 1000);
-//      printf("slept for %f ms \n", (1.0 / DEV_GAME_FPS) * 1000);
-//    printf("time %f\n", glfwGetTime());
-//    }
-
-
     /* Main update cycle */
-//    printf("time %f\n", glfwGetTime());
     if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
     {
- //     printf("updated at %f\n", glfwGetTime());
       last_update_time = glfwGetTime();
       /* Recreate quadtree and insert agents */
       quad = quadtree_create(quad_head_pos, quad_head_size);
@@ -243,14 +234,15 @@ main(int argc, char **argv)
     glClear(GL_COLOR_BUFFER_BIT);
     gfx_framebuffer_begin(framebuffer, world_view);
     gfx_world_texture(world_shader, glfwGetTime());
-    gfx_agents_draw_new(agent_verts_new, agent_shader, scale, world_view->zoom);
-    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, scale, world_view->zoom);
+    gfx_agents_draw_new(agent_verts_new, agent_shader, 
+        scale, world_view->zoom);
+    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, 
+        scale, world_view->zoom);
     gfx_framebuffer_end();
 
     /* Draw a shaded version of the framebuffer */
     gfx_framebuffer_draw(framebuffer, world_view, fb_shader);
 
-    
     /* swap */
     glfwSwapBuffers(window);
     /* Poll for events */
