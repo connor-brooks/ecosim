@@ -65,7 +65,8 @@ agent_create_random()
   tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
   tmp_agent->dna.vision = RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX);
   tmp_agent->dna.rebirth = RANDF_MIN(AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX);
-  tmp_agent->dna.aggresion = RANDF_MIN(AGENT_AGGRESION_MIN, AGENT_AGGRESION_MAX);
+  tmp_agent->dna.aggresion = RANDF_MIN(AGENT_AGGRESION_MIN,
+      AGENT_AGGRESION_MAX);
   tmp_agent->dna.diet = RANDF_MIN(AGENT_DIET_MIN, AGENT_DIET_MAX);
   tmp_agent->dna.flock = RANDF_MIN(AGENT_FLOCK_MIN, AGENT_FLOCK_MAX);
   tmp_agent->dna.wobble= RANDF_MIN(AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX);
@@ -96,7 +97,7 @@ agent_setup_colors(Agent* a_ptr)
   float *metabolism = &a_ptr->dna.metabolism;
   float *rebirth = &a_ptr->dna.rebirth;
   a_ptr->rgb.r = (*diet >= 0)? *diet : 0.0f;
-  a_ptr->rgb.g = *flocking; //(a_ptr->dna.diet > 0.0) ? a_ptr->dna.diet : 0.0;
+  a_ptr->rgb.g = *flocking;
   a_ptr->rgb.b = (*diet < 0.0f)? -(*diet): 0.0f;
 
   float mag = sqrt(
@@ -312,8 +313,8 @@ agents_update_mv_wrap(Agent* a_ptr)
   /* loop through x and y and put the agents at the opposite side
    * of the screen if they're past the ends */
   for(tmp_ptr = &a_ptr->x; tmp_ptr <= &a_ptr->y; tmp_ptr++){
-    *tmp_ptr = ((*tmp_ptr > WORLD_MAX_COORD) || 
-                (*tmp_ptr <= WORLD_MIN_COORD)) ?
+    *tmp_ptr = ((*tmp_ptr > WORLD_MAX_COORD) ||
+        (*tmp_ptr <= WORLD_MIN_COORD)) ?
       -(*tmp_ptr)* 0.99:
       *tmp_ptr;
   }
@@ -439,8 +440,8 @@ void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
   free(cohes_vel);
   free(serpa_vel);
 
-  a_ptr->velocity.x += final_vel[0];
-  a_ptr->velocity.y += final_vel[1];
+  a_ptr->velocity.x += final_vel[0] * a_ptr->dna.flock;
+  a_ptr->velocity.y += final_vel[1] * a_ptr->dna.flock;
   //  agent_normalize_velocity(a_ptr);
 
 }
@@ -504,7 +505,7 @@ agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
   /* Get total */
   for(i = 0; i < aa->count; i++) {
     attraction = agent_item_attraction(a_ptr, aa->agents[i]);
-    if(aa->agents[i]->state == AGENT_STATE_LIVING && 
+    if(aa->agents[i]->state == AGENT_STATE_LIVING &&
         attraction == AGENT_NEUTRAL)
     {
       total[0] += aa->agents[i]->x;
@@ -550,7 +551,7 @@ agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
   /* Get total */
   for(i = 0; i < aa->count; i++) {
     attraction = agent_item_attraction(a_ptr, aa->agents[i]);
-    if(aa->agents[i]->state == AGENT_STATE_LIVING && 
+    if(aa->agents[i]->state == AGENT_STATE_LIVING &&
         attraction == AGENT_NEUTRAL)
     {
       total[0] += aa->agents[i]->x - a_ptr->x;
@@ -735,7 +736,8 @@ agent_dna_mutate(Agent* a_ptr)
 void
 agents_update_energy(Agent* a_ptr)
 {
-  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * AGENTS_TIME_FACTOR;
+  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * 
+    AGENTS_TIME_FACTOR;
   if(a_ptr->energy < AGENTS_ENERGY_DEAD) {
     a_ptr->state = AGENT_STATE_DEAD;
     a_ptr->velocity.x = 0.0f;
