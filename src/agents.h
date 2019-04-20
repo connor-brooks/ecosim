@@ -75,6 +75,12 @@ enum agent_diet {
   AGENT_DIET_DEAD
 };
 
+enum agent_attraction {
+  AGENT_AVOID   = -1,
+  AGENT_NEUTRAL =  0,
+  AGENT_ATTRACT =  1
+};
+
 struct _DNA {
   float metabolism;
   float fear;
