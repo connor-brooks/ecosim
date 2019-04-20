@@ -180,8 +180,5 @@ Agent_verts* agent_verts_create();
 void agent_verts_free(Agent_verts* av);
 void agents_to_verts(Agent_array* aa, Agent_verts* av);
 
-//Agent_vis_verts* agent_vis_verts_create();
-//
-
 #endif
 

@@ -39,6 +39,7 @@ agent_array_insert(Agent_array* aa, Agent* a)
   aa->count++;
 }
 
+/* Remove non-visable agents from the array */
 Agent_array*
 agent_array_prune(Agent_array* aa)
 {
@@ -53,7 +54,6 @@ agent_array_prune(Agent_array* aa)
   free(aa);
   return tmp_aa;
 }
-  //
 
 /* Create random agent */
 Agent*
@@ -110,6 +110,7 @@ agent_setup_colors(Agent* a_ptr)
   a_ptr->rgb.b /= mag;
 }
 
+/* Insert "dead" agents into the array so food */
 void
 agents_insert_dead(Agent_array* aa, int count)
 {
@@ -129,6 +130,7 @@ agents_insert_dead(Agent_array* aa, int count)
   }
 }
 
+/* Calculate vision quad area */
 void
 agent_setup_vision_quad(Agent* a_ptr)
 {
@@ -142,7 +144,7 @@ agent_setup_vision_quad(Agent* a_ptr)
   a_ptr->vis_quad.top_right[1] = a_ptr->y + half_rad;
 }
 
-/* For testing: Create an agent array with randomised population*/
+/* Create a empty array and fill it with agents */
 Agent_array*
 agent_array_setup_random(int count)
 {
@@ -158,6 +160,7 @@ agent_array_setup_random(int count)
   return tmp_aa;
 }
 
+/* Destroy agent array */
 void
 agent_array_free(Agent_array* aa)
 {
@@ -198,15 +201,11 @@ agents_update(Agent_array* aa, Quadtree* quad)
     for(j = 0; j < local_agents->count; j++){
       agent_update_mv_avoid(a_ptr, local_agents->agents[j]);
       agent_item_collision(a_ptr, local_agents->agents[j]);
-
-      //printf("agent %d velocity %f %f\n", j, local_agents->agents[j]->velocity.x, local_agents->agents[j]->velocity.y);
     }
 
     /* updates */
     agents_update_location(a_ptr);
-
     agents_update_energy(a_ptr);
-
     agent_split(a_ptr, aa);
 
     /* radius sized box around agent */
@@ -227,6 +226,9 @@ agents_update(Agent_array* aa, Quadtree* quad)
   }
 }
 
+/* Query the quadtree for local agents,
+ * Check they are in line of sight
+ * Ignore irrelevent agents */
 Agent_array*
 agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 {
@@ -241,7 +243,6 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   float *bot_left  = (a_ptr->vis_quad.bot_left);
   float *top_right = (a_ptr->vis_quad.top_right);
 
-  /* Do query */
   quadtree_query(quad, query, pos, radius);
 
   /* Loop through agents */
@@ -275,16 +276,14 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
   return agent_array;
 }
 
+/* Move the agent based on their velocity */
 void
 agents_update_location(Agent* a_ptr)
 {
-  /* Calculate move magnitude */
   float mv_amt = agents_update_mv_amt(a_ptr);
-
-  /* also change velocity into an array */
-  /* Move agents */
   float wobble[] = {0.0, 0.0};
 
+  /* add a wobble to their step */
   wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
   a_ptr->x += a_ptr->velocity.x * mv_amt * fabs(wobble[0]);
@@ -294,13 +293,16 @@ agents_update_location(Agent* a_ptr)
   agents_update_mv_wrap(a_ptr);
 }
 
+/* Calculate how much the agent can move */
 float
 agents_update_mv_amt(Agent* a_ptr)
 {
   return AGENT_MAX_SPEED * a_ptr->dna.metabolism;
 }
 
-/* This function is stupid.
+/* Wraps agents to the other side of the screen if they leave the visible
+ * area.
+ * This function is stupid.
  * Put X and y for agents into an arrary so this type
  * of thing doesn't exist. */
 void
@@ -310,12 +312,14 @@ agents_update_mv_wrap(Agent* a_ptr)
   /* loop through x and y and put the agents at the opposite side
    * of the screen if they're past the ends */
   for(tmp_ptr = &a_ptr->x; tmp_ptr <= &a_ptr->y; tmp_ptr++){
-    *tmp_ptr = ((*tmp_ptr > WORLD_MAX_COORD) || (*tmp_ptr <= WORLD_MIN_COORD)) ?
+    *tmp_ptr = ((*tmp_ptr > WORLD_MAX_COORD) || 
+                (*tmp_ptr <= WORLD_MIN_COORD)) ?
       -(*tmp_ptr)* 0.99:
       *tmp_ptr;
   }
 }
 
+/* Calculate the attitude of one agent about another*/
 float
 agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 {
@@ -334,10 +338,9 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
   if(t_state == AGENT_STATE_PRUNE) return AGENT_NEUTRAL;
 
   /* meat eater vs other meat eater */
-  else if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING){
-    //if(*mag < 0.01 && t_state == AGENT_STATE_LIVING) attraction = -1.0f;
+  else if(a_diet == AGENT_DIET_LIVING && t_diet == AGENT_DIET_LIVING)
     attraction = AGENT_NEUTRAL;
-  }
+
   /* meat eater vs any living */
   else if(a_diet == AGENT_DIET_LIVING && t_state == AGENT_STATE_LIVING)
     attraction = AGENT_ATTRACT;
@@ -365,6 +368,7 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
   return attraction;
 }
 
+/* Normalise velocity */
 void
 agent_normalize_velocity(Agent* a_ptr)
 {
@@ -374,6 +378,7 @@ agent_normalize_velocity(Agent* a_ptr)
   a_ptr->velocity.y = a_ptr->velocity.y / mag;
 }
 
+/* Move agent with respect to other entities */
 void
 agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
 {
@@ -390,10 +395,6 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   mag = sqrt((diff[0] * diff[0]) + (diff[1] * diff[1]));
   new_vel[0] = (diff[0] / mag);
   new_vel[1] = (diff[1] / mag);
-
-  /* Take into account metabolism for speed */
-  //new_vel[0] *= a_ptr->dna.metabolism / 2.0;
-  //new_vel[1] *= a_ptr->dna.metabolism / 2.0;
 
   /* Is agent attracted or repeled? */
   attraction = agent_item_attraction(a_ptr, t_ptr);
@@ -414,6 +415,7 @@ agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr)
   agent_normalize_velocity(a_ptr);
 }
 
+/* Flock agents */
 void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
 {
   float final_vel[] = {0.0f, 0.0f};
@@ -432,7 +434,7 @@ void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
   /* Seperation: Avoid otherss */
   final_vel[0] += serpa_vel[0];
   final_vel[1] += serpa_vel[1];
-  
+
   free(align_vel);
   free(cohes_vel);
   free(serpa_vel);
@@ -442,6 +444,8 @@ void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
   //  agent_normalize_velocity(a_ptr);
 
 }
+
+/* Align with neutral agents */
 float*
 agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
 {
@@ -472,7 +476,6 @@ agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
   avg[0] = total[0] / (float) count;
   avg[1] = total[1] / (float) count;
 
-
   /* Normalise */
   mag = sqrt((avg[0] * avg[0]) + (avg[1] * avg[1]));
   if(mag == 0) return return_vel;
@@ -482,6 +485,7 @@ agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
   return return_vel;
 }
 
+/* Go towards center of mass */
 float*
 agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
 {
@@ -500,7 +504,8 @@ agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
   /* Get total */
   for(i = 0; i < aa->count; i++) {
     attraction = agent_item_attraction(a_ptr, aa->agents[i]);
-    if(aa->agents[i]->state == AGENT_STATE_LIVING && attraction == 0)
+    if(aa->agents[i]->state == AGENT_STATE_LIVING && 
+        attraction == AGENT_NEUTRAL)
     {
       total[0] += aa->agents[i]->x;
       total[1] += aa->agents[i]->y;
@@ -513,24 +518,21 @@ agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
   avg[0] = total[0] / (float) count;
   avg[1] = total[1] / (float) count;
 
+  /* Direction to center of mass */
   mass_dir[0] = avg[0] - a_ptr->x;
   mass_dir[1] = avg[1] - a_ptr->y;
-
-  //  printf("massd %f %f\n", mass_dir[0], mass_dir[1]);
-
 
   /* Normalise */
   mag = sqrt((mass_dir[0] * mass_dir[0]) + (mass_dir[1] * mass_dir[1]));
   if(mag == 0) return return_vel;
-  //printf("mag %f\n", mag);
   return_vel[0] = mass_dir[0] / mag;
   return_vel[1] = mass_dir[1] / mag;
-  //  printf("ret %f %f\n", return_vel[0], return_vel[1]);
 
   return return_vel;
 
 }
 
+/* Seperate from each other */
 float*
 agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
 {
@@ -548,7 +550,8 @@ agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
   /* Get total */
   for(i = 0; i < aa->count; i++) {
     attraction = agent_item_attraction(a_ptr, aa->agents[i]);
-    if(aa->agents[i]->state == AGENT_STATE_LIVING && attraction == 0)
+    if(aa->agents[i]->state == AGENT_STATE_LIVING && 
+        attraction == AGENT_NEUTRAL)
     {
       total[0] += aa->agents[i]->x - a_ptr->x;
       total[1] += aa->agents[i]->y - a_ptr->y;
@@ -571,15 +574,14 @@ agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
   return_vel[1] = avg[1] / mag;
 
   return return_vel;
-
 }
 
+/* Act on collision of two agents */
 void
 agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
   float close = 0.02;
-  //float a_diet = a_ptr->dna.diet;
-  //float t_diet = t_ptr->dna.diet;
+
   int a_diet = (a_ptr->dna.diet > 0.0f) ?
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
@@ -588,28 +590,31 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
-  if((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
-      (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y)) {
+  /* Is the agent close enough to the target? */
+  if(!((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
+        (a_ptr->y - close < t_ptr->y) & (a_ptr->y + close > t_ptr->y))) {
+    return;
+  }
 
-    switch(t_ptr->state){
-      case AGENT_STATE_LIVING:
-        if(a_diet == AGENT_DIET_LIVING &&
-            (t_diet == AGENT_DIET_DEAD))
-        {
-          t_ptr->state = AGENT_STATE_PRUNE;
-          a_ptr->energy += t_ptr->energy;
-        }
-        break;
-      case AGENT_STATE_DEAD:
-        if(a_diet == AGENT_DIET_DEAD) {
-          t_ptr->state = AGENT_STATE_PRUNE;
-          a_ptr->energy += t_ptr->energy;
-        }
-        break;
-    }
+  switch(t_ptr->state){
+    case AGENT_STATE_LIVING:
+      if(a_diet == AGENT_DIET_LIVING &&
+          (t_diet == AGENT_DIET_DEAD))
+      {
+        t_ptr->state = AGENT_STATE_PRUNE;
+        a_ptr->energy += t_ptr->energy;
+      }
+      break;
+    case AGENT_STATE_DEAD:
+      if(a_diet == AGENT_DIET_DEAD) {
+        t_ptr->state = AGENT_STATE_PRUNE;
+        a_ptr->energy += t_ptr->energy;
+      }
+      break;
   }
 }
 
+/* Create a copy of self */
 void
 agent_split(Agent* a_ptr, Agent_array* aa)
 {
