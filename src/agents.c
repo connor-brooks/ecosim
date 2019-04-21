@@ -640,58 +640,28 @@ agent_split(Agent* a_ptr, Agent_array* aa)
   }
 }
 
+void 
+agent_dna_mutate_trait(float* trait, float rate, float probability)
+{
+  *trait +=
+    (RANDF(1) > probability)?
+    RANDF_MIN(-1.0, 1.0) * rate :
+    0;
+}
+
 void
 agent_dna_mutate(Agent* a_ptr)
 {
-  /* SWITCH OVER TO AN ARRAY SO THIS ISNT AS LONG */
   float rate = AGENTS_DNA_MUTATE_RATE;
-  float metabolism_change = RANDF_MIN(-1.0, 1.0) * rate;
-  float fear_change       = RANDF_MIN(-1.0, 1.0) * rate;
-  float vision_change     = RANDF_MIN(-1.0, 1.0) * rate;
-  float rebirth_change     = RANDF_MIN(-1.0, 1.0) * rate;
-  float aggresion_change     = RANDF_MIN(-1.0, 1.0) * rate;
-  float diet_change     = RANDF_MIN(-1.0, 1.0) * rate;
-  float flock_change     = RANDF_MIN(-1.0, 1.0) * rate;
-  float wobble_change     = RANDF_MIN(-1.0, 1.0) * rate * 10;
 
-  a_ptr->dna.metabolism +=
-    (RANDF(1) > 0.3)?
-    metabolism_change :
-    0;
-  a_ptr->dna.fear +=
-    (RANDF(1) > 0.3)?
-    fear_change:
-    0;
-
-  a_ptr->dna.vision +=
-    (RANDF(1) > 0.3)?
-    vision_change:
-    0;
-
-  a_ptr->dna.rebirth +=
-    (RANDF(1) > 0.3)?
-    rebirth_change :
-    0;
-
-  a_ptr->dna.aggresion +=
-    (RANDF(1) > 0.3)?
-    aggresion_change :
-    0;
-
-  a_ptr->dna.diet +=
-    (RANDF(1) > 0.3)?
-    diet_change :
-    0;
-
-  a_ptr->dna.flock +=
-    (RANDF(1) > 0.3)?
-    flock_change :
-    0;
-
-  a_ptr->dna.wobble +=
-    (RANDF(1) > 0.3)?
-    wobble_change :
-    0;
+  agent_dna_mutate_trait(&a_ptr->dna.metabolism, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.fear, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.vision, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.rebirth, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.aggresion, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.diet, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.flock, rate, 0.3);
+  agent_dna_mutate_trait(&a_ptr->dna.wobble, rate, 0.3);
 
   agent_setup_colors(a_ptr);
 

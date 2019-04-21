@@ -74,7 +74,4 @@
 #define QUADTREE_DIMS (2)
 #define WORLD_MIN_COORD (-1.0)
 #define WORLD_MAX_COORD (1.0)
-
-
-
 #endif

@@ -120,6 +120,7 @@ void agent_item_collision(Agent* a_ptr, Agent* t_ptr);
 
 void agent_split(Agent* a_ptr, Agent_array* aa);
 void agent_dna_mutate(Agent* a_ptr);
+void agent_dna_mutate_trait(float* trait, float rate, float probability);
 
 /* verts */
 Agent_verts* agent_verts_create();
