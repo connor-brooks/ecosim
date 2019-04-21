@@ -106,7 +106,7 @@ main(int argc, char **argv)
   World_view* world_view;
   Input* input;
   Agent_array* agent_array;
-  Agent_verts* agent_verts_new;
+  Agent_verts* agent_verts;
   Quadtree* quad;
   int cyclecount = 0;
   float quad_head_pos[] = {-1.0f, -1.0f};
@@ -148,10 +148,10 @@ main(int argc, char **argv)
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
   agents_insert_dead(agent_array, 25);
-  agent_verts_new = agent_verts_create();
+  agent_verts = agent_verts_create();
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
-  GLuint world_shader = gfx_world_shader();
+  GLuint bg_shader = gfx_bg_shader();
 
   /* Setup callbacks */
   callb_ptrs.inp = input;
@@ -174,24 +174,16 @@ main(int argc, char **argv)
     /* Set the viewport & grab scale*/
     int i;
     Agent* tmp_agent;
-    float tmp_pos;
     int width, height;
     float scale;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
     scale = gfx_get_scale(window);
 
-    /* QUADTREE GRAPHICS ARE BEING REMOVED SOON
-     * Every frame rebuild the quadtree verts, draw them free them
-     * will sort out later */
-    //quad_verts = quadtree_verts_create();
-    //quadtree_to_verts(quad, quad_verts);
-    //gfx_quad_draw(quad_verts);
-    //quadtree_verts_free(quad_verts);
-
+    /* Deal with user input */
     if(input->btn_left.is_down) {
       input_spawn_cycle(input, agent_array);
-      agents_to_verts(agent_array, agent_verts_new);
+      agents_to_verts(agent_array, agent_verts);
     }
     
     /* Main update cycle */
@@ -210,7 +202,7 @@ main(int argc, char **argv)
       /* Update agents position using quadtree, convert
        * them into their verts*/
       agents_update(agent_array, quad);
-      agents_to_verts(agent_array, agent_verts_new);
+      agents_to_verts(agent_array, agent_verts);
 
       /* Every 100 cycles insert food and prune redundant
        * agents */
@@ -229,10 +221,10 @@ main(int argc, char **argv)
     /* Draw all the elments to framebuffer */
     glClear(GL_COLOR_BUFFER_BIT);
     gfx_framebuffer_begin(framebuffer, world_view);
-    gfx_world_texture(world_shader, glfwGetTime());
-    gfx_agents_draw_new(agent_verts_new, agent_shader, 
+    gfx_bg_draw(bg_shader, glfwGetTime());
+    gfx_agents_draw_cell(agent_verts, agent_shader, 
         scale, world_view->zoom);
-    gfx_agents_draw_vis(agent_verts_new, agent_vis_shader, 
+    gfx_agents_draw_vis(agent_verts, agent_vis_shader, 
         scale, world_view->zoom);
     gfx_framebuffer_end();
 
@@ -247,7 +239,7 @@ main(int argc, char **argv)
 
   /* Agent verts can be persistant, so free at end, not each frame*/
   agent_array_free(agent_array);
-  agent_verts_free(agent_verts_new);
+  agent_verts_free(agent_verts);
   free(framebuffer);
   input_free(input);
   system("pkill ffplay");

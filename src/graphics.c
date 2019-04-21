@@ -185,9 +185,9 @@ gfx_framebuffer_shader(){
 }
 
 GLuint
-gfx_world_shader()
+gfx_bg_shader()
 {
-  const char* world_vs =
+  const char* bg_vs =
     "#version 130\n"
     "in vec4 position;"
     "in vec4 color_in;"
@@ -201,7 +201,7 @@ gfx_world_shader()
     "gl_Position = gl_ModelViewProjectionMatrix * position;"
     "}";
 
-  const char* world_fs =
+  const char* bg_fs =
     "#version 130\n"
     "in vec4 color_out;"
     "in vec4 pos_out;"
@@ -222,7 +222,7 @@ gfx_world_shader()
     "gl_FragColor = new_col;"
     "}";
 
-  return gfx_setup_shader(world_vs, world_fs);
+  return gfx_setup_shader(bg_vs, bg_fs);
 }
 
 GLuint
@@ -321,8 +321,9 @@ gfx_agent_vis_shader()
   return gfx_setup_shader(vis_vs, vis_fs);
 }
 
+/* Draw agents from agent verts */
 void
-gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom)
+gfx_agents_draw_cell(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
@@ -345,6 +346,7 @@ gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom)
   glDisableClientState(GL_VERTEX_ARRAY);
 }
 
+/* Draw vision fields from agent vision vertex*/
 void
 gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
@@ -401,11 +403,12 @@ gfx_world_view_create()
   return tmp;
 }
 
+/* Zoom in the world */
 void
 gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset)
 {
-  xoffset *= 0.020;
-  yoffset *= 0.020;
+  xoffset *= INPUT_SCROLL_AMT;
+  yoffset *= INPUT_SCROLL_AMT;
 
   wv->zoom += yoffset;
 
@@ -417,11 +420,12 @@ gfx_world_view_zoom(World_view *wv, float xoffset, float yoffset)
 
 }
 
+/* Scroll in the world */
 void
 gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset)
 {
-  xoffset *= 0.020;
-  yoffset *= 0.020;
+  xoffset *= INPUT_SCROLL_AMT;
+  yoffset *= INPUT_SCROLL_AMT;
 
   wv->pos_offsets[0] += xoffset;
   wv->pos_offsets[1] += -yoffset;
@@ -430,6 +434,7 @@ gfx_world_view_scroll(World_view *wv, float xoffset, float yoffset)
 
 }
 
+/* Prevent scrolling off the edge */
 void
 gfx_world_view_constrain(World_view *wv)
 {
@@ -440,6 +445,9 @@ gfx_world_view_constrain(World_view *wv)
   wv->pos_offsets[1] = MAX(max, wv->pos_offsets[1]);
   wv->pos_offsets[1] = MIN(-max, wv->pos_offsets[1]);
 }
+
+/* Get reletive position of a point in the window, taking into account the
+ * zoom and offset position of the simulation */
 float*
 gfx_world_view_relpos(World_view* wv, GLFWwindow* window, float x, float y)
 {
@@ -464,7 +472,8 @@ gfx_world_view_relpos(World_view* wv, GLFWwindow* window, float x, float y)
   return tmp;
 }
 
-void gfx_world_texture(GLuint shader, float time)
+/* Draw textured background */
+void gfx_bg_draw(GLuint shader, float time)
 {
   glColor3f(0.0, 1.0, 0.0);
   glUseProgram(shader);

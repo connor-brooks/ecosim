@@ -8,6 +8,7 @@
 
 /* Input config */
 #define INPUT_SPAWN_DELAY (0.5)
+#define INPUT_SCROLL_AMT (0.02)
 
 
 /* Agent config */
