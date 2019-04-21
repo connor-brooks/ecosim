@@ -101,65 +101,6 @@ quadtree_insert(Quadtree* q, void* ptr, float pos[])
 }
 
 
-Quadtree_verts*
-quadtree_verts_create()
-{
-  Quadtree_verts* tmp = malloc(sizeof(Quadtree_verts));
-  tmp->capacity = sizeof(float) * (QUADTREE_VERT_LEN +1);;;
-  tmp->size = 0;
-  tmp->verts = malloc(tmp->capacity);
-  tmp->q_count = 0;
-  tmp->end = 0;
-  return tmp;
-}
-
-void
-quadtree_verts_free(Quadtree_verts* qv)
-{
-  free(qv->verts);
-  free(qv);
-}
-
-void
-quadtree_to_verts(Quadtree* q, Quadtree_verts *v)
-{
-  int i;
-  size_t new_size = v->size + (sizeof(float) * QUADTREE_VERT_LEN);
-
-  /* if verts array too big, grow */
-  if(new_size > v->capacity){
-    v->capacity = v->capacity * 2;
-    v->verts = realloc(v->verts, v->capacity);
-  }
-
-  // X & y
-  v->verts[v->end++] = q->pos[0];
-  v->verts[v->end++] = q->pos[1];
-  v->verts[v->end++] = 0.0;
-
-  v->verts[v->end++] = q->pos[0] + q->size;
-  v->verts[v->end++] = q->pos[1];
-  v->verts[v->end++] = 0.0;
-
-  v->verts[v->end++] = q->pos[0] + q->size;
-  v->verts[v->end++] = q->pos[1] + q->size;
-  v->verts[v->end++] = 0.0;
-
-  v->verts[v->end++] = q->pos[0];
-  v->verts[v->end++] = q->pos[1] + q->size;
-  v->verts[v->end++] = 0.0;
-  // For Z
-
-  v->size = new_size;
-  v->q_count++;
-
-  if(q->has_child){
-    for(i = 0; i < QUAD_COUNT; i++){
-      quadtree_to_verts(q->sect[i], v);
-    }
-  }
-}
-
 
 /* check if a point intersects with a quad */
 int quadtree_intersect(Quadtree *q, float pos[], float size)

@@ -322,18 +322,6 @@ gfx_agent_vis_shader()
 }
 
 void
-gfx_quad_draw(Quadtree_verts* qv)
-{
-  glColor4f(1.0, 1.0, 1.0, 0.02);
-  glPolygonMode (GL_FRONT_AND_BACK, GL_LINE);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexPointer(3, GL_FLOAT, 0, qv->verts);
-  glDrawArrays(GL_QUADS, 0, qv->q_count * 4);
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glPolygonMode (GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void
 gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
   glEnableClientState(GL_VERTEX_ARRAY);

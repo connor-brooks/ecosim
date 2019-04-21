@@ -108,7 +108,6 @@ main(int argc, char **argv)
   Agent_array* agent_array;
   Agent_verts* agent_verts_new;
   Quadtree* quad;
-  Quadtree_verts* quad_verts;
   int cyclecount = 0;
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;

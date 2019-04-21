@@ -36,8 +36,6 @@ void gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader);
 void gfx_agents_draw_new(Agent_verts* av, GLuint shader, float scale, float zoom);
 void gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom);
 
-void gfx_quad_draw(Quadtree_verts* qv);
-
 void gfx_text_draw(float x, float y, const unsigned char* txt);
 
 float gfx_get_scale(GLFWwindow* window);
