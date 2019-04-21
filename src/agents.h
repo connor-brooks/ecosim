@@ -32,7 +32,6 @@ struct _DNA {
   float fear;
   float vision;
   float rebirth;
-  float aggresion;
   float diet; /* -1 for dead, 1 for living */
   float flock;
   float wobble;
@@ -121,6 +120,7 @@ void agent_item_collision(Agent* a_ptr, Agent* t_ptr);
 void agent_split(Agent* a_ptr, Agent_array* aa);
 void agent_dna_mutate(Agent* a_ptr);
 void agent_dna_mutate_trait(float* trait, float rate, float probability);
+void agent_dna_trait_constrain(float* trait, float min, float max);
 
 /* verts */
 Agent_verts* agent_verts_create();

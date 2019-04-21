@@ -66,8 +66,6 @@ agent_create_random()
   tmp_agent->dna.fear = RANDF_MIN(AGENT_FEAR_MIN, AGENT_FEAR_MAX);
   tmp_agent->dna.vision = RANDF_MIN(AGENT_VISION_MIN, AGENT_VISION_MAX);
   tmp_agent->dna.rebirth = RANDF_MIN(AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX);
-  tmp_agent->dna.aggresion = RANDF_MIN(AGENT_AGGRESION_MIN,
-      AGENT_AGGRESION_MAX);
   tmp_agent->dna.diet = RANDF_MIN(AGENT_DIET_MIN, AGENT_DIET_MAX);
   tmp_agent->dna.flock = RANDF_MIN(AGENT_FLOCK_MIN, AGENT_FLOCK_MAX);
   tmp_agent->dna.wobble= RANDF_MIN(AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX);
@@ -325,7 +323,7 @@ agents_update_mv_wrap(Agent* a_ptr)
 float
 agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 {
-  float attraction = AGENT_NEUTRAL;// 0.0f; //(a_ptr->dna.aggresion);
+  float attraction = AGENT_NEUTRAL;
 
   int a_diet = (a_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
@@ -649,59 +647,42 @@ agent_dna_mutate_trait(float* trait, float rate, float probability)
     0;
 }
 
+void 
+agent_dna_trait_constrain(float* trait, float min, float max)
+{
+  if(*trait < min) *trait = min;
+  else if(*trait > max) *trait = max;
+}
+
 void
 agent_dna_mutate(Agent* a_ptr)
 {
   float rate = AGENTS_DNA_MUTATE_RATE;
 
+  /* Mutate traits */
   agent_dna_mutate_trait(&a_ptr->dna.metabolism, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.fear, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.vision, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.rebirth, rate, 0.3);
-  agent_dna_mutate_trait(&a_ptr->dna.aggresion, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.diet, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.flock, rate, 0.3);
   agent_dna_mutate_trait(&a_ptr->dna.wobble, rate, 0.3);
 
+  /* Stop going over max or under min */
+  agent_dna_trait_constrain(&a_ptr->dna.vision,
+      AGENT_VISION_MIN, AGENT_VISION_MAX);
+  agent_dna_trait_constrain(&a_ptr->dna.metabolism,
+      AGENT_METAB_MIN, AGENT_METAB_MAX);
+  agent_dna_trait_constrain(&a_ptr->dna.rebirth,
+      AGENT_REBIRTH_MIN, AGENT_REBIRTH_MAX);
+  agent_dna_trait_constrain(&a_ptr->dna.diet,
+      AGENT_DIET_MIN, AGENT_DIET_MAX);
+  agent_dna_trait_constrain(&a_ptr->dna.flock,
+      AGENT_FLOCK_MIN, AGENT_FLOCK_MAX);
+  agent_dna_trait_constrain(&a_ptr->dna.wobble,
+      AGENT_WOBBLE_MIN, AGENT_WOBBLE_MAX);
+
   agent_setup_colors(a_ptr);
-
-  /* use minmax etc with new val for this */
-  if(a_ptr->dna.vision < AGENT_VISION_MIN)
-    a_ptr->dna.vision = AGENT_VISION_MIN;
-
-  if(a_ptr->dna.vision > AGENT_VISION_MAX)
-    a_ptr->dna.vision = AGENT_VISION_MAX;
-
-  if(a_ptr->dna.metabolism < AGENT_METAB_MIN)
-    a_ptr->dna.metabolism = AGENT_METAB_MIN;
-
-  if(a_ptr->dna.metabolism > AGENT_METAB_MAX)
-    a_ptr->dna.metabolism = AGENT_METAB_MAX;
-
-  if(a_ptr->dna.rebirth < AGENT_REBIRTH_MIN)
-    a_ptr->dna.rebirth = AGENT_REBIRTH_MIN;
-
-  if(a_ptr->dna.rebirth > AGENT_REBIRTH_MAX)
-    a_ptr->dna.rebirth = AGENT_REBIRTH_MAX;
-
-  if(a_ptr->dna.diet > AGENT_DIET_MAX)
-    a_ptr->dna.diet = AGENT_DIET_MAX;
-
-  if(a_ptr->dna.diet < AGENT_DIET_MIN)
-    a_ptr->dna.diet = AGENT_DIET_MIN;
-
-  if(a_ptr->dna.flock > AGENT_FLOCK_MAX)
-    a_ptr->dna.flock = AGENT_FLOCK_MAX;
-
-  if(a_ptr->dna.flock < AGENT_FLOCK_MIN)
-    a_ptr->dna.flock = AGENT_FLOCK_MIN;
-
-  if(a_ptr->dna.wobble > AGENT_WOBBLE_MAX)
-    a_ptr->dna.wobble = AGENT_WOBBLE_MAX;
-
-  if(a_ptr->dna.wobble < AGENT_WOBBLE_MIN)
-    a_ptr->dna.wobble = AGENT_WOBBLE_MIN;
-
 }
 
 void
