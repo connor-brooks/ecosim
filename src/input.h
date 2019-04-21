@@ -1,7 +1,7 @@
 #ifndef INPUT_H
 #define INPUT_H
 #include "agents.h"
-#define INPUT_SPAWN_DELAY (0.5)
+#include "config.h"
 
 typedef struct _Input Input;
 

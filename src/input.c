@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <GLFW/glfw3.h>
 #include "input.h"
+#include "config.h"
 #include "agents.h"
 
 Input*

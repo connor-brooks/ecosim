@@ -4,7 +4,6 @@
 #include <GLFW/glfw3.h>
 #include "agents.h"
 #include "quadtree.h"
-#define GFX_WORLD_VIEW_SCROLL_FACTOR
 
 typedef struct RGB_ RGB;
 

@@ -79,7 +79,7 @@ gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader)
 
   /* Draw framebuffer*/
   glPushMatrix();
-  glScalef(1.05, 1.05, 1.0);
+  glScalef(1.025, 1.025, 1.0); //hack
   glBegin(GL_QUADS);
   glVertex2f(-1, -1);
   glVertex2f(1, -1);
@@ -140,7 +140,6 @@ gfx_framebuffer_shader(){
     "offset += t_pos;"
     "offset += wobble;"
     "offset += vec2(off_x, off_y);"
-
     "return offset;"
     "}"
 
@@ -177,12 +176,6 @@ gfx_framebuffer_shader(){
     "offset_tex(t_pos, wobble, offset.x, -offset.y)) * blur_amt;"
     "t_sum += texture2D(fbo_texture,"
     "offset_tex(t_pos, wobble, 0.0, 0.0)) * 1.0;"
-    //"vec2 st = pos_offset;"
-    //"st *= 1.0;"
-    //"st -= 0.0;"
-    "vec4 sum = vec4(0.0, 0.0, 0.0, 1.0);"
-    "sum.x = wobble.x * 100;"
-    "sum.z = wobble.y * 100;"
     //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
     //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
     " gl_FragColor = t_sum;"
@@ -263,11 +256,14 @@ gfx_agent_shader()
     "void main() {"
     " vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
+    "/* Gen pattern */"
     " float pat_r = length(pos)*1.0;"
     " float pat_a = atan(pos.y,pos.x);"
     " float pat_f = cos(pat_a * 80);"
     " float alpha =  smoothstep(pat_f,pat_f+0.02,pat_r) * 1.0;"
     " float cut_r = 1.0;"
+
+    "/* Gen circle */"
     " float cutoff = 1.0 - smoothstep(cut_r - (cut_r * 0.02),"
     " cut_r + (cut_r * 0.02),"
     " dot(pos, pos) * 4.0);"
@@ -290,7 +286,7 @@ gfx_agent_vis_shader()
     "out vec4 color_out;"
     "uniform float zoom;"
     "void main() {"
-    ""
+
     "color_out = color;"
     "  gl_Position = gl_ModelViewProjectionMatrix * vec4(position.xyz, 1.0);"
     "  gl_PointSize = position.w * window.x * zoom;"
@@ -301,8 +297,10 @@ gfx_agent_vis_shader()
     "out vec4 frag_colour;"
     "in vec4 color_out;"
     "uniform float zoom;"
+
     "float rand(float n){return fract(sin(n) * 43758.5453123);}"
     "float mini_rand(float n){return fract(sin(n) * 150);}"
+
     "void main() {"
     "vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
@@ -311,7 +309,7 @@ gfx_agent_vis_shader()
 
     " float radius = 1.0;" //0.25;;"
     " float cutoff = 1.0 - smoothstep(radius - (radius * 0.01),"
-    " radius+(radius * 0.01),"
+    " radius + (radius * 0.01),"
     " dot(pos, pos) * 4.0);"
 
     " float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"

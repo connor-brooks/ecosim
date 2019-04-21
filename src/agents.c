@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <time.h>
 #include <math.h>
+#include "config.h"
 #include "utils.h"
 #include "agents.h"
 #include "quadtree.h"

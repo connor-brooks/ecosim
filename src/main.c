@@ -6,15 +6,12 @@
 #include <string.h>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "config.h"
 #include "agents.h"
 #include "utils.h"
 #include "input.h"
 #include "graphics.h"
 #include "quadtree.h"
-
-#define DEV_AGENT_COUNT (90)
-#define DEV_GAME_FPS (60)
-#define DEV_GAME_FOOD_SPAWN_FREQ (2)
 
 
 /* TEMPORARY GLOBAL */

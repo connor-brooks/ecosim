@@ -4,8 +4,6 @@
 #include <GL/gl.h>
 #include "quadtree.h"
 
-#define QUADTREE_VERT_LEN (3 * 4)
-#define QUADTREE_QUERY_SIZE (16)
 
 
 Quadtree*

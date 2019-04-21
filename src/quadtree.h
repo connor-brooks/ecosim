@@ -1,9 +1,7 @@
 #include <stddef.h>
 #ifndef QUADTREE_H
 #define QUADTREE_H
-#define QUAD_COUNT (4)
-#define QUADTREE_MAX_PER_CELL (4)
-#define QUADTREE_DIMS (2)
+#include "config.h"
 
 typedef struct Quadtree_ Quadtree;
 typedef struct Quadtree_verts_ Quadtree_verts;
