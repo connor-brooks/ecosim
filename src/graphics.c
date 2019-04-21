@@ -78,12 +78,15 @@ gfx_framebuffer_draw(Framebuffer* fb, World_view* wv, GLuint shader)
   glUniform2f(pos_u, wv->pos_offsets[0], wv->pos_offsets[1]);
 
   /* Draw framebuffer*/
+  glPushMatrix();
+  glScalef(1.05, 1.05, 1.0);
   glBegin(GL_QUADS);
   glVertex2f(-1, -1);
   glVertex2f(1, -1);
   glVertex2f(1, 1);
   glVertex2f(-1, 1);
   glEnd();
+  glPopMatrix();
 
   glUseProgram(0);
 }
@@ -120,7 +123,7 @@ gfx_framebuffer_shader(){
     "void main() {"
     "pos_out = position;"
     "color_out = color_in;"
-    "gl_Position = position;"
+    "gl_Position = gl_ModelViewProjectionMatrix * position;"
     "}";
 
   const char* test_fs =
@@ -137,7 +140,17 @@ gfx_framebuffer_shader(){
     "offset += t_pos;"
     "offset += wobble;"
     "offset += vec2(off_x, off_y);"
+
     "return offset;"
+    "}"
+
+    "vec2 calc_wobble(vec2 cam_offset, vec2 pos, float zoom)"
+    "{"
+    "vec2 wobble = vec2(0.0, 0.0);"
+    "wobble.x = max(0, sin((cam_offset.y - pos.y / zoom)*16)) * 0.007;"
+    "wobble.y = max(0, sin((cam_offset.x - pos.x / zoom)*24)) * 0.007;"
+    "wobble *= zoom;"
+    "return wobble;"
     "}"
 
     "void main()"
@@ -151,9 +164,7 @@ gfx_framebuffer_shader(){
     "t_pos += vec2(0.5, 0.5);"
 
     "/* Create wobble for warping agents */"
-    "wobble.x = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
-    "wobble.y = max(0, sin((pos_offset.x - pos_out.x / zoom)*24)) * 0.007;"
-    "wobble *= zoom;"
+    "wobble = calc_wobble(pos_offset.xy, pos_out.xy, zoom);"
 
     "/* Add offset textures, clearing wobble and blur effect */"
     "t_sum += texture2D(fbo_texture,"
@@ -164,11 +175,15 @@ gfx_framebuffer_shader(){
     "offset_tex(t_pos, wobble, -offset.x, -offset.y)) * blur_amt;"
     "t_sum += texture2D(fbo_texture,"
     "offset_tex(t_pos, wobble, offset.x, -offset.y)) * blur_amt;"
-    "t_sum += texture2D(fbo_texture, t_pos + wobble) * 1.0;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, 0.0, 0.0)) * 1.0;"
     //"vec2 st = pos_offset;"
     //"st *= 1.0;"
     //"st -= 0.0;"
-    ////"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
+    "vec4 sum = vec4(0.0, 0.0, 0.0, 1.0);"
+    "sum.x = wobble.x * 100;"
+    "sum.z = wobble.y * 100;"
+    //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
     //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
     " gl_FragColor = t_sum;"
     "}";
