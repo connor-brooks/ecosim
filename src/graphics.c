@@ -21,7 +21,7 @@ gfx_framebuffer_create(int width, int height)
 
   glGenTextures(1, &texBuffer);
   glBindTexture(GL_TEXTURE_2D, texBuffer);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, 
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
       GL_UNSIGNED_BYTE, NULL);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -130,21 +130,40 @@ gfx_framebuffer_shader(){
     "uniform sampler2D fbo_texture;"
     "uniform vec2 pos_offset;"
     "uniform float zoom;"
-    "void main() {"
+
+    "vec2 offset_tex(vec2 t_pos, vec2 wobble, float off_x, float off_y)"
+    "{"
+    "vec2 offset = vec2(0.0, 0.0);"
+    "offset += t_pos;"
+    "offset += wobble;"
+    "offset += vec2(off_x, off_y);"
+    "return offset;"
+    "}"
+
+    "void main()"
+    "{"
     "vec4 t_sum = vec4(0.0);"
     "vec2 wobble;"
-    "vec2 t_pos = vec2(0.5, 0.5);"
     "vec2 offset = vec2(0.003, 0.003);"
     "float blur_amt = 0.45 / 4;"
+    "vec2 t_pos = vec2(0.5, 0.5);"
     "t_pos *= pos_out.xy;"
     "t_pos += vec2(0.5, 0.5);"
+
+    "/* Create wobble for warping agents */"
     "wobble.x = max(0, sin((pos_offset.y - pos_out.y / zoom)*16)) * 0.007;"
     "wobble.y = max(0, sin((pos_offset.x - pos_out.x / zoom)*24)) * 0.007;"
     "wobble *= zoom;"
-    "t_sum += texture2D(fbo_texture, t_pos + wobble +vec2(offset.x, offset.y)) * blur_amt;"
-    "t_sum += texture2D(fbo_texture, t_pos + wobble +vec2(-offset.x, offset.y)) * blur_amt;"
-    "t_sum += texture2D(fbo_texture, t_pos + wobble +vec2(-offset.x, -offset.y)) * blur_amt;"
-    "t_sum += texture2D(fbo_texture, t_pos + wobble +vec2(offset.x, -offset.y)) * blur_amt;"
+
+    "/* Add offset textures, clearing wobble and blur effect */"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, offset.x, offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, -offset.x, offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, -offset.x, -offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, offset.x, -offset.y)) * blur_amt;"
     "t_sum += texture2D(fbo_texture, t_pos + wobble) * 1.0;"
     //"vec2 st = pos_offset;"
     //"st *= 1.0;"
@@ -167,7 +186,7 @@ gfx_world_shader()
     "uniform float time;"
     "out vec4 color_out;"
     "out vec4 pos_out;"
-    ""
+
     "void main() {"
     "pos_out = position;"
     "color_out = color_in;"
@@ -179,15 +198,19 @@ gfx_world_shader()
     "in vec4 color_out;"
     "in vec4 pos_out;"
     "uniform float time;"
-    "/* Thanks to : https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 */"
-    "float rand(float n){return fract(sin(n + fract(time)) * 43758.5453123);}"
-    ""
+
+    "/* Thanks for the random function!"
+    "https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 */"
+    "float rand(float n)"
+    "{"
+    "return fract(sin(n + fract(time)) * 43758.5453123);"
+    "}"
+
     "void main() {"
     "vec2 pos = pos_out.xy;"
     "vec4 new_col = vec4(1.0, 1.0, 1.0, 1.0);"
     "float noise = rand(pos.x * pos.y) * 0.02;"
     "new_col.a = noise;"
-    //"new_col = vec4( 1 - length(pos));"
     "gl_FragColor = new_col;"
     "}";
 
@@ -207,7 +230,8 @@ gfx_agent_shader()
     ""
     "void main() {"
     "color_out = color;"
-    "gl_Position = gl_ModelViewProjectionMatrix  * vec4(position.x, position.y, position.z, 1.0);"
+    "gl_Position = gl_ModelViewProjectionMatrix *"
+    "vec4(position.x, position.y, position.z, 1.0);"
     "gl_PointSize = position.w * window.x * zoom * 1.0;"
     "}";
 
@@ -215,9 +239,12 @@ gfx_agent_shader()
     "#version 130\n"
     "out vec4 frag_colour;"
     "in vec4 color_out;"
-    "/* Thanks to : https://gist.github.com/patriciogonzalezvivo/670c22f3966e662d2f83 */"
-    "float rand(float n){return fract(sin(n) * 43758.5453123);}"
-    " "
+
+    "float rand(float n)"
+    "{"
+    "return fract(sin(n) * 43758.5453123);"
+    "}"
+
     "void main() {"
     " vec4 color = color_out;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
@@ -230,7 +257,8 @@ gfx_agent_shader()
     " cut_r + (cut_r * 0.02),"
     " dot(pos, pos) * 4.0);"
     " if(color_out.a == 0) color.a = 0;"
-    " gl_FragColor =  alpha * cutoff * color * ((1.0 - (length(pos) )) * 1.5) ;"
+    " gl_FragColor =  alpha * cutoff * color "
+    "* ((1.0 - (length(pos) )) * 1.5) ;"
     "}";
 
   return gfx_setup_shader(agents_vs, agents_fs);
