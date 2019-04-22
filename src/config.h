@@ -8,6 +8,10 @@
 #define DEV_GAME_FPS (60)
 /* How often (in seconds) to spawn food */
 #define DEV_GAME_FOOD_SPAWN_FREQ (4)
+#define DEV_GAME_FOOD_SPAWN_INIT (25)
+/* Max/min: How many foods to spawn each feeding time */
+#define DEV_GAME_FOOD_SPAWN_MIN (5)
+#define DEV_GAME_FOOD_SPAWN_MAX (7)
 /* End world config */
 
 /* Input config */

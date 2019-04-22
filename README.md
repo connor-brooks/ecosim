@@ -1,8 +1,6 @@
 **NOT CURRENTLY FIT FOR HUMAN CONSUMPTION**
 # ecosim
-*An ecosystem simulator*
-
-Ecosim is an ecosystem simulator:
+*An ecosystem and evolution simulator*
 
 ![Screenshot of ecosim](screenshot.png)
 ## Requirements
@@ -80,9 +78,8 @@ This is entirely down to personal preference, however, most people will only be 
 * `DEV_AGENT_COUNT` - The amount of agents to spawn when the simulation runs
 * `DEV_GAME_FPS` - Frames per second (FPS) of the simulation
 * `DEV_GAME_FOOD_SPAWN_FREQ` - How often (in seconds) to spawn food
-#### Input settings
-* `INPUT_SPAWN_DELAY` - How often to respawn agents when the mouse is held down
-* `INPUT_SCROLL_AMT` - Input sensitivity (Effects scroll and zoom)
+* `DEV_GAME_FOOD_SPAWN_INIT` - How many items of food to spawn when the simulation runs
+* `DEV_GAME_FOOD_SPAWN_MAX`/`DEV_GAME_FOOD_SPAWN_MIN` - The maximum and minimum amount of food that is spawned each food spawn
 #### Agent general settings
 * `AGENT_RGB_ALPHA` - Transparency of agent's inner cell
 * `AGENT_VIS_ALPHA` - Transparaney of agent's vision field
@@ -100,6 +97,9 @@ This is entirely down to personal preference, however, most people will only be 
 * `AGENT_DIET_MAX`/`AGENT_DIET_MIN` - The maximum and minimum diet values allowed
 * `AGENT_FLOCK_MAX`/`AGENT_FLOCK_MIN` - The maximum and minimum influence flocking has on agents
 * `AGENT_WOBBLE_MAX`/`AGENT_WOBBLE_MIN` - The maximum and minimum amount an agent can wobble per second
+#### Input settings
+* `INPUT_SPAWN_DELAY` - How often to respawn agents when the mouse is held down
+* `INPUT_SCROLL_AMT` - Input sensitivity (Effects scroll and zoom)
 
 
 ## Notes 

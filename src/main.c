@@ -14,9 +14,7 @@
 #include "quadtree.h"
 
 
-/* TEMPORARY GLOBAL */
 int game_run = 1;
-int food_spawn_freq_mod = 0;
 
 /* For passing pointers to callbacks */
 struct Callback_ptrs{
@@ -33,9 +31,11 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
+    /* Pause the simulation */
     if(key == GLFW_KEY_SPACE)
       game_run = !game_run;
 
+    /* Close the simulation */
     else if(key == GLFW_KEY_Q)
       glfwSetWindowShouldClose(window, GLFW_TRUE);
   }
@@ -48,6 +48,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
   World_view* wv ;
   double xPos, yPos;
 
+  /* Grab pointers of structs*/
   callb_ptrs = glfwGetWindowUserPointer(window);
   input = callb_ptrs->inp;
   wv = callb_ptrs->wv;
@@ -79,6 +80,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
   /* is ctrl clicked */
   key = glfwGetKey(window, GLFW_KEY_LEFT_CONTROL);
 
+  /* Zoom if ctl is pressed, scroll otherwise */
   if(key){
     gfx_world_view_zoom(wv, xoffset, yoffset);
 
@@ -92,9 +94,10 @@ void window_size_callback(GLFWwindow* window, int width, int height)
   struct Callback_ptrs* callb_ptrs;
   Framebuffer** fb_ptr;
 
-  /* Rebuild framebuffer to width x height */
+  /* Grab pointers*/
   callb_ptrs = glfwGetWindowUserPointer(window);
   fb_ptr = callb_ptrs->fb_ptr;
+  /* Rebuild framebuffer to width x height */
   *fb_ptr = gfx_framebuffer_create(width, height);
 }
 
@@ -132,12 +135,11 @@ main(int argc, char **argv)
   glfwMakeContextCurrent(window);
 
   /* initalize glew and do various gl setup */
+  srand((unsigned int) time(NULL));
   glewInit();
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE);
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-  srand((unsigned int) time(NULL));
 
   /* Setup world view */
   framebuffer = gfx_framebuffer_create(1600, 900);
@@ -147,7 +149,7 @@ main(int argc, char **argv)
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
-  agents_insert_dead(agent_array, 25);
+  agents_insert_dead(agent_array, DEV_GAME_FOOD_SPAWN_INIT);
   agent_verts = agent_verts_create();
   GLuint agent_shader = gfx_agent_shader();
   GLuint agent_vis_shader = gfx_agent_vis_shader();
@@ -190,6 +192,7 @@ main(int argc, char **argv)
     if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
     {
       last_update_time = glfwGetTime();
+
       /* Recreate quadtree and insert agents */
       quad = quadtree_create(quad_head_pos, quad_head_size);
       for(i = 0; i < agent_array->count; i++) {
@@ -198,16 +201,16 @@ main(int argc, char **argv)
         if(tmp_agent->state != AGENT_STATE_PRUNE)
           quadtree_insert(quad, tmp_agent, tmp_pos);
       }
-
       /* Update agents position using quadtree, convert
        * them into their verts*/
       agents_update(agent_array, quad);
       agents_to_verts(agent_array, agent_verts);
 
-      /* Every 100 cycles insert food and prune redundant
-       * agents */
+      /* Insert dead agents for herbivours */
       if(glfwGetTime() > last_food_time + DEV_GAME_FOOD_SPAWN_FREQ) {
-        agents_insert_dead(agent_array, RANDF_MIN(5, 7));
+        int food_insert_amount = (int) RANDF_MIN(DEV_GAME_FOOD_SPAWN_MIN,
+            DEV_GAME_FOOD_SPAWN_MAX);
+        agents_insert_dead(agent_array, food_insert_amount);
         printf("Food added & agent array pruned\n");
         agent_array = agent_array_prune(agent_array);
         callb_ptrs.aa = agent_array;
@@ -218,7 +221,7 @@ main(int argc, char **argv)
       quadtree_free(quad);
     }
 
-    /* Draw all the elments to framebuffer */
+    /* Draw all the elments to off-screen framebuffer */
     glClear(GL_COLOR_BUFFER_BIT);
     gfx_framebuffer_begin(framebuffer, world_view);
     gfx_bg_draw(bg_shader, glfwGetTime());
