@@ -51,9 +51,18 @@ Dietary preferences of agents vary, but fall into two main categories:
 
 If an agents energy drops below a threshold, death occurs. In contrast, passing above a another threshold causes the agent to split into two copies of itself (asexual reproduction).
 
-When an agent splits, it doesn't always make an exact copy of itself. Sometimes mutation occurs. This means that the genetic code (DNA) that dictates the agents behaviours is slightly modified. 
+When an agent splits, it doesn't always make an exact copy of itself. Sometimes mutation occurs. This means that the genetic code (DNA) that dictates the agents behaviours is slightly modified.
+
+These genetic traits are as follows:
+* Metabolic rate
+* Vision range
+* Rebirth rate
+* Dietary preference 
+* Flocking strength
 
 Over time, only the most successful agents are able to pass on their DNA, causing the population of agents to slowly evolve.
+
+However, it is important to note that there is no one-size-fits-all perfect agent. Ecosystems are a delicate and interconnected system. For a well functioning ecosystem to exist, balance is essential. For example: the existence of carnivores is essential to the existence of the herbivores in order to prevent overpopulation, which would result in mass-starvation and extinction of the herbivores.
 
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
