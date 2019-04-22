@@ -62,7 +62,7 @@ These genetic traits are as follows:
 
 Over time, only the most successful agents are able to pass on their DNA, causing the population of agents to slowly evolve.
 
-However, it is important to note that there is no one-size-fits-all perfect agent. Ecosystems are a delicate and interconnected system. For a well functioning ecosystem to exist, balance is essential. For example: the existence of carnivores is essential to the existence of the herbivores in order to prevent overpopulation, which would result in mass-starvation and extinction of the herbivores.
+However, it is important to note that there is no one-size-fits-all perfect agent. For a well functioning ecosystem to exist, balance is essential. For example: the existence of carnivores is essential to the existence of the herbivores in order to prevent overpopulation, which would result in mass-starvation and extinction of the herbivores.
 
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
