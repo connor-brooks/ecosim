@@ -29,7 +29,6 @@ enum agent_attraction {
 
 struct _DNA {
   float metabolism;
-  float fear;
   float vision;
   float rebirth;
   float diet; /* -1 for dead, 1 for living */

@@ -146,8 +146,8 @@ gfx_framebuffer_shader(){
     "vec2 calc_wobble(vec2 cam_offset, vec2 pos, float zoom)"
     "{"
     "vec2 wobble = vec2(0.0, 0.0);"
-    "wobble.x = max(0, sin((cam_offset.y - pos.y / zoom)*16)) * 0.007;"
-    "wobble.y = max(0, sin((cam_offset.x - pos.x / zoom)*24)) * 0.007;"
+    "wobble.x = max(0, sin((cam_offset.y - pos.y / zoom)*16)) * 0.008;"
+    "wobble.y = max(0, sin((cam_offset.x - pos.x / zoom)*24)) * 0.008;"
     "wobble *= zoom;"
     "return wobble;"
     "}"
@@ -156,8 +156,8 @@ gfx_framebuffer_shader(){
     "{"
     "vec4 t_sum = vec4(0.0);"
     "vec2 wobble;"
-    "vec2 offset = vec2(0.003, 0.003);"
-    "float blur_amt = 0.45 / 4;"
+    "vec2 offset = vec2(0.0035, 0.0035);"
+    "float blur_amt = 0.5 / 8;"
     "vec2 t_pos = vec2(0.5, 0.5);"
     "t_pos *= pos_out.xy;"
     "t_pos += vec2(0.5, 0.5);"
@@ -174,10 +174,24 @@ gfx_framebuffer_shader(){
     "offset_tex(t_pos, wobble, -offset.x, -offset.y)) * blur_amt;"
     "t_sum += texture2D(fbo_texture,"
     "offset_tex(t_pos, wobble, offset.x, -offset.y)) * blur_amt;"
+
+    "offset *= 2.0;"
+    "blur_amt *= 0.75;"
+
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, offset.x, offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, -offset.x, offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, -offset.x, -offset.y)) * blur_amt;"
+    "t_sum += texture2D(fbo_texture,"
+    "offset_tex(t_pos, wobble, offset.x, -offset.y)) * blur_amt;"
+
     "t_sum += texture2D(fbo_texture,"
     "offset_tex(t_pos, wobble, 0.0, 0.0)) * 1.0;"
-    //"sum.x = max(0, sin((st.y - pos_out.y /zoom )*16));"
-    //"sum.z = max(0, sin((st.x - pos_out.x / zoom)*24));"
+    //"if(t_sum.x > 0.8) t_sum *= 1.25;"
+    //"if(t_sum.y > 0.8) t_sum *= 1.25;"
+    //"if(t_sum.z > 0.8) t_sum *= 1.25;"
     " gl_FragColor = t_sum;"
     "}";
 
@@ -312,9 +326,11 @@ gfx_agent_vis_shader()
     " radius + (radius * 0.01),"
     " dot(pos, pos) * 4.0);"
 
-    " float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"
+    "float noise_pat = mini_rand((pos.x + 0.5) * (pos.y + 0.5));"
+    "float ripple = fract((length(pos) - 0.4) * 4.0);"
     "color += vec4(noise_pat * 0.15);"
-    "  gl_FragColor = cutoff * color * fract((length(pos) - 0.4) * 4.0) + 0.02;"
+
+    "  gl_FragColor = cutoff * color * ripple + 0.02;"
     " if(color_out.w == 0) gl_FragColor.w = 0;"
     "}";
 

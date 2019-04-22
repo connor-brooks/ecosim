@@ -2,72 +2,93 @@
 #define CONFIG_H
 
 /* Main World config */
+/* How many agents to initaly spawn */
 #define DEV_AGENT_COUNT (90)
+/* Frames per second */
 #define DEV_GAME_FPS (60)
-#define DEV_GAME_FOOD_SPAWN_FREQ (2)
+/* How often (in seconds) to spawn food */
+#define DEV_GAME_FOOD_SPAWN_FREQ (4)
+/* End world config */
 
 /* Input config */
+/* The delay between re-spawn of agents when the mouse is held down */
 #define INPUT_SPAWN_DELAY (0.5)
+/* Scroll sensitivity (also used for zoom */
 #define INPUT_SCROLL_AMT (0.02)
+/* End input config */
 
-
-/* Agent config */
+/* Agent general config */
+/* Min / max RGB */
 #define AGENT_RGB_MAX (1.0)
 #define AGENT_RGB_MIN (1.0)
+/* Agent transparency */
 #define AGENT_RGB_ALPHA (0.9)
-
+/* Agent vision field transparency */
 #define AGENT_VIS_ALPHA (0.2)
-
+/* Maximum agent velocity */
 #define AGENT_MAX_VELOCITY (1.0)
 #define AGENT_MIN_VELOCITY (-1.0)
-
+/* Default energy for new-spawned agents */
 #define AGENT_ENERGY_DEFAULT (1.0)
+/* The rate energy is burned over time, with respect to metabolism rates 
+ * (where x is agents metabolism */
+#define AGENT_METAB_ENERGY_SCALE(x) (0.0015 * x)
+/* How large agents are, with respect to their energy (Where x is energy) */
+#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 2)
+/* The maximum speed any agents can move at */
+#define AGENT_MAX_SPEED (0.0015)
+/* The energy level at which an agent dies */
+#define AGENTS_ENERGY_DEAD (0.3)
+/* How quickly ageing effects the agents */
+#define AGENTS_TIME_FACTOR (0.5)
+/* End agent general config */
+
+/* Agent DNA config */
+/* The amount a DNA trait changes if mutation occurs */
+#define AGENTS_DNA_MUTATE_RATE (0.075)
+/* Metabolism trait max/min 
+ * How quickly an agent can move. Faster moving agents burn energy a lot
+ * quicker */
 #define AGENT_METAB_MAX (0.5)
 #define AGENT_METAB_MIN (0.05)
-
-#define AGENT_FEAR_MAX (1.0)
-#define AGENT_FEAR_MIN (-1.0)
-
+/* Vision trait max/min 
+ * How wide the agents field of view is */
 #define AGENT_VISION_MAX (0.1)
 #define AGENT_VISION_MIN (0.2)
-
+/* Rebirth trait max/min 
+ * How much energy is stored within an agent until it splits, creating a 
+ * possibly mutated clone of itself, halving it's energy */
 #define AGENT_REBIRTH_MAX (3.00)
 #define AGENT_REBIRTH_MIN (1.00)
-
-#define AGENT_AGGRESION_MAX (1.00)
-#define AGENT_AGGRESION_MIN (-1.00)
-
+/* Diet trait max/min
+ * If greater or equal to zero, the agent eats other agents, if less than 
+ * zero, the agent eats only dead agents */
 #define AGENT_DIET_MAX (1.00)
 #define AGENT_DIET_MIN (-1.00)
-
+/* Flock max/min
+ * How strong flocking behaviours influence the movement of an agent */
 #define AGENT_FLOCK_MAX (1.00)
 #define AGENT_FLOCK_MIN (0.00)
-
-#define AGENT_WOBBLE_MAX (15.00)
-#define AGENT_WOBBLE_MIN (3.00)
-
-#define AGENT_METAB_ENERGY_SCALE(x) (0.0015 * x)
-#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 2)
-
-#define AGENT_MAX_SPEED (0.0015)
-
-#define AGENTS_ENERGY_DEAD (0.3)
-
-#define AGENTS_TIME_FACTOR (0.5)
-
-#define AGENTS_DNA_MUTATE_RATE (0.075)
-
-#define AGENT_ARRAY_DEFAULT_SIZE (16)
-#define AGENT_DEBUG_SHOW_VISION (0)
-
-#define AGENT_VIS_VERTS_DEFAULT (16)
+/* Wobble max/min
+ * How many times per second the agent "wobbles" This is a movement based on
+ * a sin wav, which gives a temporary boost of speed, followed by a equal
+ * period of slower movement */
+#define AGENT_WOBBLE_MAX (6.00)
+#define AGENT_WOBBLE_MIN (2.00)
 
 /* Quadtree config */
-#define QUADTREE_MAX_PER_CELL (4)
+/* How many agents are stored in a single quadtree cell, only change this if
+ * you encounter any performance issues and you know what a quadtree is */
+#define QUADTREE_MAX_PER_CELL (8)
+/* End quadtree config */
 
-/* Engine config: Do not touch */
+/* Engine config: 
+ * DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING! */
 #define AGENT_VERT_DIMS (4)
 #define AGENT_DIMENTIONS (4)
+#define AGENT_ARRAY_DEFAULT_SIZE (16)
+#define AGENT_DEBUG_SHOW_VISION (0)
+#define AGENT_VIS_VERTS_DEFAULT (16)
 #define AGENT_DRAWABLE_FEATURES (2)
 #define QUADTREE_VERT_LEN (3 * 4)
 #define QUADTREE_QUERY_SIZE (16)
@@ -75,4 +96,5 @@
 #define QUADTREE_DIMS (2)
 #define WORLD_MIN_COORD (-1.0)
 #define WORLD_MAX_COORD (1.0)
+/* End engine config */
 #endif
