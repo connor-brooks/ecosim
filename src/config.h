@@ -18,9 +18,6 @@
 /* End input config */
 
 /* Agent general config */
-/* Min / max RGB */
-#define AGENT_RGB_MAX (1.0)
-#define AGENT_RGB_MIN (1.0)
 /* Agent transparency */
 #define AGENT_RGB_ALPHA (0.9)
 /* Agent vision field transparency */
@@ -38,14 +35,14 @@
 /* The maximum speed any agents can move at */
 #define AGENT_MAX_SPEED (0.0015)
 /* The energy level at which an agent dies */
-#define AGENTS_ENERGY_DEAD (0.3)
+#define AGENT_ENERGY_DEAD (0.3)
 /* How quickly ageing effects the agents */
-#define AGENTS_TIME_FACTOR (0.5)
+#define AGENT_TIME_FACTOR (0.5)
 /* End agent general config */
 
 /* Agent DNA config */
 /* The amount a DNA trait changes if mutation occurs */
-#define AGENTS_DNA_MUTATE_RATE (0.075)
+#define AGENT_DNA_MUTATE_RATE (0.075)
 /* Metabolism trait max/min 
  * How quickly an agent can move. Faster moving agents burn energy a lot
  * quicker */

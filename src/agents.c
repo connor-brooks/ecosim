@@ -656,7 +656,7 @@ agent_dna_trait_constrain(float* trait, float min, float max)
 void
 agent_dna_mutate(Agent* a_ptr)
 {
-  float rate = AGENTS_DNA_MUTATE_RATE;
+  float rate = AGENT_DNA_MUTATE_RATE;
 
   /* Mutate traits */
   agent_dna_mutate_trait(&(a_ptr->dna.metabolism), rate, 0.3);
@@ -687,8 +687,8 @@ void
 agents_update_energy(Agent* a_ptr)
 {
   a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * 
-    AGENTS_TIME_FACTOR;
-  if(a_ptr->energy < AGENTS_ENERGY_DEAD) {
+    AGENT_TIME_FACTOR;
+  if(a_ptr->energy < AGENT_ENERGY_DEAD) {
     a_ptr->state = AGENT_STATE_DEAD;
     a_ptr->velocity.x = 0.0f;
     a_ptr->velocity.y = 0.0f;
