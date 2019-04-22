@@ -15,13 +15,13 @@ Ecosim is an ecosystem simulator:
 * libglew-dev
 * ffplay (optional)
 ## How to use
- Install dependacies
+ Install dependencies
 
 `$ sudo apt-get install libglfw3 libglew2.0 libglfw3-dev libglew-dev ffmpeg`
 
  Grab the code:
 
-`$ git clone https://github.com/connor-brooks/ecosim`
+`$ git clone https://github.com/connor-brooks/ecosim.git`
 
  Enter source directory:
 
@@ -69,10 +69,15 @@ This is entirely down to personal preference, however, most people will only be 
 * `AGENT_METAB_ENERGY_SCALE(x)` - The rate of which energy is burned over time, with respect to the metabolic rate of an agent (where x is metabolism)
 * `AGENT_ENERGY_SIZE_SCALE(x)` - How large an agent is, with respect to their energy (where x is energy)
 * `AGENT_MAX_SPEED` - The maximum speed any agent can move
-* `AGENTS_TIME_FRACTOR` - How fast the process of ageing occurs
-
-
-
+* `AGENT_TIME_FRACTOR` - How fast the process of ageing occurs
+#### Agent DNA settings
+* `AGENT_DNA_MUTATE_RATE` - The maximum amount a trait can change if mutation occurs
+* `AGENT_METAB_MAX`/`AGENT_METAB_MIN` - The maximum and minimum metabolic rates allowed
+* `AGENT_VISION_MAX`/`AGENT_VISION_MIN` - The maximum and minimum vision field sizes allowed
+* `AGENT_REBIRTH_MAX`/`AGENT_REBIRTH_MIN` - The maximum and minimum amount of energy stored in an agent before splitting occurs
+* `AGENT_DIET_MAX`/`AGENT_DIET_MIN` - The maximum and minimum diet values allowed
+* `AGENT_FLOCK_MAX`/`AGENT_FLOCK_MIN` - The maximum and minimum influence flocking has on agents
+* `AGENT_WOBBLE_MAX`/`AGENT_WOBBLE_MIN` - The maximum and minimum amount an agent can wobble per second
 
 
 
