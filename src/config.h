@@ -73,14 +73,9 @@
 #define AGENT_WOBBLE_MAX (6.00)
 #define AGENT_WOBBLE_MIN (2.00)
 
-/* Quadtree config */
-/* How many agents are stored in a single quadtree cell, only change this if
- * you encounter any performance issues and you know what a quadtree is */
-#define QUADTREE_MAX_PER_CELL (8)
-/* End quadtree config */
-
 /* Engine config: 
  * DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING! */
+#define QUADTREE_MAX_PER_CELL (8)
 #define AGENT_VERT_DIMS (4)
 #define AGENT_DIMENTIONS (4)
 #define AGENT_ARRAY_DEFAULT_SIZE (16)
