@@ -51,7 +51,17 @@ Ecosim provides a way to configure the mechanics of the simulation via editing t
 * Run `make`
 
 ### What to change
-This is entirely down to personal preference, however, most people will only be concerned with two sections of the configuration: The general agent settings, and the agent DNA settings. 
+This is entirely down to personal preference, however, most people will only be concerned with two sections of the configuration: The general agent settings, and the agent DNA settings.
+
+### List of config settings
+#### Main world settings
+* `DEV_AGENT_COUNT` - The amount of agents to spawn when the simulation runs
+* `DEV_GAME_FPS` - Frames per second (FPS) of the simulation
+* `DEV_GAME_FOOD_SPAWN_FREQ` - How often (in seconds) to spawn food
+#### Input settings
+* `INPUT_SPAWN_DELAY` - How often to respawn agents when the mouse is held down
+* `INPUT_SCROLL_AMT` - Input sensitivity (Effects scroll and zoom)
+
 
 
 
