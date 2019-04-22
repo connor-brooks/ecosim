@@ -43,9 +43,17 @@ Ecosim is an ecosystem simulator:
 * Cycle agents: `left click` (hold)
 
 ## Behaviour of agents
-Agents within the simulation constantly loose energy over time, as moving around in the environment causes energy to be burned. The only way energy levels can be increased is via consumption. If an agents energy drops below a threshold, death occurs. In contrast, passing above a another threshold causes the agent to split into two copies of itself (asexual reproduction).
+Agents within the simulation constantly loose energy over time, as moving around in the environment causes energy to be burned. The only way energy levels can be increased is via consumption.
 
-When an agent splits, it doesn't always make an exact copy of itself. Sometimes mutation occurs. This means that the genetic code (DNA) that dictates the agents behaviours is slightly modified. Over time, only the most successful agents are able to pass on their DNA, causing the population of agents to slowly evolve.
+Dietary preferences of agents vary, but fall into two main categories: 
+* Primary consumers - Agents which only take energy from non-living entities.
+* Secondary consumers - Agents which only take energy from living agents, killing them in the process.
+
+If an agents energy drops below a threshold, death occurs. In contrast, passing above a another threshold causes the agent to split into two copies of itself (asexual reproduction).
+
+When an agent splits, it doesn't always make an exact copy of itself. Sometimes mutation occurs. This means that the genetic code (DNA) that dictates the agents behaviours is slightly modified. 
+
+Over time, only the most successful agents are able to pass on their DNA, causing the population of agents to slowly evolve.
 
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
