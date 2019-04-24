@@ -62,6 +62,18 @@ Over time, only the most successful agents are able to pass on their DNA, causin
 
 However, it is important to note that there is no one-size-fits-all perfect agent. For a well functioning ecosystem to exist, balance is essential. For example: the existence of carnivores is essential to the existence of the herbivores in order to prevent overpopulation, which would result in mass-starvation and extinction of the herbivores.
 
+## Traits in detail
+### Metabolic rate
+The metabolic rate is the rate which an agent transforms stored energy into kinetic energy. This has both pros and cons. Being able to move around the environment faster allows agents to consume food faster, but also causes the agent to eat more frequently.
+### Vision range
+This trait dictates how far an agent can sense other entities. A larger vision range is generally beneficial. However, this trait has some minor downfalls, especially for herbivorous agents. For example: hypersensitivity to other agents causes fleeing from non-dangerous situations, which in turn results in reduced ability to consume.
+### Rebirth rate
+Rebirth rate controls how much energy is stored within an agent before splitting (asexual reproduction) occurs. This is especially useful for agents with low metabolism, as it allows them to navigate the environment for a longer time without depleting their energy. 
+### Dietary preference 
+Agent's dietary preference influences what food source an agent will pursue and consume: living or non-living. For an ecosystem to be stable, the need for agents of both these groups is required.
+### Flocking strength
+Flocking is a behaviour in which agents form groups, or clusters, whilst navigating the map, forming "multicellular life". Paradoxically this offers both safety and vulnerability. By sharing information whilst flocking, a group increases knowledge of other potential dangers or food. In contrast, if the group fails to avoid a potential danger the whole group suffers.
+
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
 
