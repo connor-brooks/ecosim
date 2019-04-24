@@ -72,7 +72,7 @@ Rebirth rate controls how much energy is stored within an agent before splitting
 ### Dietary preference 
 Agent's dietary preference influences what food source an agent will pursue and consume: living or non-living. For an ecosystem to be stable, the need for agents of both these groups is required.
 ### Flocking strength
-Flocking is a behaviour in which agents form groups, or clusters, whilst navigating the map, forming "multicellular life". Paradoxically this offers both safety and vulnerability. By sharing information whilst flocking, a group increases knowledge of other potential dangers or food. In contrast, if the group fails to avoid a potential danger the whole group suffers.
+Flocking is a behaviour in which agents form groups, or clusters, whilst navigating the map, forming "multicellular life". Paradoxically this offers both safety and vulnerability. By sharing information whilst flocking, a group increases it's memebers knowledge of other potential dangers or food. In contrast, if the group fails to avoid a potential danger the whole group suffers.
 
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
