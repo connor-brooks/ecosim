@@ -11,7 +11,7 @@
 #define DEV_GAME_FOOD_SPAWN_INIT (25)
 /* Max/min: How many foods to spawn each feeding time */
 #define DEV_GAME_FOOD_SPAWN_MIN (5)
-#define DEV_GAME_FOOD_SPAWN_MAX (7)
+#define DEV_GAME_FOOD_SPAWN_MAX (10)
 /* End world config */
 
 /* Input config */
@@ -41,7 +41,7 @@
 /* The energy level at which an agent dies */
 #define AGENT_ENERGY_DEAD (0.3)
 /* How quickly ageing effects the agents */
-#define AGENT_TIME_FACTOR (0.5)
+#define AGENT_TIME_FACTOR (0.3)
 /* End agent general config */
 
 /* Agent DNA config */
@@ -77,6 +77,10 @@
 #define AGENT_WOBBLE_MAX (6.00)
 #define AGENT_WOBBLE_MIN (2.00)
 
+/*Log config */
+#define LOGGER_ENABLE (1)
+#define LOGGER_FILE "logger_data.py"
+
 /* Engine config: 
  * DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING! */
 #define QUADTREE_MAX_PER_CELL (8)
@@ -92,5 +96,7 @@
 #define QUADTREE_DIMS (2)
 #define WORLD_MIN_COORD (-1.0)
 #define WORLD_MAX_COORD (1.0)
+
+#define LOG_DEFAULT_SIZE (12)
 /* End engine config */
 #endif

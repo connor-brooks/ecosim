@@ -121,6 +121,7 @@ agents_insert_dead(Agent_array* aa, int count)
     tmp_agent->velocity.x = 0.00f;
     tmp_agent->velocity.y = 0.00f;
     tmp_agent->dna.diet = -1.0f;
+    tmp_agent->energy *= 0.5f;
 
     tmp_agent->rgb.r = 0.2;
     tmp_agent->rgb.g = 0.2;

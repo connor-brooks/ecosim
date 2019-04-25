@@ -12,6 +12,7 @@
 #include "input.h"
 #include "graphics.h"
 #include "quadtree.h"
+#include "log.h"
 
 
 int game_run = 1;
@@ -111,6 +112,7 @@ main(int argc, char **argv)
   Agent_array* agent_array;
   Agent_verts* agent_verts;
   Quadtree* quad;
+  Logger* logger;
   int cyclecount = 0;
   float quad_head_pos[] = {-1.0f, -1.0f};
   float quad_head_size = 2.0f;
@@ -146,6 +148,8 @@ main(int argc, char **argv)
   GLuint fb_shader = gfx_framebuffer_shader();
   world_view = gfx_world_view_create();
   input = input_create();
+
+  logger= logger_create();
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -187,7 +191,7 @@ main(int argc, char **argv)
       input_spawn_cycle(input, agent_array);
       agents_to_verts(agent_array, agent_verts);
     }
-    
+
     /* Main update cycle */
     if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
     {
@@ -212,7 +216,26 @@ main(int argc, char **argv)
             DEV_GAME_FOOD_SPAWN_MAX);
         agents_insert_dead(agent_array, food_insert_amount);
         printf("Food added & agent array pruned\n");
+
         agent_array = agent_array_prune(agent_array);
+        int veg = 0;
+        int meat = 0;
+        for(int test = 0; test < agent_array->count; test++) {
+          if(agent_array->agents[test]->state == AGENT_STATE_LIVING){
+            if(agent_array->agents[test]->dna.diet > 0) meat++;
+            else veg++;
+          }
+        }
+
+        printf("time_");
+        logger_record(logger, LOG_TIME, (int) glfwGetTime());
+        printf("pop_");
+        logger_record(logger, LOG_POPULATION, (int)  agent_array->count);
+        printf("veg_");
+        logger_record(logger, LOG_HERBIVOUR, (int) veg);
+        printf("meat_");
+        logger_record(logger, LOG_CARNIVOUR, (int)  meat);
+
         callb_ptrs.aa = agent_array;
         last_food_time = glfwGetTime();
       }
@@ -225,9 +248,9 @@ main(int argc, char **argv)
     glClear(GL_COLOR_BUFFER_BIT);
     gfx_framebuffer_begin(framebuffer, world_view);
     gfx_bg_draw(bg_shader, glfwGetTime());
-    gfx_agents_draw_cell(agent_verts, agent_shader, 
+    gfx_agents_draw_cell(agent_verts, agent_shader,
         scale, world_view->zoom);
-    gfx_agents_draw_vis(agent_verts, agent_vis_shader, 
+    gfx_agents_draw_vis(agent_verts, agent_vis_shader,
         scale, world_view->zoom);
     gfx_framebuffer_end();
 
@@ -241,6 +264,8 @@ main(int argc, char **argv)
   }
 
   /* Agent verts can be persistant, so free at end, not each frame*/
+  logger_write(logger);
+  logger_free(logger);
   agent_array_free(agent_array);
   agent_verts_free(agent_verts);
   free(framebuffer);
