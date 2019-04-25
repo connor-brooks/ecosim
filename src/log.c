@@ -8,14 +8,16 @@
 #include <string.h>
 
 Logger*
-logger_create()
+logger_create(float time, int freq)
 {
   int i;
   Logger* tmp = malloc(sizeof(Logger));
-  tmp->count = 4;
+  tmp->count = 5;
   for(i = 0; i < tmp->count; i++){
     tmp->log[i] = log_create();
   }
+  tmp->freq = freq;
+  tmp->last_log = time ;
   return tmp;
 }
 
@@ -35,12 +37,13 @@ logger_write(Logger* logger)
   fp = fopen(LOGGER_FILE, "w+");
   log_write(logger->log[LOG_TIME], fp, "x_time");
   log_write(logger->log[LOG_POPULATION], fp, "y_pop");
+  log_write(logger->log[LOG_FOOD], fp, "y_food");
   log_write(logger->log[LOG_HERBIVOUR], fp, "y_herb");
   log_write(logger->log[LOG_CARNIVOUR], fp, "y_meat");
   fclose(fp);
 }
 
-void 
+void
 log_write(Log* log, FILE* fp, char label[])
 {
   fprintf(fp, "%s = [", label);
@@ -57,16 +60,47 @@ Log* log_create()
   return tmp;
 }
 
+void
+logger_record(Logger* logger, Agent_array* aa, float time)
+{
+  int i;
+  int population = 0;
+  int food = 0;
+  int pop_herb = 0;
+  int pop_carn = 0;
+  int i_time = (int) time;
+
+  if(logger->last_log + logger->freq >= time)
+    return;
+
+  logger->last_log = time;
+  printf("Logged at %ds\n", i_time);
+
+  for(i = 0; i < aa->count; i++) {
+    if(aa->agents[i]->state == AGENT_STATE_LIVING) {
+      population++;
+      if(aa->agents[i]->dna.diet >= 0.0f)
+        pop_carn++;
+      else
+        pop_herb++;
+    }
+    else
+      food++;
+  }
+  if(i_time != 0){
+    logger_log_val(logger, LOG_TIME, i_time);
+    logger_log_val(logger, LOG_POPULATION, population);
+    logger_log_val(logger, LOG_CARNIVOUR, pop_carn);
+    logger_log_val(logger, LOG_HERBIVOUR, pop_herb);
+    logger_log_val(logger, LOG_FOOD, food);
+  }
+}
 
 void
-logger_record(Logger* logger, int log_num, int n)
+logger_log_val(Logger* logger, int log_num, int n)
 {
   Log_string* str = log_int_to_str(n);
-
   log_cat(logger->log[log_num], str);
-
-//  printf("log = [%s]\n", logger->log[log_num]->data);
-
   log_string_free(str);
 }
 
@@ -84,9 +118,7 @@ log_cat(Log* log, Log_string* ls)
   strcat(log->data + log->end, ls->string);
   log->end += ls->length - 1;
   log->data[log->end] = '\0';
-
 }
-
 
 Log_string*
 log_int_to_str(int n)

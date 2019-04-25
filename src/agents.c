@@ -21,6 +21,7 @@ agent_array_create()
   temp->size = sizeof(Agent*) * temp->capacity;
   temp->agents = malloc(temp->size);
   temp->count_change = 0;
+  temp->clock = 0;
 
   return temp;
 }
@@ -47,11 +48,13 @@ agent_array_prune(Agent_array* aa)
   int i;
   Agent_array* tmp_aa;
   tmp_aa = agent_array_create();
+  tmp_aa->clock = aa->clock;
   for(i = 0; i < aa->count; i++) {
     if(aa->agents[i]->state != AGENT_STATE_PRUNE) {
       agent_array_insert(tmp_aa, aa->agents[i]);
     }
   }
+
   free(aa);
   return tmp_aa;
 }
@@ -94,9 +97,9 @@ agent_setup_colors(Agent* a_ptr)
   float *flocking = &a_ptr->dna.flock;
   float *metabolism = &a_ptr->dna.metabolism;
   float *rebirth = &a_ptr->dna.rebirth;
-  a_ptr->rgb.r = (*diet >= 0)? *diet : 0.0f;
+  a_ptr->rgb.r = (*diet >= 0)? *diet + 0.1: 0.0f;
   a_ptr->rgb.g = *flocking;
-  a_ptr->rgb.b = (*diet < 0.0f)? -(*diet): 0.0f;
+  a_ptr->rgb.b = (*diet < 0.0f)? -(*diet) + 0.1: 0.0f;
 
   float mag = sqrt(
       (a_ptr->rgb.r * a_ptr->rgb.r) +
@@ -121,7 +124,7 @@ agents_insert_dead(Agent_array* aa, int count)
     tmp_agent->velocity.x = 0.00f;
     tmp_agent->velocity.y = 0.00f;
     tmp_agent->dna.diet = -1.0f;
-    tmp_agent->energy *= 0.5f;
+    tmp_agent->energy *= DEV_GAME_FOOD_ENERGY;
 
     tmp_agent->rgb.r = 0.2;
     tmp_agent->rgb.g = 0.2;
@@ -182,6 +185,9 @@ agents_update(Agent_array* aa, Quadtree* quad)
   Agent* a_ptr;
   Agent_array* local_agents;
 
+//  printf("time %f clock %f\n", glfwGetTime(), aa->clock);
+  aa->clock += 0.05;
+
   for(i = 0; i < aa->count; i++)
   {
     /* temp pointer for agent */
@@ -204,7 +210,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
     }
 
     /* updates */
-    agents_update_location(a_ptr);
+    agents_update_location(a_ptr, aa->clock);
     agents_update_energy(a_ptr);
     agent_split(a_ptr, aa);
 
@@ -278,16 +284,16 @@ agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 
 /* Move the agent based on their velocity */
 void
-agents_update_location(Agent* a_ptr)
+agents_update_location(Agent* a_ptr, float clock)
 {
   float mv_amt = agents_update_mv_amt(a_ptr);
   float wobble[] = {0.0, 0.0};
 
   /* add a wobble to their step */
-  wobble[0] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
-  wobble[1] =(2.0 + sin(a_ptr->dna.wobble * glfwGetTime())) * 0.5;
+  wobble[0] =(2.0 + sin(a_ptr->dna.wobble + a_ptr->dna.wobble * clock)) * 0.5;
+  wobble[1] =(2.0 + sin(a_ptr->dna.wobble + a_ptr->dna.wobble * clock)) * 0.5;
   a_ptr->x += a_ptr->velocity.x * mv_amt * fabs(wobble[0]);
-  a_ptr->y += a_ptr->velocity.y * mv_amt * fabs(wobble[1]);
+  a_ptr->y += a_ptr->velocity.y * mv_amt  * fabs(wobble[1]);
 
   /* Wrap if needed */
   agents_update_mv_wrap(a_ptr);
@@ -582,11 +588,11 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
   float close = 0.02;
 
-  int a_diet = (a_ptr->dna.diet > 0.0f) ?
+  int a_diet = (a_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
-  int t_diet = (t_ptr->dna.diet > 0.0f) ?
+  int t_diet = (t_ptr->dna.diet >= 0.0f) ?
     AGENT_DIET_LIVING :
     AGENT_DIET_DEAD;
 
@@ -694,6 +700,9 @@ agents_update_energy(Agent* a_ptr)
     a_ptr->velocity.x = 0.0f;
     a_ptr->velocity.y = 0.0f;
     a_ptr->dna.diet = -1.0f;
+    a_ptr->rgb.r = 0.2;
+    a_ptr->rgb.g = 0.2;
+    a_ptr->rgb.b = 0.2;
   }
 }
 

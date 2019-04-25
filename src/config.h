@@ -8,10 +8,11 @@
 #define DEV_GAME_FPS (60)
 /* How often (in seconds) to spawn food */
 #define DEV_GAME_FOOD_SPAWN_FREQ (4)
-#define DEV_GAME_FOOD_SPAWN_INIT (25)
+#define DEV_GAME_FOOD_SPAWN_INIT (15)
 /* Max/min: How many foods to spawn each feeding time */
 #define DEV_GAME_FOOD_SPAWN_MIN (5)
-#define DEV_GAME_FOOD_SPAWN_MAX (10)
+#define DEV_GAME_FOOD_SPAWN_MAX (7)
+#define DEV_GAME_FOOD_ENERGY (0.5)
 /* End world config */
 
 /* Input config */
@@ -35,7 +36,7 @@
  * (where x is agents metabolism */
 #define AGENT_METAB_ENERGY_SCALE(x) (0.0015 * x)
 /* How large agents are, with respect to their energy (Where x is energy) */
-#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 2)
+#define AGENT_ENERGY_SIZE_SCALE(x) ((10 * x) + 4)
 /* The maximum speed any agents can move at */
 #define AGENT_MAX_SPEED (0.0015)
 /* The energy level at which an agent dies */
@@ -74,8 +75,8 @@
  * How many times per second the agent "wobbles" This is a movement based on
  * a sin wav, which gives a temporary boost of speed, followed by a equal
  * period of slower movement */
-#define AGENT_WOBBLE_MAX (6.00)
-#define AGENT_WOBBLE_MIN (2.00)
+#define AGENT_WOBBLE_MAX (3.0)
+#define AGENT_WOBBLE_MIN (1.5)
 
 /*Log config */
 #define LOGGER_ENABLE (1)
@@ -96,7 +97,6 @@
 #define QUADTREE_DIMS (2)
 #define WORLD_MIN_COORD (-1.0)
 #define WORLD_MAX_COORD (1.0)
-
 #define LOG_DEFAULT_SIZE (12)
 /* End engine config */
 #endif

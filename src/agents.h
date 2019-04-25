@@ -66,6 +66,7 @@ struct _Agent_array {
   size_t capacity;
   size_t size;
   int count_change;
+  float clock;
 };
 
 
@@ -99,7 +100,7 @@ Agent_array* agents_get_local(Agent* a_ptr, Quadtree* quad, float radius);
 Agent* agent_create_random();
 void agent_setup_colors(Agent* a_ptr);
 void agent_setup_vision_quad(Agent* a_ptr);
-void agents_update_location(Agent* a_ptr);
+void agents_update_location(Agent* a_ptr, float clock);
 void agents_update_energy(Agent* a_ptr);
 float agents_update_mv_amt(Agent* a_ptr);
 void agents_update_mv_wrap(Agent* a_ptr);

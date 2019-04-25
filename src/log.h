@@ -12,13 +12,16 @@ typedef struct _Log_string Log_string;
 enum logger_logs {
   LOG_TIME,
   LOG_POPULATION,
+  LOG_FOOD,
   LOG_HERBIVOUR,
-  LOG_CARNIVOUR
+  LOG_CARNIVOUR,
 };
 
 struct _Logger {
-Log* log[4];
+Log* log[5];
 int count;
+float last_log;
+int freq;
 };
 
 struct _Log_string {
@@ -33,9 +36,10 @@ struct _Log {
 };
 
 
-Logger* logger_create();
+Logger* logger_create(float time, int freq);
 void logger_free(Logger* logger);
-void logger_record(Logger* logger, int log_num, int x);
+void logger_record(Logger* logger, Agent_array* aa, float time);
+void logger_log_val(Logger* logger, int log_num, int x);
 void logger_write(Logger* logger);
 
 Log* log_create();

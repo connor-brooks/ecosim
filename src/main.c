@@ -149,7 +149,7 @@ main(int argc, char **argv)
   world_view = gfx_world_view_create();
   input = input_create();
 
-  logger= logger_create();
+  logger= logger_create(glfwGetTime(), 1);
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -192,6 +192,11 @@ main(int argc, char **argv)
       agents_to_verts(agent_array, agent_verts);
     }
 
+#if LOGGER_ENABLE == 1
+      logger_record(logger, agent_array, glfwGetTime());
+#endif
+
+
     /* Main update cycle */
     if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
     {
@@ -218,23 +223,6 @@ main(int argc, char **argv)
         printf("Food added & agent array pruned\n");
 
         agent_array = agent_array_prune(agent_array);
-        int veg = 0;
-        int meat = 0;
-        for(int test = 0; test < agent_array->count; test++) {
-          if(agent_array->agents[test]->state == AGENT_STATE_LIVING){
-            if(agent_array->agents[test]->dna.diet > 0) meat++;
-            else veg++;
-          }
-        }
-
-        printf("time_");
-        logger_record(logger, LOG_TIME, (int) glfwGetTime());
-        printf("pop_");
-        logger_record(logger, LOG_POPULATION, (int)  agent_array->count);
-        printf("veg_");
-        logger_record(logger, LOG_HERBIVOUR, (int) veg);
-        printf("meat_");
-        logger_record(logger, LOG_CARNIVOUR, (int)  meat);
 
         callb_ptrs.aa = agent_array;
         last_food_time = glfwGetTime();
@@ -243,6 +231,7 @@ main(int argc, char **argv)
 
       quadtree_free(quad);
     }
+    /* log */
 
     /* Draw all the elments to off-screen framebuffer */
     glClear(GL_COLOR_BUFFER_BIT);
