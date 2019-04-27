@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stddef.h>
 #include "config.h"
-#include "log.h"
+#include "logger.h"
 #include "agents.h"
 #include "math.h"
 #include <string.h>

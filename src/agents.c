@@ -112,6 +112,15 @@ agent_setup_colors(Agent* a_ptr)
   a_ptr->rgb.b /= mag;
 }
 
+void
+agents_food_drop(Agent_array* aa)
+{
+  int food_insert_amount = (int) RANDF_MIN(DEV_GAME_FOOD_SPAWN_MIN,
+      DEV_GAME_FOOD_SPAWN_MAX);
+  agents_insert_dead(aa, food_insert_amount);
+}
+
+
 /* Insert "dead" agents into the array so food */
 void
 agents_insert_dead(Agent_array* aa, int count)
@@ -185,7 +194,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
   Agent* a_ptr;
   Agent_array* local_agents;
 
-//  printf("time %f clock %f\n", glfwGetTime(), aa->clock);
+  //  printf("time %f clock %f\n", glfwGetTime(), aa->clock);
   aa->clock += 0.05;
 
   for(i = 0; i < aa->count; i++)
@@ -644,7 +653,7 @@ agent_split(Agent* a_ptr, Agent_array* aa)
   }
 }
 
-void 
+void
 agent_dna_mutate_trait(float* trait, float rate, float probability)
 {
   *trait +=
@@ -653,7 +662,7 @@ agent_dna_mutate_trait(float* trait, float rate, float probability)
     0;
 }
 
-void 
+void
 agent_dna_trait_constrain(float* trait, float min, float max)
 {
   if(*trait < min) *trait = min;
@@ -693,7 +702,7 @@ agent_dna_mutate(Agent* a_ptr)
 void
 agents_update_energy(Agent* a_ptr)
 {
-  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) * 
+  a_ptr->energy -= AGENT_METAB_ENERGY_SCALE(a_ptr->dna.metabolism) *
     AGENT_TIME_FACTOR;
   if(a_ptr->energy < AGENT_ENERGY_DEAD) {
     a_ptr->state = AGENT_STATE_DEAD;

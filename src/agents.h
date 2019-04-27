@@ -106,6 +106,8 @@ float agents_update_mv_amt(Agent* a_ptr);
 void agents_update_mv_wrap(Agent* a_ptr);
 void agents_insert_dead(Agent_array* aa, int count);
 
+void agents_food_drop(Agent_array* aa);
+
 void agent_normalize_velocity(Agent* a_ptr);
 void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);
 float agent_item_attraction(Agent* a_ptr, Agent* t_ptr);

@@ -6,8 +6,8 @@ CFLAGS=-g3
 LIBS=-lGL -lm -lglfw -lGLEW
 
 
-ecosim: quadtree.o graphics.o utils.o agents.o input.o main.o
-	$(CC) $(CFLAGS) quadtree.o graphics.o utils.o agents.o input.o main.o -o ecosim $(LIBS) 
+ecosim: logger.o quadtree.o graphics.o utils.o agents.o input.o main.o
+	$(CC) $(CFLAGS) logger.o quadtree.o graphics.o utils.o agents.o input.o main.o -o ecosim $(LIBS)
 
 main.o: main.c
 	$(CC) -c main.c
@@ -26,6 +26,9 @@ graphics.o: graphics.c
 
 quadtree.o: quadtree.c
 	$(CC) -c quadtree.c
+
+logger.o: logger.c
+	$(CC) -c logger.c
 
 clean:
 	rm *.o

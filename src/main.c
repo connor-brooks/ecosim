@@ -12,7 +12,7 @@
 #include "input.h"
 #include "graphics.h"
 #include "quadtree.h"
-#include "log.h"
+#include "logger.h"
 
 
 int game_run = 1;
@@ -192,8 +192,9 @@ main(int argc, char **argv)
       agents_to_verts(agent_array, agent_verts);
     }
 
+    /* Log if needed */
 #if LOGGER_ENABLE == 1
-      logger_record(logger, agent_array, glfwGetTime());
+    logger_record(logger, agent_array, glfwGetTime());
 #endif
 
 
@@ -217,17 +218,12 @@ main(int argc, char **argv)
 
       /* Insert dead agents for herbivours */
       if(glfwGetTime() > last_food_time + DEV_GAME_FOOD_SPAWN_FREQ) {
-        int food_insert_amount = (int) RANDF_MIN(DEV_GAME_FOOD_SPAWN_MIN,
-            DEV_GAME_FOOD_SPAWN_MAX);
-        agents_insert_dead(agent_array, food_insert_amount);
-        printf("Food added & agent array pruned\n");
-
+        agents_food_drop(agent_array);
         agent_array = agent_array_prune(agent_array);
-
         callb_ptrs.aa = agent_array;
         last_food_time = glfwGetTime();
+        printf("Food added & agent array pruned\n");
       }
-      cyclecount++;
 
       quadtree_free(quad);
     }
