@@ -43,6 +43,8 @@
 #define AGENT_ENERGY_DEAD (0.3)
 /* How quickly ageing effects the agents */
 #define AGENT_TIME_FACTOR (0.3)
+
+#define AGENT_DIET_BOUNDARY (0.5)
 /* End agent general config */
 
 /* Agent DNA config */
@@ -66,7 +68,7 @@
  * If greater or equal to zero, the agent eats other agents, if less than 
  * zero, the agent eats only dead agents */
 #define AGENT_DIET_MAX (1.00)
-#define AGENT_DIET_MIN (-1.00)
+#define AGENT_DIET_MIN (0.00)
 /* Flock max/min
  * How strong flocking behaviours influence the movement of an agent */
 #define AGENT_FLOCK_MAX (1.00)

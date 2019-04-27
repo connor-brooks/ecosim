@@ -95,12 +95,18 @@ agent_setup_colors(Agent* a_ptr)
 {
   float *diet = &a_ptr->dna.diet;
   float *flocking = &a_ptr->dna.flock;
-  float *metabolism = &a_ptr->dna.metabolism;
-  float *rebirth = &a_ptr->dna.rebirth;
-  a_ptr->rgb.r = (*diet >= 0)? *diet + 0.1: 0.0f;
-  a_ptr->rgb.g = *flocking;
-  a_ptr->rgb.b = (*diet < 0.0f)? -(*diet) + 0.1: 0.0f;
 
+
+  float *rebirth = &a_ptr->dna.rebirth;
+  a_ptr->rgb.r = (agent_diet(a_ptr) == AGENT_DIET_LIVING)?
+    *diet:
+    0.0f;
+  a_ptr->rgb.g = *flocking;
+  a_ptr->rgb.b = (agent_diet(a_ptr))? 
+    1.0 - (*diet) : 
+    0.0f;
+
+  /* Normalise color vector */
   float mag = sqrt(
       (a_ptr->rgb.r * a_ptr->rgb.r) +
       (a_ptr->rgb.g * a_ptr->rgb.g) +
@@ -340,13 +346,9 @@ agent_item_attraction(Agent* a_ptr, Agent* t_ptr)
 {
   float attraction = AGENT_NEUTRAL;
 
-  int a_diet = (a_ptr->dna.diet >= 0.0f) ?
-    AGENT_DIET_LIVING :
-    AGENT_DIET_DEAD;
+  int a_diet = agent_diet(a_ptr);
 
-  int t_diet = (t_ptr->dna.diet >= 0.0f) ?
-    AGENT_DIET_LIVING :
-    AGENT_DIET_DEAD;
+  int t_diet = agent_diet(t_ptr);
 
   int t_state = t_ptr->state;
 
@@ -597,13 +599,9 @@ agent_item_collision(Agent* a_ptr, Agent* t_ptr)
 {
   float close = 0.02;
 
-  int a_diet = (a_ptr->dna.diet >= 0.0f) ?
-    AGENT_DIET_LIVING :
-    AGENT_DIET_DEAD;
+  int a_diet = agent_diet(a_ptr);
+  int t_diet = agent_diet(t_ptr);
 
-  int t_diet = (t_ptr->dna.diet >= 0.0f) ?
-    AGENT_DIET_LIVING :
-    AGENT_DIET_DEAD;
 
   /* Is the agent close enough to the target? */
   if(!((a_ptr->x - close < t_ptr->x) & (a_ptr->x + close > t_ptr->x) &&
@@ -797,4 +795,14 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
     av->end++;
     av->a_count++;
   }
+}
+
+int
+agent_diet(Agent* tmp_agent)
+{
+  int diet = (tmp_agent->dna.diet >= AGENT_DIET_BOUNDARY) ?
+    AGENT_DIET_LIVING :
+    AGENT_DIET_DEAD;
+  return diet;
+
 }

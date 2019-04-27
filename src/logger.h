@@ -15,10 +15,16 @@ enum logger_logs {
   LOG_FOOD,
   LOG_HERBIVOUR,
   LOG_CARNIVOUR,
+  LOG_METABOLISM_AVG,
+  LOG_VISION_AVG,
+  LOG_REBIRTH_AVG,
+  LOG_DIET_AVG,
+  LOG_FLOCK_AVG,
+  LOG_WOBBLE_AVG
 };
 
 struct _Logger {
-Log* log[5];
+Log* log[11];
 int count;
 float last_log;
 int freq;

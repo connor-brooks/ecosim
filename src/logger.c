@@ -12,7 +12,7 @@ logger_create(float time, int freq)
 {
   int i;
   Logger* tmp = malloc(sizeof(Logger));
-  tmp->count = 5;
+  tmp->count = 11;
   for(i = 0; i < tmp->count; i++){
     tmp->log[i] = log_create();
   }
@@ -40,6 +40,12 @@ logger_write(Logger* logger)
   log_write(logger->log[LOG_FOOD], fp, "y_food");
   log_write(logger->log[LOG_HERBIVOUR], fp, "y_herb");
   log_write(logger->log[LOG_CARNIVOUR], fp, "y_meat");
+  log_write(logger->log[LOG_METABOLISM_AVG], fp, "y_metab_a");
+  log_write(logger->log[LOG_VISION_AVG], fp, "y_vision_a");
+  log_write(logger->log[LOG_REBIRTH_AVG], fp, "y_rebirth_a");
+  log_write(logger->log[LOG_DIET_AVG], fp, "y_diet_a");
+  log_write(logger->log[LOG_FLOCK_AVG], fp, "y_flock_a");
+  log_write(logger->log[LOG_WOBBLE_AVG], fp, "y_wobble_a");
   fclose(fp);
 }
 
@@ -64,36 +70,64 @@ void
 logger_record(Logger* logger, Agent_array* aa, float time)
 {
   int i;
-  int population = 0;
-  int food = 0;
-  int pop_herb = 0;
-  int pop_carn = 0;
   int i_time = (int) time;
+  int total[logger->count];
+  Agent* tmp_agent;
 
-  if(logger->last_log + logger->freq >= time)
-    return;
+  if(logger->last_log + logger->freq >= time) return;
+
 
   logger->last_log = time;
   printf("Logged at %ds\n", i_time);
 
+  /* Null out totals array */
+  for(i = 0; i < logger->count; i++)
+    total[i] = 0;
+
+  /* save the time */
+  total[LOG_TIME] = (int) time;
+
+  /* return if time is zero */
+  if(total[LOG_TIME] == 0) return;
+
   for(i = 0; i < aa->count; i++) {
-    if(aa->agents[i]->state == AGENT_STATE_LIVING) {
-      population++;
-      if(aa->agents[i]->dna.diet >= 0.0f)
-        pop_carn++;
+    tmp_agent = aa->agents[i];
+    /* Log living agents */
+    if(tmp_agent->state == AGENT_STATE_LIVING) {
+      total[LOG_POPULATION]++;
+
+      /* log trait */
+      total[LOG_METABOLISM_AVG] += tmp_agent->dna.metabolism * 100;
+      total[LOG_VISION_AVG] += tmp_agent->dna.vision * 100;
+      total[LOG_REBIRTH_AVG] += tmp_agent->dna.rebirth * 100;
+      total[LOG_DIET_AVG] += tmp_agent->dna.diet * 100;
+      total[LOG_FLOCK_AVG] += tmp_agent->dna.flock * 100;
+      total[LOG_WOBBLE_AVG] += tmp_agent->dna.wobble * 100;
+
+      /* Carnivour or plant */
+      if(agent_diet(tmp_agent) == AGENT_DIET_LIVING)
+        total[LOG_CARNIVOUR]++;
       else
-        pop_herb++;
+        total[LOG_HERBIVOUR]++;
     }
-    else
-      food++;
+    /* Dead agents are food */
+    else if(tmp_agent->state == AGENT_STATE_DEAD)
+      total[LOG_FOOD]++;
   }
-  if(i_time != 0){
-    logger_log_val(logger, LOG_TIME, i_time);
-    logger_log_val(logger, LOG_POPULATION, population);
-    logger_log_val(logger, LOG_CARNIVOUR, pop_carn);
-    logger_log_val(logger, LOG_HERBIVOUR, pop_herb);
-    logger_log_val(logger, LOG_FOOD, food);
+
+  /* Get trait averages */
+  total[LOG_METABOLISM_AVG] /= total[LOG_POPULATION];
+  total[LOG_VISION_AVG] /= total[LOG_POPULATION];
+  total[LOG_REBIRTH_AVG] /= total[LOG_POPULATION];
+  total[LOG_DIET_AVG] /= total[LOG_POPULATION];
+  total[LOG_FLOCK_AVG] /= total[LOG_POPULATION];
+  total[LOG_WOBBLE_AVG] /= total[LOG_POPULATION];
+
+  /* change five to count */
+  for(i = 0; i < logger->count; i++) {
+    logger_log_val(logger, i, total[i]);
   }
+  logger_write(logger);
 }
 
 void
@@ -124,26 +158,37 @@ Log_string*
 log_int_to_str(int n)
 {
   int i;
+  int int_char_len;
   Log_string* log_str = malloc(sizeof(Log_string));
+
   /* How many digits in the int */
-  int int_char_len = log10(n) + 1;
+  if(n != 0)
+    int_char_len = log10(n) + 1;
+  else
+    int_char_len = 1;
+
   /*One for comma, one for space, one for nill*/
   int term_len = 3;
 
   log_str->length = int_char_len + term_len;
   log_str->string = calloc(term_len, sizeof(char));
 
-  /* convert to char array */
-  for(i = int_char_len; i > 0; --i) {
-    log_str->string[i - 1] = 48 + (n % 10); //48 - int ascii offfset
-    n /= 10;
-  }
-
   /* Go to end and add terminators */
   i = int_char_len;
   log_str->string[i] = ',';
   i++;
   log_str->string[i] = ' ';
+
+  /* If the value was zero, don't do math,
+   * just add the char '0' to array and return*/
+  log_str->string[int_char_len - 1] = 48;
+  if(n == 0) return log_str;
+
+  /* otherwise convert to char array */
+  for(i = int_char_len; i > 0; --i) {
+    log_str->string[i - 1] = 48 + (n % 10); //48 - int ascii offfset
+    n /= 10;
+  }
 
   return log_str;
 }

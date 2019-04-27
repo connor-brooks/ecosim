@@ -249,7 +249,6 @@ main(int argc, char **argv)
   }
 
   /* Agent verts can be persistant, so free at end, not each frame*/
-  logger_write(logger);
   logger_free(logger);
   agent_array_free(agent_array);
   agent_verts_free(agent_verts);
