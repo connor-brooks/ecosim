@@ -1,4 +1,5 @@
 **NOT CURRENTLY FIT FOR HUMAN CONSUMPTION**
+**This documentation is out of date**
 # ecosim
 *An ecosystem and evolution simulator*
 
