@@ -227,8 +227,6 @@ main(int argc, char **argv)
 
       quadtree_free(quad);
     }
-    /* log */
-
     /* Draw all the elments to off-screen framebuffer */
     glClear(GL_COLOR_BUFFER_BIT);
     gfx_framebuffer_begin(framebuffer, world_view);

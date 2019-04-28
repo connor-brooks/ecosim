@@ -253,8 +253,8 @@ gfx_agent_shader()
     "void main() {"
     "color_out = color;"
     "gl_Position = gl_ModelViewProjectionMatrix *"
-    "vec4(position.x, position.y, position.z, 1.0);"
-    "gl_PointSize = position.w * window.x * zoom * 1.0;"
+    "vec4(position.x, position.y, 0.0, 1.0);"
+    "gl_PointSize = position.z * window.x * zoom * 1.0;"
     "}";
 
   const char* agents_fs =
@@ -268,7 +268,13 @@ gfx_agent_shader()
     "}"
 
     "void main() {"
+    "float agent_state = color_out.w;"
+    "if(agent_state == -1) {"
+    "gl_FragColor = vec4(0.0);"
+    "return;"
+    "}"
     " vec4 color = color_out;"
+    "color.w = 0.9;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
     "/* Gen pattern */"
     " float pat_r = length(pos)*1.0;"
@@ -281,7 +287,7 @@ gfx_agent_shader()
     " float cutoff = 1.0 - smoothstep(cut_r - (cut_r * 0.02),"
     " cut_r + (cut_r * 0.02),"
     " dot(pos, pos) * 4.0);"
-    " if(color_out.a == 0) color.a = 0;"
+//    " if(color_out.a == 0) color.a = 0;"
     " gl_FragColor =  alpha * cutoff * color "
     "* ((1.0 - (length(pos) )) * 1.5) ;"
     "}";
@@ -302,7 +308,8 @@ gfx_agent_vis_shader()
     "void main() {"
 
     "color_out = color;"
-    "  gl_Position = gl_ModelViewProjectionMatrix * vec4(position.xyz, 1.0);"
+    "gl_Position = gl_ModelViewProjectionMatrix *"
+    "vec4(position.x, position.y, 0.0, 1.0);"
     "  gl_PointSize = position.w * window.x * zoom;"
     "}";
 
@@ -316,7 +323,13 @@ gfx_agent_vis_shader()
     "float mini_rand(float n){return fract(sin(n) * 150);}"
 
     "void main() {"
+    "float agent_state = color_out.w;"
+    "if(agent_state != 1) {"
+    "gl_FragColor = vec4(0.0);"
+    "return;"
+    "}"
     "vec4 color = color_out;"
+    "color.w = 0.2;"
     " vec2 pos = gl_PointCoord - vec2(0.5);"
     "float noise = rand(pos.x * pos.y) * 0.07;"
     "color.w = color.w + noise;"
@@ -368,8 +381,8 @@ gfx_agents_draw_vis(Agent_verts* av, GLuint shader, float scale, float zoom)
 {
 
   glEnableClientState(GL_VERTEX_ARRAY);
-  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_vis_pos);
-  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_vis_col);
+  glVertexAttribPointer(0, 4, GL_FLOAT, 0, 0, av->verts_pos);
+  glVertexAttribPointer(1, 4, GL_FLOAT, 0, 0, av->verts_col);
 
   glUseProgram(shader);
 

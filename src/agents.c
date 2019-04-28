@@ -721,8 +721,6 @@ agent_verts_create()
   tmp->size = sizeof(float) * 4 * tmp->capacity;;
   tmp->verts_pos = malloc(tmp->size);
   tmp->verts_col = malloc(tmp->size);
-  tmp->verts_vis_pos = malloc(tmp->size);
-  tmp->verts_vis_col = malloc(tmp->size);
   tmp->a_count = 0;
   tmp->end = 0;
   return tmp;
@@ -745,52 +743,32 @@ agents_to_verts(Agent_array* aa, Agent_verts* av)
   av->size = sizeof(float) * 4 * av->capacity;
   av->verts_pos = realloc(av->verts_pos, av->size);
   av->verts_col = realloc(av->verts_col, av->size);
-  av->verts_vis_pos = realloc(av->verts_vis_pos, av->size);
-  av->verts_vis_col = realloc(av->verts_vis_col, av->size);
 
   av->end = 0;
   av->a_count= 0;
 
-  // Don't need dynamic array yet
-  //  /* if verts array too big, grow */
-  //  if(new_size > av->capacity){
-  //    av->capacity = new_size;
-  //    av->verts_pos = realloc(av->verts_pos, av->capacity);
-  //    av->verts_col = realloc(av->verts_col, av->capacity);
-  //  }
-  //
   for(i = 0; i < aa->count ; i++) {
     Agent* agent = aa->agents[i];
     /* agent drawing */
     float* pos = av->verts_pos;
     float* col = av->verts_col;
-    /* vision drawing */
-    float* v_pos = av->verts_vis_pos;
-    float* v_col = av->verts_vis_col;
 
     /* rgb, x y and z*/
-    v_pos[av->end] = pos[av->end] = agent->x;
-    v_col[av->end] = col[av->end] = agent->rgb.r;
+    pos[av->end] = agent->x;
+    col[av->end] = agent->rgb.r;
     av->end++;
 
-    v_pos[av->end] = pos[av->end] = agent->y;
-    v_col[av->end] = col[av->end] = agent->rgb.g;
+    pos[av->end] = agent->y;
+    col[av->end] = agent->rgb.g;
     av->end++;
 
-    v_pos[av->end] = pos[av->end] = 0.0f;
-    v_col[av->end] = col[av->end] = agent->rgb.b;
+    pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy);
+    col[av->end] = agent->rgb.b;
     av->end++;
 
     /* special vert data */
-    pos[av->end] = AGENT_ENERGY_SIZE_SCALE(agent->energy);
-    col[av->end] = (agent->state == AGENT_STATE_PRUNE)?
-      0.0f : // pruning
-      AGENT_RGB_ALPHA;
-
-    v_pos[av->end] = agent->dna.vision * 400;
-    v_col[av->end] = (agent->state != AGENT_STATE_LIVING)?
-      0.0f : // pruning
-      AGENT_VIS_ALPHA;
+    pos[av->end] = agent->dna.vision * 400;
+    col[av->end] = agent->state;
 
     av->end++;
     av->a_count++;

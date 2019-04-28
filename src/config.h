@@ -49,7 +49,7 @@
 
 /* Agent DNA config */
 /* The amount a DNA trait changes if mutation occurs */
-#define AGENT_DNA_MUTATE_RATE (0.075)
+#define AGENT_DNA_MUTATE_RATE (0.1)
 /* Metabolism trait max/min 
  * How quickly an agent can move. Faster moving agents burn energy a lot
  * quicker */

@@ -72,18 +72,10 @@ struct _Agent_array {
 
 struct _Agent_verts {
   float* verts_pos, *verts_col;
-  float* verts_vis_pos, *verts_vis_col;
   size_t capacity;
   size_t size;
   int a_count;
   ptrdiff_t end;
-};
-
-struct _Agent_vis_verts {
-  float* pos_verts, *col_verts;
-  size_t count;
-  size_t capacity;
-  size_t pos_size, col_size;
 };
 
 
