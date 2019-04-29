@@ -1,9 +1,11 @@
 **NOT CURRENTLY FIT FOR HUMAN CONSUMPTION**
+
 **This documentation is out of date**
 # ecosim
 *An ecosystem and evolution simulator*
 
 ![Screenshot of ecosim](screenshot.png)
+![Screenshot of ecosim's logging feature](screenshot-log.png)
 ## Requirements
 * GNU/Linux
 * make
