@@ -83,6 +83,7 @@
 /*Log config */
 #define LOGGER_ENABLE (1)
 #define LOGGER_FILE "logger_data.py"
+#define LOGGER_FREQ (1)
 
 /* Engine config: 
  * DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING! */
@@ -100,5 +101,10 @@
 #define WORLD_MIN_COORD (-1.0)
 #define WORLD_MAX_COORD (1.0)
 #define LOG_DEFAULT_SIZE (12)
+#define QUAD_HEAD_POS (-1.0f)
+#define QUAD_HEAD_SIZE (2.0f)
+#define WINDOW_DEFAULT_X (1600)
+#define WINDOW_DEFAULT_Y (900)
+#define AGENT_ARRAY_PRUNE_TIME (2)
 /* End engine config */
 #endif

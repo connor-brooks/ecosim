@@ -86,6 +86,8 @@ void agent_array_free(Agent_array* aa);
 Agent_array* agent_array_prune(Agent_array* aa);
 void agents_update(Agent_array* aa, Quadtree* quad);
 
+void agent_array_to_quadtree(Agent_array* aa, Quadtree* q);
+
 
 Agent_array* agents_get_local(Agent* a_ptr, Quadtree* quad, float radius);
 
@@ -98,7 +100,7 @@ float agents_update_mv_amt(Agent* a_ptr);
 void agents_update_mv_wrap(Agent* a_ptr);
 void agents_insert_dead(Agent_array* aa, int count);
 
-void agents_food_drop(Agent_array* aa);
+int agents_food_drop(Agent_array* aa, float time, float last);
 
 void agent_normalize_velocity(Agent* a_ptr);
 void agent_update_mv_avoid(Agent* a_ptr, Agent* t_ptr);

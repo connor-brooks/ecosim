@@ -113,11 +113,12 @@ main(int argc, char **argv)
   Agent_verts* agent_verts;
   Quadtree* quad;
   Logger* logger;
-  int cyclecount = 0;
-  float quad_head_pos[] = {-1.0f, -1.0f};
-  float quad_head_size = 2.0f;
+  float quad_head_pos[] = {QUAD_HEAD_POS,
+                           QUAD_HEAD_POS};
+  float quad_head_size = QUAD_HEAD_SIZE;
   float last_update_time = glfwGetTime();
   float last_food_time = last_update_time;
+  float last_prune_time = last_food_time;
   // For passing structs between callbacks in glfw
   struct Callback_ptrs callb_ptrs;
 
@@ -126,7 +127,9 @@ main(int argc, char **argv)
     return -1; //exit
 
   /* Create window */
-  window = glfwCreateWindow(1600, 900, "ecosim", NULL, NULL);
+  window = glfwCreateWindow(WINDOW_DEFAULT_X, 
+                            WINDOW_DEFAULT_Y, 
+                            "Ecosim", NULL, NULL);
   if (!window)
   {
     glfwTerminate();
@@ -144,12 +147,13 @@ main(int argc, char **argv)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   /* Setup world view */
-  framebuffer = gfx_framebuffer_create(1600, 900);
+  framebuffer = gfx_framebuffer_create(WINDOW_DEFAULT_X, 
+                                       WINDOW_DEFAULT_Y);
   GLuint fb_shader = gfx_framebuffer_shader();
   world_view = gfx_world_view_create();
   input = input_create();
 
-  logger= logger_create(glfwGetTime(), 1);
+  logger= logger_create(glfwGetTime(), LOGGER_FREQ);
 
   /* Setup shaders, agents and verts */
   agent_array = agent_array_setup_random(DEV_AGENT_COUNT);
@@ -178,10 +182,9 @@ main(int argc, char **argv)
   while(!glfwWindowShouldClose(window))
   {
     /* Set the viewport & grab scale*/
-    int i;
-    Agent* tmp_agent;
     int width, height;
     float scale;
+    float time;
     glfwGetFramebufferSize(window, &width, &height);
     glViewport(0, 0, width, height);
     scale = gfx_get_scale(window);
@@ -197,32 +200,33 @@ main(int argc, char **argv)
     logger_record(logger, agent_array, glfwGetTime());
 #endif
 
+    
+    /* Grab time once to user through whole update cycle */
+    time = glfwGetTime();
 
     /* Main update cycle */
-    if(game_run && glfwGetTime() > last_update_time + (1.0 / DEV_GAME_FPS))
+    if(game_run && time > last_update_time + (1.0 / DEV_GAME_FPS))
     {
-      last_update_time = glfwGetTime();
+      last_update_time = time; 
 
       /* Recreate quadtree and insert agents */
       quad = quadtree_create(quad_head_pos, quad_head_size);
-      for(i = 0; i < agent_array->count; i++) {
-        tmp_agent = (agent_array->agents[i]);
-        float tmp_pos[] = {tmp_agent->x, tmp_agent->y};
-        if(tmp_agent->state != AGENT_STATE_PRUNE)
-          quadtree_insert(quad, tmp_agent, tmp_pos);
-      }
+      agent_array_to_quadtree(agent_array, quad);
       /* Update agents position using quadtree, convert
        * them into their verts*/
       agents_update(agent_array, quad);
       agents_to_verts(agent_array, agent_verts);
 
       /* Insert dead agents for herbivours */
-      if(glfwGetTime() > last_food_time + DEV_GAME_FOOD_SPAWN_FREQ) {
-        agents_food_drop(agent_array);
+      if(agents_food_drop(agent_array, time, last_food_time))
+        last_food_time = time; 
+
+      /* Prune the array and update pointers if needed */
+      if(glfwGetTime() > last_prune_time + AGENT_ARRAY_PRUNE_TIME) {
         agent_array = agent_array_prune(agent_array);
         callb_ptrs.aa = agent_array;
-        last_food_time = glfwGetTime();
-        printf("Food added & agent array pruned\n");
+        last_prune_time = time; 
+        printf("Pruned\n");
       }
 
       quadtree_free(quad);

@@ -102,8 +102,8 @@ agent_setup_colors(Agent* a_ptr)
     *diet:
     0.0f;
   a_ptr->rgb.g = *flocking;
-  a_ptr->rgb.b = (agent_diet(a_ptr))? 
-    1.0 - (*diet) : 
+  a_ptr->rgb.b = (agent_diet(a_ptr))?
+    1.0 - (*diet) :
     0.0f;
 
   /* Normalise color vector */
@@ -119,11 +119,32 @@ agent_setup_colors(Agent* a_ptr)
 }
 
 void
-agents_food_drop(Agent_array* aa)
+agent_array_to_quadtree(Agent_array* aa, Quadtree* q)
 {
+  int i;
+  Agent* tmp_agent;
+  for(i = 0; i < aa->count; i++) {
+    tmp_agent = (aa->agents[i]);
+    float tmp_pos[] = {tmp_agent->x, tmp_agent->y};
+    if(tmp_agent->state != AGENT_STATE_PRUNE)
+      quadtree_insert(q, tmp_agent, tmp_pos);
+  }
+}
+
+
+int
+agents_food_drop(Agent_array* aa, float time, float last)
+{
+  int ret = 0;
   int food_insert_amount = (int) RANDF_MIN(DEV_GAME_FOOD_SPAWN_MIN,
       DEV_GAME_FOOD_SPAWN_MAX);
-  agents_insert_dead(aa, food_insert_amount);
+
+  if(time > last + DEV_GAME_FOOD_SPAWN_FREQ) {
+    agents_insert_dead(aa, food_insert_amount);
+    printf("Food added \n");
+    ret = 1;
+  }
+  return ret;
 }
 
 
