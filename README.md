@@ -1,6 +1,3 @@
-**NOT CURRENTLY FIT FOR HUMAN CONSUMPTION**
-
-**This documentation is out of date**
 # ecosim
 *An ecosystem and evolution simulator*
 
@@ -14,6 +11,8 @@
 * libglfw3-dev
 * libglew-dev
 * ffplay (optional)
+* python3 (optional)
+* matplotlib (optional)
 ## How to use
  Install dependencies
 
@@ -87,6 +86,14 @@ Ecosim provides a way to configure the mechanics of the simulation via editing t
 ### What to change
 This is entirely down to personal preference, however, most people will only be concerned with two sections of the configuration: The general agent settings, and the agent DNA settings.
 
+### Enable logging
+In order to use the population/trait logger, change the `LOGGER_ENABLE` setting to `1`, recompile, and run:
+
+`./ecosim_with_log.sh`
+
+Note, python3 and matplotlib is required in order to plot logged data.
+
+
 ### List of config settings
 #### Main world settings
 * `DEV_AGENT_COUNT` - The amount of agents to spawn when the simulation runs
@@ -94,6 +101,7 @@ This is entirely down to personal preference, however, most people will only be 
 * `DEV_GAME_FOOD_SPAWN_FREQ` - How often (in seconds) to spawn food
 * `DEV_GAME_FOOD_SPAWN_INIT` - How many items of food to spawn when the simulation runs
 * `DEV_GAME_FOOD_SPAWN_MAX`/`DEV_GAME_FOOD_SPAWN_MIN` - The maximum and minimum amount of food that is spawned each food spawn
+* `DEV_GAME_FOOD_ENERGY` - The amount of energy a piece of food provides when consumed
 #### Agent general settings
 * `AGENT_RGB_ALPHA` - Transparency of agent's inner cell
 * `AGENT_VIS_ALPHA` - Transparaney of agent's vision field
@@ -102,7 +110,9 @@ This is entirely down to personal preference, however, most people will only be 
 * `AGENT_METAB_ENERGY_SCALE(x)` - The rate of which energy is burned over time, with respect to the metabolic rate of an agent (where x is metabolism)
 * `AGENT_ENERGY_SIZE_SCALE(x)` - How large an agent is, with respect to their energy (where x is energy)
 * `AGENT_MAX_SPEED` - The maximum speed any agent can move
-* `AGENT_TIME_FRACTOR` - How fast the process of ageing occurs
+* `AGENT_ENERGY_DEAD` - The energy level which an agent dies
+* `AGENT_TIME_FACTOR` - How fast the process of ageing occurs
+* `AGENT_DIET_BOUNDARY` - Herbivore / Carnivore boundary
 #### Agent DNA settings
 * `AGENT_DNA_MUTATE_RATE` - The maximum amount a trait can change if mutation occurs
 * `AGENT_METAB_MAX`/`AGENT_METAB_MIN` - The maximum and minimum metabolic rates allowed
@@ -114,7 +124,10 @@ This is entirely down to personal preference, however, most people will only be 
 #### Input settings
 * `INPUT_SPAWN_DELAY` - How often to respawn agents when the mouse is held down
 * `INPUT_SCROLL_AMT` - Input sensitivity (Effects scroll and zoom)
-
+#### Log settings
+* `LOGGER_ENABLE` - Enable / disable logging
+* `LOGGER_FILE` - Filename to log to
+* `LOGGER_FREQ` - Logging sample rate
 
 ## Notes 
 * If you'd like some background noise to play whilst running the simulation, install ffmpeg, otherwise it's not required

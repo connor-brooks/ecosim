@@ -81,9 +81,9 @@
 #define AGENT_WOBBLE_MIN (1.5)
 
 /*Log config */
-#define LOGGER_ENABLE (1)
+#define LOGGER_ENABLE (0)
 #define LOGGER_FILE "logger_data.py"
-#define LOGGER_FREQ (1)
+#define LOGGER_FREQ (2)
 
 /* Engine config: 
  * DO NOT CHANGE UNLESS YOU KNOW WHAT YOU ARE DOING! */
