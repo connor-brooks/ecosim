@@ -93,6 +93,8 @@ In order to use the population/trait logger, change the `LOGGER_ENABLE` setting 
 
 Note, python3 and matplotlib is required in order to plot logged data.
 
+![Screenshot of ecosim in logger mode](screenshot_logger.png)
+
 
 ### List of config settings
 #### Main world settings
