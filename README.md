@@ -58,6 +58,7 @@ These genetic traits are as follows:
 * Rebirth rate
 * Dietary preference 
 * Flocking strength
+* Wobble frequency
 
 Over time, only the most successful agents are able to pass on their DNA, causing the population of agents to slowly evolve.
 
@@ -74,6 +75,9 @@ Rebirth rate controls how much energy is stored within an agent before splitting
 Agent's dietary preference influences what food source an agent will pursue and consume: living or non-living. For an ecosystem to be stable, the need for agents of both these groups is required.
 ### Flocking strength
 Flocking is a behaviour in which agents form groups, or clusters, whilst navigating the map, forming "multicellular life". Paradoxically this offers both safety and vulnerability. By sharing information whilst flocking, a group increases it's memebers knowledge of other potential dangers or food. In contrast, if the group fails to avoid a potential danger the whole group suffers.
+### Wobble frequency
+Whilst moving around the screen, agents speed up and down in a sinusoidal pattern, creating a "crawling" effect. The frequency of this movement is dictated by the wobble trait. Wobbling has both advantages and disadvantages, with a lower freuqnecy resulting in longer periods of increased speed but also longer resting periods.
+
 
 ## Tweaking the simulation 
 Ecosim provides a way to configure the mechanics of the simulation via editing the `config.h` file. The process of doing so is as follows:
