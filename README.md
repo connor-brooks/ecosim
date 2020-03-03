@@ -1,5 +1,4 @@
 ![Ecosim Logo](ecosim-logo.png)
-*An ecosystem and evolution simulator*
 
 ![Screenshot of ecosim](screenshot.png)
 ## Requirements
