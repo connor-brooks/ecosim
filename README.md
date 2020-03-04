@@ -2,7 +2,9 @@
 
 ![Screenshot of ecosim](screenshot.png)
 
-Ecosim is an ecosystem and evolution simulator. The enviroment consists of a number of autonomous creatures (or "agents"). Each agent has a collection of genetic traits that influences it's behaviours. They need to eat to survive, as they constantly lose energy by living. If they eat enough mitosis occurs. Sometimes the genetics mutate when this happens. Over time natural selection causes the agents to evolve.
+Ecosim is an ecosystem and evolution simulator. The environment consists of a number of autonomous creatures (or "agents"). Each agent has a collection of genetic traits that influences it's behaviours. 
+
+Agents need to eat to survive, as they constantly lose energy by living. If they eat an amount which exceeds a certain threshold, mitosis occurs. Sometimes the genetics mutate when this happens. Over time natural selection causes the agents to evolve.
 
 
 ## Requirements
