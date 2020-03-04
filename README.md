@@ -136,5 +136,5 @@ Note, python3 and matplotlib is required in order to plot logged data.
 
 ## Notes 
 * If you'd like some background noise to play whilst running the simulation, install ffmpeg, otherwise it's not required
-
-
+* Please report any bugs or issues encountered whilst trying to run. Ideally please mention your distribution and graphics driver.
+* Windows and Mac users: Don't worry, once Ecosim is ported to SDL2 it will be made officially multiplatform
