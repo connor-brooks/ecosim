@@ -96,8 +96,6 @@ agent_setup_colors(Agent* a_ptr)
   float *diet = &a_ptr->dna.diet;
   float *flocking = &a_ptr->dna.flock;
 
-
-  float *rebirth = &a_ptr->dna.rebirth;
   a_ptr->rgb.r = (agent_diet(a_ptr) == AGENT_DIET_LIVING)?
     *diet:
     0.0f;
