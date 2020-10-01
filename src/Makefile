@@ -2,7 +2,7 @@ CC=gcc
 
 all: ecosim
 
-CFLAGS=-g3
+CFLAGS=-g3 -pedantic -Wall -Wextra
 LIBS=-lGL -lm -lglfw -lGLEW
 
 
@@ -10,25 +10,25 @@ ecosim: logger.o quadtree.o graphics.o utils.o agents.o input.o main.o
 	$(CC) $(CFLAGS) logger.o quadtree.o graphics.o utils.o agents.o input.o main.o -o ecosim $(LIBS)
 
 main.o: main.c
-	$(CC) -c main.c
+	$(CC) ${CFLAGS} -c main.c
 
 input.o: input.c
-	$(CC) -c input.c
+	$(CC) ${CFLAGS} -c input.c
 
 agents.o: agents.c
-	$(CC) -c agents.c
+	$(CC) ${CFLAGS} -c agents.c
 
 utils.o: utils.c
-	$(CC) -c utils.c
+	$(CC) ${CFLAGS} -c utils.c
 
 graphics.o: graphics.c
-	$(CC) -c graphics.c
+	$(CC) ${CFLAGS} -c graphics.c
 
 quadtree.o: quadtree.c
-	$(CC) -c quadtree.c
+	$(CC) ${CFLAGS} -c quadtree.c
 
 logger.o: logger.c
-	$(CC) -c logger.c
+	$(CC) ${CFLAGS} -c logger.c
 
 clean:
 	rm *.o
