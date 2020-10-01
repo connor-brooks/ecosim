@@ -14,6 +14,7 @@
 #include "quadtree.h"
 #include "logger.h"
 
+#define UNUSED __attribute__((unused))
 
 int game_run = 1;
 
@@ -28,7 +29,7 @@ struct Callback_ptrs{
 
 /* Keyboard callback */
 void
-key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+key_callback(GLFWwindow* window, int key, UNUSED int scancode, int action, UNUSED int mods)
 {
   if(action == GLFW_PRESS || action == GLFW_REPEAT)
   {
@@ -42,7 +43,7 @@ key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
   }
 }
 
-void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+void mouse_button_callback(GLFWwindow* window, int button, int action, UNUSED int mods)
 {
   struct Callback_ptrs* callb_ptrs;
   Input* input;
@@ -103,7 +104,7 @@ void window_size_callback(GLFWwindow* window, int width, int height)
 }
 
 int
-main(int argc, char **argv)
+main(UNUSED int argc, UNUSED char **argv)
 {
   GLFWwindow* window;
   Framebuffer* framebuffer;
