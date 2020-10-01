@@ -184,5 +184,5 @@ quadtree_query_dump(Quadtree_query* qq)
 {
   printf("DUMP: Got %ld pointers\n", (unsigned long) qq->ptr_count);
   for(unsigned int i =0; i < qq->ptr_count; i++)
-    printf("DUMP: Got pointer 0x%x at loc %d\n", (void*) qq->ptrs[i], i);
+    printf("DUMP: Got pointer %p at loc %d\n", (void*) qq->ptrs[i], i);
 }
