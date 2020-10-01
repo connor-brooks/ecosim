@@ -45,7 +45,7 @@ agent_array_insert(Agent_array* aa, Agent* a)
 Agent_array*
 agent_array_prune(Agent_array* aa)
 {
-  int i;
+  unsigned int i;
   Agent_array* tmp_aa;
   tmp_aa = agent_array_create();
   tmp_aa->clock = aa->clock;
@@ -121,7 +121,7 @@ agent_setup_colors(Agent* a_ptr)
 void
 agent_array_to_quadtree(Agent_array* aa, Quadtree* q)
 {
-  int i;
+  unsigned int i;
   Agent* tmp_agent;
   for(i = 0; i < aa->count; i++) {
     tmp_agent = (aa->agents[i]);
@@ -203,7 +203,7 @@ agent_array_setup_random(int count)
 void
 agent_array_free(Agent_array* aa)
 {
-  int i;
+  unsigned int i;
   /* free each agent */
   for(i = 0; i < aa->count; i++)
     free(aa->agents[i]);
@@ -217,7 +217,7 @@ agent_array_free(Agent_array* aa)
 void
 agents_update(Agent_array* aa, Quadtree* quad)
 {
-  int i, j;
+  unsigned int i, j;
   Agent* a_ptr;
   Agent_array* local_agents;
 
@@ -274,7 +274,7 @@ agents_update(Agent_array* aa, Quadtree* quad)
 Agent_array*
 agents_get_local(Agent* a_ptr, Quadtree* quad, float radius)
 {
-  int i;
+  unsigned int i;
   int ignore;
 
   Quadtree_query* query = quadtree_query_setup();
@@ -487,7 +487,7 @@ void agent_mv_flock(Agent* a_ptr, Agent_array* aa)
 float*
 agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
 {
-  int i;
+  unsigned int i;
   int count = 0;
   float* return_vel = malloc(sizeof(float) * 2);
   float total[] = {0.0f, 0.0f};
@@ -527,7 +527,7 @@ agent_mv_flock_align(Agent* a_ptr, Agent_array* aa)
 float*
 agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
 {
-  int i;
+  unsigned int i;
   int count = 0;
   float* return_vel = malloc(sizeof(float) * 2);
   float total[] = {0.0f, 0.0f};
@@ -574,7 +574,7 @@ agent_mv_flock_cohesion(Agent* a_ptr, Agent_array* aa)
 float*
 agent_mv_flock_seperation(Agent* a_ptr, Agent_array* aa)
 {
-  int i;
+  unsigned int i;
   int count = 0;
   float* return_vel = malloc(sizeof(float) * 2);
   float total[] = {0.0f, 0.0f};
@@ -758,7 +758,7 @@ agent_verts_free(Agent_verts* av)
 void
 agents_to_verts(Agent_array* aa, Agent_verts* av)
 {
-  int i;
+  unsigned int i;
 
   av->capacity = aa->count;
   av->size = sizeof(float) * 4 * av->capacity;
