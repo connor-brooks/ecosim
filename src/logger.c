@@ -90,7 +90,7 @@ logger_record(Logger* logger, Agent_array* aa, float time)
   /* return if time is zero */
   if(total[LOG_TIME] == 0) return;
 
-  for(i = 0; i < aa->count; i++) {
+  for(i = 0; (unsigned int) i < aa->count; i++) {
     tmp_agent = aa->agents[i];
     /* Log living agents */
     if(tmp_agent->state == AGENT_STATE_LIVING) {
